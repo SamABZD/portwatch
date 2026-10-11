@@ -1,10 +1,12 @@
 port_id: los_angeles
 display_name: Port of Los Angeles
 timezone: America/Los_Angeles
-# Step 01 must establish an authoritative source and version for these boundaries.
-bounding_box: null
+# Heuristic collection filter [west longitude, south latitude, east longitude,
+# north latitude] in WGS84. Includes LA harbor and nearby approaches; this is
+# not an official port boundary or an analytical geofence.
+bounding_box: [-118.34, 33.66, -118.225, 33.80]
 geofence_path: null
-# Provisional analytical thresholds; revisit and version with Step 01 source audit.
+# Version 1 provisional waiting heuristics; validate against observed tracks in Step 04.
 waiting_speed_knots: 1.0
 waiting_min_minutes: 30
 max_observation_gap_minutes: 15

@@ -27,6 +27,7 @@ Thumbs.db
 
 # Provider downloads, local data, and generated artifacts
 data/raw/
+data/live-spool/
 data/derived/
 data/quarantine/
 data/downloads/
@@ -39,6 +40,7 @@ artifacts/
 *.sqlite3
 *.db
 pgdata/
+pg-runtime/
 postgres-data/
 
 # Keep small synthetic test fixtures under tests/fixtures/ trackable.

@@ -17,11 +17,11 @@ def test_settings_are_typed_and_paths_resolve_from_project_root(
     assert settings.project_path(settings.raw_dir) == PROJECT_ROOT / "data/raw"
 
 
-def test_los_angeles_config_is_valid_with_unconfigured_geography() -> None:
+def test_los_angeles_config_has_collection_bounds_without_geofence() -> None:
     config = load_port_config(PROJECT_ROOT / "configs/ports/los_angeles.yaml")
     assert isinstance(config, PortConfig)
     assert config.port_id == "los_angeles"
-    assert config.bounding_box is None
+    assert config.bounding_box == (-118.34, 33.66, -118.225, 33.80)
     assert config.geofence_path is None
 
 
@@ -54,12 +54,13 @@ def test_doctor_exits_nonzero_and_never_prints_connection_secret(
 ) -> None:
     monkeypatch.setenv("PORTWATCH_DB_PASSWORD", "very_private_test_value")
     monkeypatch.setenv("PORTWATCH_RAW_DIR", str(tmp_path / "raw"))
-    monkeypatch.delenv("PORTWATCH_AIS_API_KEY", raising=False)
+    # Explicitly override ignored local .env when the developer has a real key.
+    monkeypatch.setenv("PORTWATCH_AIS_API_KEY", "")
 
     def fail_connect(**_kwargs: object) -> None:
         raise OSError("very_private_test_value")
 
-    monkeypatch.setattr("portwatch.doctor.psycopg.connect", fail_connect)
+    monkeypatch.setattr("portwatch.db.psycopg.connect", fail_connect)
     result = CliRunner().invoke(app, ["doctor"])
     assert result.exit_code == 1
     assert "[PASS] Port config" in result.stdout
