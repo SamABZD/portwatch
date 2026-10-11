@@ -9,6 +9,7 @@ import psycopg
 import yaml
 from pydantic import ValidationError
 
+from portwatch.db import connect_db
 from portwatch.settings import PROJECT_ROOT, Settings, load_port_config
 
 
@@ -49,9 +50,10 @@ def diagnose() -> list[Check]:
     try:
         config = load_port_config(config_path)
         geography = (
-            "geography pending Step 01"
-            if config.bounding_box is None or config.geofence_path is None
-            else "geography configured"
+            "collection bounds pending"
+            if config.bounding_box is None
+            else "collection bounds configured; analytical geofence "
+            + ("pending" if config.geofence_path is None else "configured")
         )
         checks.append(Check("PASS", "Port config", f"{config.port_id}; {geography}"))
     except (OSError, ValueError, TypeError, yaml.YAMLError) as exc:
@@ -73,14 +75,7 @@ def diagnose() -> list[Check]:
         return checks
 
     try:
-        with psycopg.connect(
-            host=settings.db_host,
-            port=settings.db_port,
-            dbname=settings.db_name,
-            user=settings.db_user,
-            password=settings.db_password.get_secret_value(),
-            connect_timeout=2,
-        ) as connection:
+        with connect_db(settings) as connection:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT 1")
                 if cursor.fetchone() != (1,):

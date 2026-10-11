@@ -1,6 +1,7 @@
 """Typed local settings and port configuration validation."""
 
 from pathlib import Path
+from typing import Literal
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import yaml
@@ -20,9 +21,21 @@ class Settings(BaseSettings):
     db_name: str = Field(default="portwatch", min_length=1)
     db_user: str = Field(default="portwatch", min_length=1)
     db_password: SecretStr = SecretStr("portwatch_dev_only")
+    db_sslmode: Literal["disable", "allow", "prefer", "require", "verify-ca", "verify-full"] = (
+        "prefer"
+    )
     raw_dir: Path = Path("data/raw")
+    derived_dir: Path = Path("data/derived")
+    demo_config: Path = Path("configs/demo.yaml")
+    quarantine_dir: Path = Path("data/quarantine")
     port_config: Path = Path("configs/ports/los_angeles.yaml")
     ais_api_key: SecretStr | None = None
+    live_spool_dir: Path = Path("data/live-spool")
+    live_status_dir: Path = Path("artifacts/live")
+    live_queue_records: int = Field(default=128, ge=1, le=1024)
+    live_rotate_seconds: float = Field(default=30, ge=1, le=300)
+    live_rotate_bytes: int = Field(default=1048576, ge=262144, le=16777216)
+    live_flush_seconds: float = Field(default=1, gt=0, le=5)
 
     @field_validator("db_host", "db_name", "db_user")
     @classmethod
