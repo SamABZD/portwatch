@@ -24,4 +24,43 @@ At the foundation stage, no branch protection, hosted website, or CI run was con
 
 The Validate workflow and shared verification command are implemented locally. The authenticated account is still `SamABZD`; repository visibility is public, default branch is `main`, and viewer permission is `ADMIN`. Before this stage, remote `main` was `f40700b91de01b0aff3a59c727852277e8755d0f` and contained only the foundation. The user approved publishing the already completed Steps01–05 separately: [prerequisite PR #1](https://github.com/SamABZD/portwatch/pull/1) contains commit `434e5f71373fabcf849f3f659085ce5e363218db` and was merged as `f784a9374942c704630bd412704a67c4896ead24`. Its 41 changed paths excluded private `.env`, the actual AIS credential, and provider/runtime/database artifacts. Pre-CI snapshot versions were staged directly, preserving the current CI changes for a separate PR. That prerequisite PR had no Actions workflow; its recorded checks were local, not remote CI.
 
-Existing protection inspection returned `Branch not protected`; repository ruleset listing returned an empty array. Proposed settings after an observed passing baseline: required checks `quality` and `integration`, strict/up-to-date checks, required PRs with zero human approvals for this solo project, no force pushes or deletions, and administrator enforcement. These settings are **not yet applied**. Exact observed run links, tested SHA, merge outcome, and applied rule evidence will be recorded after remote verification; no GitHub success is claimed by local checks.
+Existing protection inspection returned `Branch not protected`; repository ruleset listing returned an empty array. Branch settings are **not applied**, because the required successful baseline has not occurred.
+
+### Actual GitHub attempts: blocked before execution
+
+- Focused [CI PR #2](https://github.com/SamABZD/portwatch/pull/2) is open and attached to the Codex chat, as is prerequisite PR#1. Initial CI code/head SHA: `97b8af116948088bf6730866b77cdffc71f0e16b`.
+- [PR run 38171159125](https://github.com/SamABZD/portwatch/actions/runs/38171159125) and [push run 38171158488](https://github.com/SamABZD/portwatch/actions/runs/38171158488) both concluded failure for that exact SHA. GitHub registered job/check names `quality` and `integration`, application ID15368, but neither job received a runner or executed any steps. There are no job logs because no jobs started.
+- The annotations on both PR checks report exactly: **“The job was not started because your account is locked due to a billing issue.”** Repository Actions are enabled with all actions allowed. This is an account-level execution blocker; no remote lint, test, package, PostGIS service, or migration pass is claimed.
+- CI PR remains unmerged. Remote main is the prerequisite merge `f784a9374942c704630bd412704a67c4896ead24`; its Actions list is empty because the workflow is not on main yet. A resulting-main CI run cannot be verified until the setup PR passes and merges.
+- Local shared validation passed independently: 87 unit/12 integration tests, Ruff lint/format, real wheel import/resources/CLI, fresh/repeated migrations. The second run used the documented `uv run --locked --extra dev python scripts/validate.py` command and passed in 26.57s unit/6.29s integration. Eleven formatting-only files had identical Python ASTs; SQL migration bytes match the saved prerequisite snapshot.
+
+### Required user action and resume
+
+Inspect GitHub Settings **Billing & Licensing** for `SamABZD`, then resolve the account lock. To keep the $0 constraint, review GitHub's [locked-account guidance](https://docs.github.com/en/billing/how-tos/troubleshooting/locked-account), including its GitHub Free option where applicable, or [contact GitHub Support](https://docs.github.com/en/support/contacting-github-support) about blocked free public Actions. No purchase, payment, plan change, or support message was made by this implementation. Account plan/payment decisions require the account owner.
+
+After GitHub clears the lock, resume Step05A: identify PR#2's latest head/run, rerun it, fix any actual execution failures, and confirm both jobs pass on that intended SHA. Apply the rule below only after a successful baseline, merge PR#2 while matching its head SHA, then verify the resulting main push run. Record successful URLs and SHAs before marking Step05A complete. Do not advance to Step06 while these gates are pending.
+
+### Exact proposed main protection (unapplied)
+
+Apply using `PUT /repos/SamABZD/portwatch/branches/main/protection`, after rechecking for any stricter rules and observing actual successful check names:
+
+```json
+{
+  "required_status_checks": {
+    "strict": true,
+    "checks": [
+      {"context": "quality", "app_id": 15368},
+      {"context": "integration", "app_id": 15368}
+    ]
+  },
+  "enforce_admins": true,
+  "required_pull_request_reviews": {
+    "dismiss_stale_reviews": true,
+    "require_code_owner_reviews": false,
+    "required_approving_review_count": 0
+  },
+  "restrictions": null,
+  "allow_force_pushes": false,
+  "allow_deletions": false
+}
+```

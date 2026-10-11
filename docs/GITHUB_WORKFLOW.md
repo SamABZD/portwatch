@@ -49,3 +49,5 @@ Official action versions verified on 2026-10-11:
 Both jobs use uv 0.13.0, Python 3.11, locked development dependencies, and only the uv dependency cache keyed by `uv.lock`. Integration starts [postgis/postgis:17-3.6-alpine](https://github.com/postgis/docker-postgis), checks readiness with `pg_isready`, and uses disposable CI-only credentials. The image tag matches the native installation's PostgreSQL/PostGIS major versions; patch image versions may change. The validator checks both server versions explicitly. Each hosted job gets a fresh database service.
 
 Remote run, PR, and branch-rule evidence is recorded in [GITHUB_SETUP.md](GITHUB_SETUP.md) and [HANDOFF.md](HANDOFF.md). Reading YAML or passing local tests alone does not establish a GitHub pass.
+
+Current Step05A status: CI PR#2 is open; account billing lock prevented both hosted jobs from starting. Required check settings are proposed but unapplied until an actual baseline succeeds. The account owner must clear that lock before PR/main execution can be verified.
