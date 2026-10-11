@@ -93,7 +93,8 @@ def test_corrupt_batch_never_registered(connection, tmp_path, spec):
     assert result.invalid == 1 and result.registered == 0
     assert connection.execute("SELECT count(*) FROM ingestion_batches").fetchone() == (0,)
     assert connection.execute("SELECT status, error_summary FROM pipeline_runs").fetchone() == (
-        "failed", "ValueError",
+        "failed",
+        "ValueError",
     )
 
 

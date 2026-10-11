@@ -75,18 +75,28 @@ def plan(
         url = SOURCE_ROOT + f"ais-{day.isoformat()}.parquet"
         if demo and configured["noaa_url"] != url:
             raise ValueError("demo URL must match its selected NOAA day")
-        dataset = configured["dataset_id"] if demo else (
-            f"{port_id}_{day:%Y_%m_%d}_noaa_ocm_geoparquet_v1"
+        dataset = (
+            configured["dataset_id"]
+            if demo
+            else (f"{port_id}_{day:%Y_%m_%d}_noaa_ocm_geoparquet_v1")
         )
         day_start = datetime.combine(day, datetime.min.time(), tzinfo=UTC)
         day_end = day_start + timedelta(days=1)
         spec = BatchSpec(
-            source_id=SOURCE_ID, dataset_id=dataset, source_url=url, mode="historical",
-            source_date=day, source_start_utc=day_start, source_end_utc=day_end,
+            source_id=SOURCE_ID,
+            dataset_id=dataset,
+            source_url=url,
+            mode="historical",
+            source_date=day,
+            source_start_utc=day_start,
+            source_end_utc=day_end,
             file_suffix=".parquet",
         )
         parameters = ExtractParameters(
-            port_id=port_id, bounding_box=port.bounding_box, start_utc=day_start, end_utc=day_end,
+            port_id=port_id,
+            bounding_box=port.bounding_box,
+            start_utc=day_start,
+            end_utc=day_end,
         )
         requests.append((spec, parameters))
     return requests
@@ -117,10 +127,14 @@ def ingest_historical(
             derived, reused = extract(raw_path, transfer.manifest, parameters, derived_root)
             inspected += derived.source_rows_inspected
             selected += derived.rows_selected
-            results.append(HistoricalResult(
-                manifest=derived, downloaded=transfer.downloaded, reused_extract=reused,
-                elapsed_seconds=time.perf_counter() - started,
-            ))
+            results.append(
+                HistoricalResult(
+                    manifest=derived,
+                    downloaded=transfer.downloaded,
+                    reused_extract=reused,
+                    elapsed_seconds=time.perf_counter() - started,
+                )
+            )
         finish_run(connection, run_id, input_count=inspected, output_count=selected)
     except Exception as error:
         finish_run(connection, run_id, input_count=inspected, output_count=selected, error=error)

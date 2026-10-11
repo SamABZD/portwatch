@@ -1,5 +1,17 @@
 # Measured results
 
+## Step 05A: deterministic local CI gates
+
+On 2026-10-11, `.\.venv\Scripts\python.exe scripts/validate.py --group all` passed against the existing native PostgreSQL17/PostGIS3.6.2 installation:
+
+- Ruff lint and format check passed (43 formatted Python files).
+- 87 unit tests passed in 23.38 seconds; 12 integration tests passed in 6.30 seconds. Selected suites had zero skips. Six additional unit cases verify validation refuses empty/skipped/failed/errored suites and external Python socket networking.
+- Built source distribution and wheel. An isolated Python process imported the built wheel (asserted wheel origin), loaded both SQL migrations from that wheel, imported CLI dependencies, and ran CLI help.
+- Applied both immutable migrations in a fresh owned schema, verified ledger count, and repeated them with zero applications. Integration fixtures separately verify duplicate replay, quarantine bytes/lineage, transactional rollback, and rejection of modified/broken migrations. All fixture data and outputs are temporary and synthetic.
+- Fixed a Windows test timing race by advancing a controlled clock, and bounded periodic collector fixture teardown. Twelve files were formatted; production collector logic and migration SQL remain unchanged.
+
+The validator clears live credentials for its subprocesses and redirects outputs to temporary roots. This evidence is local. Completed prerequisite stages were separately published in [PR#1](https://github.com/SamABZD/portwatch/pull/1). Actual CI PR/main runs and branch-rule application are pending remote verification; see [GITHUB_SETUP.md](GITHUB_SETUP.md). No hosted UI or deployment was created in this stage.
+
 ## Step 05 — cleaning and real live verification (2026-10-11)
 
 Real key is saved only in ignored `.env`; its value is omitted from every report. A finite `ingest live --port los_angeles --duration 60` completed in **60.843 seconds**, with compression/subscription accepted, **38** saved envelopes, **26** position messages (24 Class A, 2 Class B), **11** static messages (8 ship static, 3 static reports), and **1** confirmation. Collector observed 33 distinct MMSIs across position/static messages; clean positions represent 24 distinct MMSIs. These measure this short collection window, not complete harbor coverage. Parse errors, reconnects, unfinalized received records and recovered tail bytes were all zero; queue high-water was 2/128. Two genuine raw batches were finalized and registered:

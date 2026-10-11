@@ -88,8 +88,8 @@ def relative_path(spec: BatchSpec, batch_id: str) -> Path:
         period = spec.source_date.strftime("%Y/%m/%d")
     else:
         period = spec.received_at.strftime("%Y/%m/%d/%H")
-    return Path(spec.source_id) / spec.mode / period / spec.dataset_id / (
-        batch_id + spec.file_suffix
+    return (
+        Path(spec.source_id) / spec.mode / period / spec.dataset_id / (batch_id + spec.file_suffix)
     )
 
 
@@ -295,8 +295,12 @@ def quarantine_record(
         sidecar = Path(str(destination) + ".manifest.json")
         if not sidecar.exists():
             metadata = dict(
-                schema_version=1, batch_id=batch_id, record_offset=record_offset,
-                reason=reason, content_sha256=checksum, byte_count=len(payload),
+                schema_version=1,
+                batch_id=batch_id,
+                record_offset=record_offset,
+                reason=reason,
+                content_sha256=checksum,
+                byte_count=len(payload),
             )
             _publish_json(sidecar, json.dumps(metadata, indent=2))
         if not destination.exists():

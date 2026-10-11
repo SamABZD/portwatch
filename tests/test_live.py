@@ -371,6 +371,8 @@ def test_complete_corrupt_active_record_is_not_silently_skipped(tmp_path):
 
 
 def test_rotation_by_size_time_hour_and_frequent_durable_flush(tmp_path, monkeypatch):
+    clock = [100.0]
+    monkeypatch.setattr("portwatch.live_spool.time.monotonic", lambda: clock[0])
     spec = synthetic_spec()
     spool = LiveSpool(
         tmp_path / "active",
@@ -388,10 +390,10 @@ def test_rotation_by_size_time_hour_and_frequent_durable_flush(tmp_path, monkeyp
     assert spool.append(
         envelope(spec, sequence=3, received_at=datetime(2026, 10, 11, 13, tzinfo=UTC))
     )  # Hour.
-    time.sleep(0.015)
+    clock[0] += 0.015
     before_flush = len(flushes)
     assert spool.tick() == [] and len(flushes) > before_flush
-    time.sleep(0.02)
+    clock[0] += 0.02
     assert spool.tick()  # Short interval rotation.
     assert len(spool.store.inspect()) == 3
 
@@ -484,17 +486,18 @@ def test_periodic_status_updates_during_connected_idle_capture(tmp_path):
                 status_interval=0.02,
             )
             task = asyncio.create_task(collector.run(stop_event=stop))
-            for _ in range(100):
-                await asyncio.sleep(0.01)
-                if collector.status_path.exists():
-                    report = json.loads(collector.status_path.read_text())
-                    if report["observations"] == 1 and report["last_socket_heartbeat"]:
-                        break
-            else:
-                pytest.fail("live metrics did not advance while connected")
-            assert report["connected"] and report["state"] == "subscribed"
-            stop.set()
-            await task
+            try:
+                async with asyncio.timeout(3):
+                    while True:
+                        await asyncio.sleep(0.01)
+                        if collector.status_path.exists():
+                            report = json.loads(collector.status_path.read_text())
+                            if report["observations"] == 1 and report["last_socket_heartbeat"]:
+                                break
+                assert report["connected"] and report["state"] == "subscribed"
+            finally:
+                stop.set()
+                await asyncio.wait_for(task, timeout=3)
 
     asyncio.run(scenario())
 

@@ -81,10 +81,12 @@ def test_no_credentials_in_manifest_or_cli_errors(
     tmp_path: Path, spec: BatchSpec, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     private = "synthetic_api_secret_do_not_log"
-    safe_spec = BatchSpec(**{
-        **spec.model_dump(),
-        "source_url": f"https://user:{private}@example.invalid/synthetic.csv?APIKey={private}#{private}",
-    })
+    safe_spec = BatchSpec(
+        **{
+            **spec.model_dump(),
+            "source_url": f"https://user:{private}@example.invalid/synthetic.csv?APIKey={private}#{private}",
+        }
+    )
     store = RawStore(tmp_path)
     manifest = store.write([SYNTHETIC], safe_spec)
     body = Path(str(tmp_path / manifest.local_path) + ".manifest.json").read_text()
@@ -105,17 +107,23 @@ def test_no_credentials_in_manifest_or_cli_errors(
 
 def test_live_receipt_hour_and_duplicate_across_hours(tmp_path: Path) -> None:
     spec = BatchSpec(
-        source_id="synthetic_live", dataset_id="synthetic_step02_live", mode="live",
-        source_url="wss://example.invalid/stream", file_suffix=".jsonl",
+        source_id="synthetic_live",
+        dataset_id="synthetic_step02_live",
+        mode="live",
+        source_url="wss://example.invalid/stream",
+        file_suffix=".jsonl",
         received_at=datetime(2026, 10, 11, 19, tzinfo=UTC),
         source_start_utc=datetime(2024, 1, 1, tzinfo=UTC),
         source_end_utc=datetime(2024, 1, 1, 1, tzinfo=UTC),
     )
     store = RawStore(tmp_path)
     first = store.write([b'{"synthetic":true,"source_time":"2024-01-01T00:00:00Z"}\n'], spec)
-    next_hour = BatchSpec(**{
-        **spec.model_dump(), "received_at": datetime(2026, 10, 11, 20, tzinfo=UTC),
-    })
+    next_hour = BatchSpec(
+        **{
+            **spec.model_dump(),
+            "received_at": datetime(2026, 10, 11, 20, tzinfo=UTC),
+        }
+    )
     repeated = store.write([(tmp_path / first.local_path).read_bytes()], next_hour)
     assert first == repeated
     assert "/live/2026/10/11/19/" in first.local_path
@@ -133,8 +141,11 @@ def test_concurrent_duplicate_writers(tmp_path: Path, spec: BatchSpec) -> None:
 def test_quarantine_preserves_original_rejected_bytes(tmp_path: Path, spec: BatchSpec) -> None:
     batch = RawStore(tmp_path / "raw").write([SYNTHETIC], spec)
     path = quarantine_record(
-        tmp_path / "quarantine", b"synthetic invalid record\x00", batch_id=batch.batch_id,
-        record_offset=42, reason="invalid_geometry",
+        tmp_path / "quarantine",
+        b"synthetic invalid record\x00",
+        batch_id=batch.batch_id,
+        record_offset=42,
+        reason="invalid_geometry",
     )
     assert path.read_bytes() == b"synthetic invalid record\x00"
     sidecar = json.loads(Path(str(path) + ".manifest.json").read_text())

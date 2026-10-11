@@ -2,7 +2,7 @@
 
 ## Repository boundary
 
-This repository contains only PortWatch. Its root is the `portwatch` directory, not the parent `dataEngineering` folder. `main` is the default branch. `origin` must identify only `SamABZD/portwatch`; verify it with `git remote -v` before pushing. The public [Flux repository](https://github.com/SamABZD/flux) is a read-only organization reference, not a remote or source tree for PortWatch. Its text-normalization pattern informed `.gitattributes`; its CI design will be adapted at Step 05A, when the necessary tests exist.
+This repository contains only PortWatch. Its root is the `portwatch` directory, not the parent `dataEngineering` folder. `main` is the default branch. `origin` must identify only `SamABZD/portwatch`; verify it with `git remote -v` before pushing. The public [Flux repository](https://github.com/SamABZD/flux) is a read-only organization reference. Its text-normalization pattern informed `.gitattributes`; Step 05A adapts its [CI pattern](https://github.com/SamABZD/flux/blob/main/.github/workflows/ci.yml) for Python and PostGIS.
 
 ## Normal change routine
 
@@ -17,4 +17,35 @@ Use `git check-ignore -v <path>` to confirm an artifact is excluded. To unstage 
 
 ## Verification gates
 
-Run `ruff check .` and the focused tests through `uv run` locally. Run `python -m portwatch doctor` when the local database is available. Step 05A will add a GitHub Validate workflow with an isolated PostGIS service and a verified pull request run. No CI result is implied before that stage.
+From the repository root, run the same entry point used by GitHub:
+
+```powershell
+.\.bootstrap-venv\Scripts\uv.exe run --locked --extra dev python scripts/validate.py
+```
+
+With `uv` on PATH on Windows, Linux, or macOS:
+
+```sh
+uv run --locked --extra dev python scripts/validate.py
+```
+
+Use `--group quality` for lint, format, unit tests, and package checks without a database. Use `--group integration` for PostgreSQL 17/PostGIS 3.6 checks. The default runs both. Integration uses local database settings from the ignored `.env` or environment overrides; the native Windows database requires no Docker download. Each integration fixture creates and drops only its own temporary schema. Application tables and saved provider data are preserved.
+
+The validator runs `uv sync --locked --extra dev`, Ruff lint and format checks, non-integration/integration pytest selections, and `uv build`. It imports the actual wheel in isolated Python, checks its SQL migration resources and CLI help, and checks fresh/repeated migrations. Empty, skipped, failed, or errored test suites fail validation. New tests with the `integration` marker join the database gate automatically; unmarked tests join the unit gate.
+
+Tests use small labeled synthetic data, loopback HTTP/WebSocket servers, and temporary output roots. A shared fixture rejects external Python socket lookups/connections. The validator blanks the AIS key in subprocesses and never runs provider ingestion, weather/news calls, or historical downloads. Dependency installation and package building may use the network.
+
+## GitHub Validate jobs
+
+`.github/workflows/ci.yml` runs on branch pushes, PRs targeting `main`, and manual dispatch. Distinct job names are `quality` and `integration`, each with an Ubuntu 24.04 runner and 15-minute timeout. Concurrency cancels obsolete runs for the same branch/PR. Permissions default to `contents: read`; checkout does not persist credentials. No provider secrets, failure artifact uploads, workspace caches, or scheduled AIS collectors are configured.
+
+The repository is public and uses a standard hosted runner, whose execution is [free under GitHub's billing policy](https://docs.github.com/en/actions/concepts/billing-and-usage). No paid runner, deployment service, or artifact upload is requested.
+
+Official action versions verified on 2026-10-11:
+
+- [actions/checkout v7.0.1](https://github.com/actions/checkout/releases/tag/v7.0.1), pinned to `3d3c42e5aac5ba805825da76410c181273ba90b1`.
+- [astral-sh/setup-uv v10.3.0](https://github.com/astral-sh/setup-uv/releases/tag/v10.3.0), pinned to `1c37ad07a6a961277cf70c0d37d6f313000f5884`.
+
+Both jobs use uv 0.13.0, Python 3.11, locked development dependencies, and only the uv dependency cache keyed by `uv.lock`. Integration starts [postgis/postgis:17-3.6-alpine](https://github.com/postgis/docker-postgis), checks readiness with `pg_isready`, and uses disposable CI-only credentials. The image tag matches the native installation's PostgreSQL/PostGIS major versions; patch image versions may change. The validator checks both server versions explicitly. Each hosted job gets a fresh database service.
+
+Remote run, PR, and branch-rule evidence is recorded in [GITHUB_SETUP.md](GITHUB_SETUP.md) and [HANDOFF.md](HANDOFF.md). Reading YAML or passing local tests alone does not establish a GitHub pass.

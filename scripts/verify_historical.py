@@ -25,10 +25,18 @@ def verify(rebuild: bool = False) -> dict:
     settings = Settings()
     spec, parameters = plan(settings, "los_angeles", True, None, None)[0]
     store = RawStore(settings.project_path(settings.raw_dir))
-    parents = [item.manifest for item in store.inspect() if item.state == "complete"
-               and (item.manifest.source_id, item.manifest.dataset_id,
-                    item.manifest.source_url, item.manifest.source_date)
-               == (spec.source_id, spec.dataset_id, spec.source_url, spec.source_date)]
+    parents = [
+        item.manifest
+        for item in store.inspect()
+        if item.state == "complete"
+        and (
+            item.manifest.source_id,
+            item.manifest.dataset_id,
+            item.manifest.source_url,
+            item.manifest.source_date,
+        )
+        == (spec.source_id, spec.dataset_id, spec.source_url, spec.source_date)
+    ]
     if not parents:
         raise ValueError("no completed demo raw source")
     # The matching cache exists, so default acquisition performs no HTTP. Honor the
@@ -73,8 +81,10 @@ def verify(rebuild: bool = False) -> dict:
             non_minute += int(np.count_nonzero(milliseconds % 60000))
             non_second += int(np.count_nonzero(milliseconds % 1000))
             for field, expected in (
-                ("source_batch_id", parent.batch_id), ("dataset_id", parent.dataset_id),
-                ("source_id", parent.source_id), ("derivation_id", identity),
+                ("source_batch_id", parent.batch_id),
+                ("dataset_id", parent.dataset_id),
+                ("source_id", parent.source_id),
+                ("derivation_id", identity),
             ):
                 assert pc.all(pc.equal(batch.column(field), expected)).as_py()
             offsets = batch.column("source_row_offset").to_numpy()
@@ -91,16 +101,22 @@ def verify(rebuild: bool = False) -> dict:
     assert len(vessels) == report.distinct_vessels
     assert earliest == report.earliest_utc and latest == report.latest_utc
     result = {
-        "verified_rows": total, "distinct_vessels": len(vessels),
-        "earliest_utc": earliest.isoformat(), "latest_utc": latest.isoformat(),
-        "not_on_whole_minute": non_minute, "scatter_sample_rows": len(sample_longitude),
+        "verified_rows": total,
+        "distinct_vessels": len(vessels),
+        "earliest_utc": earliest.isoformat(),
+        "latest_utc": latest.isoformat(),
+        "not_on_whole_minute": non_minute,
+        "scatter_sample_rows": len(sample_longitude),
         "not_on_whole_second": non_second,
-        "artifact_sha256": report.content_sha256, "raw_sha256": parent.content_sha256,
+        "artifact_sha256": report.content_sha256,
+        "raw_sha256": parent.content_sha256,
         "rebuild_matching_checksum": None,
     }
     if rebuild:
         rebuilt, _ = extract(
-            store._path(parent.local_path), parent, parameters,
+            store._path(parent.local_path),
+            parent,
+            parameters,
             PROJECT_ROOT / "artifacts/step03-rebuild",
         )
         assert rebuilt.content_sha256 == report.content_sha256
@@ -109,29 +125,50 @@ def verify(rebuild: bool = False) -> dict:
     output = PROJECT_ROOT / "artifacts"
     output.mkdir(exist_ok=True)
     fig, ax = plt.subplots(figsize=(9, 8), dpi=150)
-    ax.scatter(sample_longitude, sample_latitude, s=5, color="#195681", alpha=0.35,
-               linewidths=0, label=f"NOAA positions ({len(sample_longitude):,} sampled)")
-    ax.add_patch(Rectangle((west, south), east-west, north-south, fill=False,
-                          edgecolor="#ba6c28", linestyle="--", linewidth=1.5))
+    ax.scatter(
+        sample_longitude,
+        sample_latitude,
+        s=5,
+        color="#195681",
+        alpha=0.35,
+        linewidths=0,
+        label=f"NOAA positions ({len(sample_longitude):,} sampled)",
+    )
+    ax.add_patch(
+        Rectangle(
+            (west, south),
+            east - west,
+            north - south,
+            fill=False,
+            edgecolor="#ba6c28",
+            linestyle="--",
+            linewidth=1.5,
+        )
+    )
     for label, longitude, latitude in (
         ("Pier 400 reference", -118.24131, 33.73519),
         ("Outer harbor reference", -118.24239, 33.71466),
         ("Long Beach Pier F reference", -118.2111, 33.7515),
     ):
         ax.scatter([longitude], [latitude], marker="x", color="#76332b", s=45)
-        ax.annotate(label, (longitude, latitude), xytext=(5, 7), textcoords="offset points",
-                    fontsize=8)
-    ax.set_xlim(west-0.01, -118.19)
-    ax.set_ylim(south-0.01, north+0.01)
-    ax.set_aspect(1/np.cos(np.deg2rad((south+north)/2)))
+        ax.annotate(
+            label, (longitude, latitude), xytext=(5, 7), textcoords="offset points", fontsize=8
+        )
+    ax.set_xlim(west - 0.01, -118.19)
+    ax.set_ylim(south - 0.01, north + 0.01)
+    ax.set_aspect(1 / np.cos(np.deg2rad((south + north) / 2)))
     ax.set_xlabel("Longitude (WGS84 degrees)")
     ax.set_ylabel("Latitude (WGS84 degrees)")
     ax.set_title("Port of Los Angeles collection area\nNOAA AIS, January 1, 2024 UTC")
     ax.grid(alpha=0.2)
     ax.legend(loc="lower left", fontsize=8)
     fig.text(
-        0.5, 0.015, "Dashed box: heuristic filter. Reference points from source audit. "
-        "No basemap or official port boundary.", ha="center", fontsize=8,
+        0.5,
+        0.015,
+        "Dashed box: heuristic filter. Reference points from source audit. "
+        "No basemap or official port boundary.",
+        ha="center",
+        fontsize=8,
     )
     fig.tight_layout(rect=(0, 0.03, 1, 1))
     fig.savefig(output / "step03-los-angeles.png")

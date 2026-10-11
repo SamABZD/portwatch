@@ -76,7 +76,9 @@ def historical_input(settings: Settings, store: RawStore, spec, parameters) -> C
     for item in store.inspect():
         parent = item.manifest
         if parent and (parent.source_id, parent.dataset_id, parent.source_url) == (
-            spec.source_id, spec.dataset_id, spec.source_url
+            spec.source_id,
+            spec.dataset_id,
+            spec.source_url,
         ):
             if item.state != "complete":
                 raise ValueError("historical raw storage integrity issue")
