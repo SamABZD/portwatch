@@ -18,7 +18,9 @@ On another machine without `uv`, create the same local bootstrap environment wit
 
 Docker Desktop must be running for the database checks. Docker publishes PostgreSQL only on `127.0.0.1:5432`; the database uses a named local volume. The sample password is strictly for this localhost demo and should be changed if the service is exposed elsewhere. Update `PORTWATCH_DB_PASSWORD` in `.env` before first Compose startup if you change it. Compose initialization variables do not reset a populated volume.
 
+Step 01 source auditing can proceed without Docker. If you defer Docker, skip `docker compose up` and expect `doctor` to report the database and PostGIS checks as incomplete until a local PostGIS service is available for Step 02.
+
 The port bounding box and geofence are intentionally `null` until Step 01 verifies them. `doctor` validates this state and reports database connectivity and PostGIS separately. It exits nonzero if a required check fails.
 
 Project decisions and the current state are in [docs/DECISIONS.md](docs/DECISIONS.md) and [docs/HANDOFF.md](docs/HANDOFF.md).
-Contributions follow [CONTRIBUTING.md](CONTRIBUTING.md) and the [GitHub workflow](docs/GITHUB_WORKFLOW.md).
+Contributions follow [CONTRIBUTING.md](CONTRIBUTING.md) and the [GitHub workflow](docs/GITHUB_WORKFLOW.md). The verified publication details are in [docs/GITHUB_SETUP.md](docs/GITHUB_SETUP.md).
