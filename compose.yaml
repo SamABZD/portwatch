@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgis/postgis:16-3.5
+    environment:
+      POSTGRES_DB: ${PORTWATCH_DB_NAME:-portwatch}
+      POSTGRES_USER: ${PORTWATCH_DB_USER:-portwatch}
+      POSTGRES_PASSWORD: ${PORTWATCH_DB_PASSWORD:-portwatch_dev_only}
+    ports:
+      - "127.0.0.1:${PORTWATCH_DB_PORT:-5432}:5432"
+    volumes:
+      - portwatch_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
+
+volumes:
+  portwatch_pgdata:

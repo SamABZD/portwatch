@@ -1,0 +1,10 @@
+port_id: los_angeles
+display_name: Port of Los Angeles
+timezone: America/Los_Angeles
+# Step 01 must establish an authoritative source and version for these boundaries.
+bounding_box: null
+geofence_path: null
+# Provisional analytical thresholds; revisit and version with Step 01 source audit.
+waiting_speed_knots: 1.0
+waiting_min_minutes: 30
+max_observation_gap_minutes: 15

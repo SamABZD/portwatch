@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling>=1.25,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "portwatch"
+version = "0.1.0"
+description = "Local-first Port of Los Angeles data engineering portfolio project"
+readme = "README.md"
+requires-python = ">=3.11,<3.15"
+dependencies = [
+  "psycopg[binary]>=3.2,<4",
+  "pydantic-settings>=2.5,<3",
+  "PyYAML>=6,<7",
+  "typer>=0.12,<1",
+  "tzdata>=2024.1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8,<10",
+  "ruff>=0.9,<1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/portwatch"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

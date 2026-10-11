@@ -1,0 +1,44 @@
+# Local configuration and environments
+.env
+.env.*
+!.env.example
+.venv/
+.bootstrap-venv/
+venv/
+
+# Python and tool caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.tox/
+.nox/
+.coverage
+coverage.xml
+htmlcov/
+*.egg-info/
+dist/
+build/
+*.log
+logs/
+Thumbs.db
+.DS_Store
+
+# Provider downloads, local data, and generated artifacts
+data/raw/
+data/derived/
+data/quarantine/
+data/downloads/
+downloads/
+artifacts/
+*.parquet
+*.feather
+*.duckdb
+*.sqlite
+*.sqlite3
+*.db
+pgdata/
+postgres-data/
+
+# Keep small synthetic test fixtures under tests/fixtures/ trackable.
