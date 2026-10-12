@@ -79,5 +79,7 @@ These are laptop processes, not boot services. Sleep/shutdown stops work and col
 raw/checkpoints survive. Queued missed ticks may run after restart, processing current saved
 inputs idempotently. They cannot recover reports never collected during downtime.
 Graceful runner shutdown pauses schedules; `orchestrate pause` pauses only these three deployments.
+Step11 adds [read-only health and safe structured events](HEALTH_RECOVERY.md); committed SQL
+audits remain authoritative and events inside outer transactions are marked provisional.
 Stage verification stops its temporary server/runner, retaining evidence. Ready schedules are not
 an always-on hosted service. No frontend or deployment was created.

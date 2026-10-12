@@ -1,5 +1,59 @@
 # Measured results
 
+## Step11: monitoring/recovery (2026-10-12)
+
+- Branch `feat/monitoring-recovery` starts at Next.js preference checkpoint
+  `a140c4baa5b4e638595609d283f20f4c36889126` (Step10 code `71d36b2`). Added read-only
+  human/JSON health, safe structured events, backup/restore verification and owned recovery drills.
+  No schema, dependency, provider request, payment, remote push or deployment was added.
+- `python -m portwatch --log-json db backup --output artifacts/step11/portwatch-2026-10-12.dump`:
+  **verified**,11,219,941 bytes; dump10.59s and restore16.34s. Actual separate owned DB restore
+  matched27 application tables/321,972 rows and column contracts; PostGIS3.6.2 verified and DB
+  removed. SHA-256 `c84c3d6647682b167831e36cca952cee0215c179cd8c191c780e40cf676b3e60`.
+  Archive/manifest remain private/ignored on the same local disk. Raw/config/Prefect metadata
+  and global roles are outside the archive; off-device disaster recovery remains unverified.
+- `python scripts/verify_recovery.py`: **PASS in39.19s**. Genuine frozen NOAA mart reruns
+  took8.18s and6.93s, each24 hours/62,157 observations with identical business rows.
+  Source hash remains `355cc069362fd84e7aa27530647bae9f8dbbcbdb0156e9585dfea9b91a8122d4`;
+  mart hash remains `6f6ca8ecaa8e3824040aa481cd85d88cd0b52990ba2a0307daf14001ad223112`.
+  Five genuine raw files remain verified; source bytes and real analytical values were preserved.
+- Owned synthetic DB/file drills persisted a raw batch before registration, denied only that
+  DB's connections, detected failure with unknown analytical counters, restored connections and
+  processed5 positions in0.377s with unchanged raw bytes. A failed mart publication retained
+  earlier valid metrics and produced a visible failed audit. A late point changed the one visit:
+  5→6 observations, obsolete visit removed and hours replaced in0.114s. Malformed input retained
+  original bytes/lineage with1 accepted,1 duplicate and1 quarantined `invalid_mmsi` record.
+  Duplicate replay left business hashes unchanged in0.031s. Truncation was detected and the
+  owned fixture restored to its original checksum. Final scoped totals7 accepted/1 duplicate/
+  1 quarantined; final health healthy; owned DB removed. No synthetic data entered the main DB.
+- Loopback WebSocket drill:2 connections,2 synthetic observations,1 reconnect in2.015s;
+  visible disconnected/backoff/connecting/healthy/stopped snapshots and a0.310s missing
+  connection interval. That interval means upstream reports unknown, not zero traffic.
+  No AIS provider request or continuous real collector was started.
+- The actual disconnect exercise found a shutdown hang caused by a Python3.11 Pong/cancellation
+  race in `asyncio.wait_for`. Replaced the Pong wait with `asyncio.timeout` and added a
+  deterministic simultaneous-completion/cancellation test. Collector-only recheck passed in
+  2.012s. Synthetic timing tolerances remain bounded; production20-second ping timing unchanged.
+- `uv run --locked --extra dev python scripts/validate.py`: **156 unit17.31s +53 integration
+  42.55s =209 passed**, zero selected skips; lint/format81 files, wheel/sdist and installed-wheel
+  CLI/resources, seven fresh migrations/repeat zero. Migrations001–007 remain unchanged.
+  Tests also verify health is read-only, secret masking, active PID identity versus silence,
+  disk warning, unregistered backlog, corrupted raw and archive/ownership guards.
+- Real `health --port los_angeles --json` at17:19:35 UTC /20:19:35 Asia/Beirut returned exit1,
+  **degraded** because current forecast is stale and the saved news429 attempt remains failed.
+  Its consecutive `news_ingest` failure count is1; all other listed stages are0, running0.
+  Historical `ready_historical`:62,157 accepted/canonical,2 duplicates,0 quarantined,0 backlog.
+  Saved live26 positions are stale with0 backlog. Collector explicitly stopped with last genuine
+  receipt2026-10-11T19:26:03.039308Z; old snapshot has no PID identity. Historical reanalysis
+  remains available. `doctor` allPASS; raw inspection5 verified/0 issues; PostgreSQL PID18824
+  remains running at localhost55432. Prefect schedules remain paused/server and runner stopped.
+
+Evidence: ignored `artifacts/step11/backup.log`, archive/manifest, `recovery-verification.json`,
+`recovery.log`, `collector-check.json`, `collector-check.log`, `validation.log`, `health.json` and
+`health-events.log`. Public copies live in this chat's `outputs`. Recovery target covers already
+durable demonstrated inputs; volatile/unreceived inputs and production recovery objectives are
+excluded. Step11 complete locally; next Step12 map/replay uses the saved Next.js preference.
+
 ## Step10: orchestration/backfills (2026-10-12)
 
 - Branch `feat/orchestration-backfills` starts from Step09 checkpoint

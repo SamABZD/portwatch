@@ -42,6 +42,65 @@ app.add_typer(pipeline_app, name="pipeline")
 app.add_typer(orchestrate_app, name="orchestrate")
 
 
+def operational_logs(
+    log_json: Annotated[
+        bool, typer.Option(help="Structured operational events on stderr.")
+    ] = False,
+):
+    if log_json:
+        from portwatch.events import enable_event_logs
+
+        return enable_event_logs()
+
+
+@app.command("health")
+def health_command(
+    port: str = "los_angeles", json_output: Annotated[bool, typer.Option("--json")] = False
+):
+    """Read-only historical readiness, live freshness, backlog and source health."""
+    from portwatch.health import collect_health, human_health
+
+    try:
+        report = collect_health(Settings(), port)
+        typer.echo(json.dumps(report, indent=2) if json_output else human_health(report))
+    except Exception as error:
+        typer.echo(f"Health unavailable: {type(error).__name__}", err=True)
+        raise typer.Exit(code=2) from None
+    if report["overall"] != "ok":
+        raise typer.Exit(code=1)
+
+
+@db_app.command("backup")
+def db_backup(
+    output: Annotated[Path, typer.Option(help="New .dump archive path; never overwrite.")],
+    verify: bool = True,
+):
+    """Dump a consistent snapshot; verify by restoring only into a newly owned test database."""
+    from portwatch.backup import BackupError, create_backup
+
+    try:
+        typer.echo(json.dumps(create_backup(Settings(), output, verify=verify), indent=2))
+    except Exception as error:
+        code = str(error) if isinstance(error, BackupError) else type(error).__name__
+        typer.echo(f"Backup failed: {code}", err=True)
+        raise typer.Exit(code=1) from None
+
+
+@db_app.command("verify-backup")
+def db_verify_backup(
+    file: Annotated[Path, typer.Option(help="Archive with matching checksum manifest.")],
+):
+    """Verify a saved archive without restoring over the analytical database."""
+    from portwatch.backup import BackupError, verify_backup
+
+    try:
+        typer.echo(json.dumps(verify_backup(Settings(), file), indent=2))
+    except Exception as error:
+        code = str(error) if isinstance(error, BackupError) else type(error).__name__
+        typer.echo(f"Backup verification failed: {code}", err=True)
+        raise typer.Exit(code=1) from None
+
+
 def pipeline_command(
     kind, port, demo=False, start=None, end=None, stop_after_raw=False, rebuild=False, local=False
 ):
@@ -395,8 +454,14 @@ def positions_transform(
 
 
 @app.callback()
-def main() -> None:
+def main(
+    ctx: typer.Context,
+    log_json: Annotated[bool, typer.Option(help="Structured events on stderr.")] = False,
+) -> None:
     """PortWatch CLI."""
+    cleanup = operational_logs(log_json)
+    if cleanup:
+        ctx.call_on_close(cleanup)
 
 
 @app.command()

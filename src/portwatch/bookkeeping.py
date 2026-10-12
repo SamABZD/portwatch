@@ -4,7 +4,9 @@ from dataclasses import dataclass
 from uuid import UUID, uuid4
 
 import psycopg
+from psycopg.pq import TransactionStatus
 
+from portwatch.events import emit
 from portwatch.storage import Manifest, RawStore, checksum_file
 
 
@@ -101,6 +103,14 @@ def start_run(connection: psycopg.Connection, stage: str) -> UUID:
         raise ValueError("unknown pipeline stage")
     run_id = uuid4()
     connection.execute("INSERT INTO pipeline_runs (run_id, stage) VALUES (%s, %s)", (run_id, stage))
+    emit(
+        "pipeline_run_started",
+        run_id=str(run_id),
+        stage=stage,
+        audit_visibility="committed"
+        if connection.info.transaction_status == TransactionStatus.IDLE
+        else "pending_transaction",
+    )
     return run_id
 
 
@@ -126,6 +136,17 @@ def finish_run(
     ).fetchone()
     if not changed:
         raise ValueError("run is not running")
+    emit(
+        "pipeline_run_finished",
+        run_id=str(run_id),
+        status="failed" if error else "succeeded",
+        input_count=input_count,
+        output_count=output_count,
+        error_class=safe_error(error) if error else None,
+        audit_visibility="committed"
+        if connection.info.transaction_status == TransactionStatus.IDLE
+        else "pending_transaction",
+    )
 
 
 @dataclass

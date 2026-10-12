@@ -5,15 +5,42 @@
 - **Frontend preference updated2026-10-12: Next.js/React/TypeScript replaces Streamlit for Step12.**
   Follow [FRONTEND_PLAN.md](FRONTEND_PLAN.md), reusing the existing Python/PostGIS pipeline via
   a read-only query API. Keep the original map/replay acceptance criteria. This is a recorded
-  user preference; frontend/API implementation has not started. Step11 remains next.
+  user preference; frontend/API implementation has not started. Step12 is now next.
 
-- Completed locally: Steps00,00A,01–10, including zones, visits/waiting, context, marts and **orchestration/backfills**. Native PostgreSQL17.11/PostGIS3.6.2 remains healthy;194 tests pass. Historical24-hour metrics/source hashes remain unchanged. No frontend or deployed site exists.
-- Project root: `C:\Users\samab\dataEngineering\portwatch`. Current branch: `feat/orchestration-backfills`, from Step09 checkpoint `5caeeb8badd0e3010f15bb6f39457417a7b638ed`. Steps06–10 remain unpushed; use `git log -1` for this stage's local checkpoint.
+- Completed locally: Steps00,00A,01–11, including zones, visits/waiting, context, marts, orchestration/backfills and **monitoring/recovery**. Native PostgreSQL17.11/PostGIS3.6.2 remains healthy;209 tests pass. Historical24-hour metrics/source hashes remain unchanged. No frontend or deployed site exists.
+- Project root: `C:\Users\samab\dataEngineering\portwatch`. Current branch: `feat/monitoring-recovery`, from Next.js preference checkpoint `a140c4baa5b4e638595609d283f20f4c36889126` (Step10 code `71d36b2`). Steps06–11 remain unpushed; use `git log -1` for this stage's local checkpoint.
 - **Step05A remote CI remains blocked by the GitHub account billing lock.** User declined payment and authorized local continuation at$0. [Repository](https://github.com/SamABZD/portwatch), [CI PR#2](https://github.com/SamABZD/portwatch/pull/2); PR stays unmerged and proposed branch rules unapplied. No payment, account change, push or hosted deployment.
-- **Next: Step11 monitoring/recovery**, sibling prompt `portwatch-prompts/11-monitoring-recovery.md`. Stop at Step10 here. Read [ORCHESTRATION.md](ORCHESTRATION.md), [RUNBOOK.md](RUNBOOK.md), [ANALYTICS.md](ANALYTICS.md), [VISITS.md](VISITS.md) and [RESULTS.md](RESULTS.md). Full playbook: `C:\Users\samab\dataEngineering\PORTWATCH_BUILD_PLAYBOOK.md`.
-- Five genuine raw batches remain verified. Last real news request remains429. Collector was not started; live tasks process the saved26 observations and report stale lag. Prefect schedules paused and temporary runner/server stopped after actual automatic-run verification; PostgreSQL stays running. Keep these process states explicit when resuming.
+- **Next: Step12 map/replay**, sibling prompt `portwatch-prompts/12-map-replay.md`. Its original Streamlit/PyDeck requirement is superseded by the user's Next.js choice; retain all data/replay acceptance checks and follow [FRONTEND_PLAN.md](FRONTEND_PLAN.md). Stop at Step11 here. Read [HEALTH_RECOVERY.md](HEALTH_RECOVERY.md), [RUNBOOK.md](RUNBOOK.md), [ORCHESTRATION.md](ORCHESTRATION.md), [ANALYTICS.md](ANALYTICS.md), [VISITS.md](VISITS.md) and [RESULTS.md](RESULTS.md). Full playbook: `C:\Users\samab\dataEngineering\PORTWATCH_BUILD_PLAYBOOK.md`.
+- Five genuine raw batches remain verified. Last real news request remains429; forecast is stale. Collector remains stopped and saved26 live observations are stale. Prefect schedules remain paused and temporary runner/server stopped; PostgreSQL PID18824 stays running. No Step11 provider request. Keep process/freshness states explicit when resuming.
 
 ## Verified commands and observed outcomes
+
+### Step11 monitoring/recovery (2026-10-12)
+
+- `python -m portwatch --log-json health --port los_angeles --json`: read-only report, safe
+  stdout JSON/stderr events, exit1 for stale forecast/news429. Historical ready,0 backlog;
+  live stale,0 backlog; collector stopped. `doctor` allPASS and storage5 verified/0 issues.
+- `python -m portwatch --log-json db backup --output artifacts/step11/portwatch-2026-10-12.dump`:
+  verified actual owned restore,27 application tables/321,972 rows, dump10.59s/restore16.34s,
+  PostGIS3.6.2, owned DB removed. Archive/manifest ignored; no main DB replacement or stop.
+- `python scripts/verify_recovery.py`:39.19s PASS. Two genuine historical recomputations preserve
+  source/mart business hashes. Owned synthetic DB denial/backlog recovery0.377s; failed
+  publication preserves previous metrics; late report replaces obsolete visit/hours0.114s;
+  malformed record accepted1/duplicate1/quarantined1 with preserved lineage; duplicate replay
+  unchanged; checksum corruption detected/restored. Owned DB removed and main data preserved.
+- Broken loopback socket reconnects once,2 connections/2 observations, missing interval0.310s
+  explicit unknown. Actual shutdown race fixed with deterministic Pong/cancellation regression;
+  collector-only recheck2.012s. Production ping timing unchanged; no real provider call.
+- `uv run --locked --extra dev python scripts/validate.py`:156 unit17.31s +53 integration42.55s
+  =209 passed, zero selected skips, lint/format81 files, packages/installed-wheel CLI and seven
+  fresh migrations/repeat zero. No dependencies/migrations added;001–007 unchanged.
+
+Evidence: ignored `artifacts/step11` logs, JSON report and backup/manifest; public copies and
+project locator in chat `outputs`. Restore verifies application data/columns, not global
+roles/ACLs or every index/sequence. Raw/config/private `.env`/Prefect metadata need separate
+preservation. Same-disk archive is not off-device disaster recovery. The no-loss target applies
+only to already durable demonstrated inputs; timings are local samples, not production RTOs.
+No user action is needed to begin the authorized local next stage; hosted CI remains pending.
 
 ### Step10 orchestration/backfills (2026-10-12)
 

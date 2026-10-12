@@ -17,10 +17,12 @@ from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
+import psutil
 from pydantic import SecretStr
 from websockets.asyncio.client import connect
 from websockets.exceptions import ConnectionClosed, InvalidStatus, WebSocketException
 
+from portwatch.events import emit
 from portwatch.live_spool import MAX_FRAME_BYTES, LiveEnvelope, LiveSpool, collector_lock
 from portwatch.settings import Settings, load_port_config
 from portwatch.storage import BatchSpec, Manifest, RawStore
@@ -165,6 +167,7 @@ class LiveCollector:
         self.status_callback = status_callback
         self.queue = asyncio.Queue(maxsize=queue_records)
         self.status = LiveStatus()
+        self.process_created_at_utc = datetime.fromtimestamp(psutil.Process().create_time(), UTC)
         self.status_lock = asyncio.Lock()
         self.terminal_error: CaptureError | None = None
         self.vessels: set[int] = set()
@@ -181,6 +184,10 @@ class LiveCollector:
     def snapshot(self) -> dict:
         return {
             **asdict(self.status),
+            "status_schema_version": 2,
+            "process_id": os.getpid(),
+            "process_created_at_utc": self.process_created_at_utc.isoformat(),
+            "status_updated_at_utc": _utc(),
             "source_id": self.spec.source_id,
             "dataset_id": self.spec.dataset_id,
             "distinct_vessels": len(self.vessels),
@@ -216,6 +223,14 @@ class LiveCollector:
                 temporary.unlink(missing_ok=True)
 
         await _thread_join(write)
+        emit(
+            "collector_status",
+            state=self.status.state,
+            connected=self.status.connected,
+            observations=self.status.observations,
+            reconnect_count=self.status.reconnect_count,
+            raw_persistence_failures=self.status.raw_persistence_failures,
+        )
         if self.status_callback:
             self.status_callback(snapshot)
 
@@ -327,7 +342,10 @@ class LiveCollector:
             while True:
                 await asyncio.sleep(self.ping_interval)
                 pong = await socket.ping()
-                await asyncio.wait_for(pong, timeout=self.ping_timeout)
+                # Await the Pong directly so a simultaneous completed Pong cannot swallow
+                # external cancellation in Python3.11 wait_for's cancellation race.
+                async with asyncio.timeout(self.ping_timeout):
+                    await pong
                 self.status.last_socket_heartbeat = _utc()
         except (TimeoutError, ConnectionClosed):
             await socket.close()

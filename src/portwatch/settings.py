@@ -36,6 +36,11 @@ class Settings(BaseSettings):
     live_rotate_seconds: float = Field(default=30, ge=1, le=300)
     live_rotate_bytes: int = Field(default=1048576, ge=262144, le=16777216)
     live_flush_seconds: float = Field(default=1, gt=0, le=5)
+    health_status_stale_seconds: int = Field(default=60, ge=10, le=3600)
+    health_observation_stale_seconds: int = Field(default=300, ge=10, le=86400)
+    health_backlog_warn_seconds: int = Field(default=120, ge=1, le=86400)
+    health_context_stale_seconds: int = Field(default=7200, ge=60, le=604800)
+    storage_min_free_bytes: int = Field(default=1073741824, ge=0)
 
     @field_validator("db_host", "db_name", "db_user")
     @classmethod

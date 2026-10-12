@@ -2,6 +2,10 @@
 
 | ID | Stage | Decision | Reason / revisit point |
 | --- | --- | --- | --- |
+| D-052 | 11 | Keep health read-only with separate historical readiness, collector heartbeat/report age, source products and unknown counters. | Old NOAA or report silence cannot establish a live failure/zero traffic. Use existing SQL audits and opt-in safe JSON events; label uncommitted audit events provisional. |
+| D-053 | 11 | Share an exported snapshot between custom pg_dump and table inventory; verify by restoring into a newly owned database. | Actual application data/column comparison and checksum are required. Refuse overwrite, preserve raw/config separately, never replace the analytical database during verification. |
+| D-054 | 11 | Demonstrate recovery in owned synthetic resources and preserve real business hashes. | Database-denial, quarantine, late replacement, rollback, corruption, duplicates and loopback reconnect are measured local proof; durable input target excludes unflushed/unreceived data. |
+| D-055 | 11 | Use asyncio.timeout for heartbeat Pong waits. | Actual disconnect exercise exposed a Python3.11 simultaneous Pong/cancellation race that hung shutdown with wait_for; deterministic regression passes, production20-second timing unchanged. |
 | D-051 | 12 planning | Use Next.js/React/TypeScript for the map/replay frontend, with a read-only Python query API. | User requested Next.js on2026-10-12, superseding Streamlit/PyDeck. Preserve completed Python/PostGIS/Prefect work and all original replay/data-quality checks. See [FRONTEND_PLAN.md](FRONTEND_PLAN.md); implementation remains pending after Step11. |
 | D-001 | 00 | Use a src-layout Python package and `python -m portwatch` Typer CLI. | Keeps pipeline entry points testable and separate from future presentation code. |
 | D-002 | 00 | Use Python 3.11 locally, with project support through 3.14. | Python 3.12 is not installed on this machine; 3.11 is installed and mature for the selected dependencies. Recheck when a 3.12 interpreter is available. |

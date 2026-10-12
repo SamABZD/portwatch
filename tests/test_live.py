@@ -58,8 +58,8 @@ def make_collector(tmp_path: Path, **kwargs) -> LiveCollector:
         tmp_path / "status.json",
         **{
             "flush_seconds": 0.02,
-            "ping_interval": 0.03,
-            "ping_timeout": 0.03,
+            "ping_interval": 0.1,
+            "ping_timeout": 1,
             "backoff_base": 0.01,
             "backoff_max": 0.04,
             **kwargs,
@@ -177,6 +177,39 @@ def test_reconnects_keep_distinct_sessions_and_reset_stable_backoff(tmp_path, mo
     records = saved_records(collector)
     assert len({record.connection_session for record in records}) == 3
     assert collector.status.observations == 3
+
+
+def test_heartbeat_cancellation_survives_simultaneous_completed_pong(tmp_path):
+    async def scenario():
+        collector = make_collector(tmp_path, ping_interval=0.001, ping_timeout=1)
+        task = None
+
+        class Socket:
+            pings = 0
+
+            async def ping(self):
+                self.pings += 1
+                pong = asyncio.get_running_loop().create_future()
+                if self.pings == 1:
+                    asyncio.get_running_loop().call_soon(task.cancel)
+
+                    def complete():
+                        if not pong.done():
+                            pong.set_result(None)
+
+                    asyncio.get_running_loop().call_soon(complete)
+                return pong
+
+            async def close(self):
+                pass
+
+        socket = Socket()
+        task = asyncio.create_task(collector._heartbeat(socket))
+        with pytest.raises(asyncio.CancelledError):
+            await asyncio.wait_for(task, timeout=0.2)
+        assert socket.pings == 1
+
+    asyncio.run(scenario())
 
 
 @pytest.mark.parametrize(

@@ -1,8 +1,8 @@
 # Frontend choice: Next.js
 
 The user requested Next.js on2026-10-12. This replaces the original Streamlit/PyDeck choice
-for Step12. Steps00–10 remain completed; Step11 monitoring/recovery is still next. This records
-the implementation direction; no frontend or API has been implemented by this documentation change.
+for Step12. Steps00–11 are completed locally; Step12 map/replay is now next. This records
+the implementation direction; no frontend or API has been implemented yet.
 
 ## Architecture for Step12
 

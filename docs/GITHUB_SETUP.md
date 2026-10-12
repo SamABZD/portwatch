@@ -1,8 +1,8 @@
 # GitHub setup record
 
-Current Step10 state: local orchestration/backfills validated, Steps06–10 unpushed. The existing
+Current Step11 state: local monitoring/recovery validated, Steps06–11 unpushed. The existing
 CI billing-lock deferral persists: no payment, push, merge or branch-rule/account change.
-See [HANDOFF.md](HANDOFF.md) and [ORCHESTRATION.md](ORCHESTRATION.md).
+See [HANDOFF.md](HANDOFF.md) and [HEALTH_RECOVERY.md](HEALTH_RECOVERY.md).
 
 ## Verified repository
 

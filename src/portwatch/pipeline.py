@@ -17,6 +17,7 @@ from portwatch.context import ARCHIVE_ENDPOINT, ContextError, plan_context
 from portwatch.context_storage import cached_response, ingest_context
 from portwatch.db import connect_db
 from portwatch.download import DownloadError, acquire
+from portwatch.events import emit
 from portwatch.historical import extract
 from portwatch.ingest import plan
 from portwatch.live import live_spec
@@ -99,6 +100,7 @@ def begin_workflow(connection, key, stage, parent=None):
         VALUES (%s,%s,%s,%s,%s)""",
         (run_id, stage, key, parent, attempt),
     )
+    emit("workflow_attempt_started", run_id=str(run_id), stage=stage, attempt_number=attempt)
     return run_id
 
 

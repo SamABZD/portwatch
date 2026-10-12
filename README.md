@@ -1,12 +1,24 @@
 # PortWatch
 
-PortWatch is a $0, local-first data engineering portfolio project for the Port of Los Angeles. Steps 00–10 establish the Python CLI, frozen historical demo, durable storage, PostgreSQL/PostGIS bookkeeping, historical/live AIS, reproducible cleaning, approximate zones, visit/waiting inference, weather/news connectors and versioned hourly analytical tables with resumable local workflows. Historical replay works without a live AIS key. Weather is saved; the latest real GDELT request was rate limited, with failure separate from empty results. No frontend or deployed site exists yet. GitHub CI Step05A remains blocked by an account billing lock; the user authorized continuing local stages at $0.
+PortWatch is a $0, local-first data engineering portfolio project for the Port of Los Angeles. Steps 00–11 establish the Python CLI, frozen historical demo, durable storage, PostgreSQL/PostGIS bookkeeping, historical/live AIS, reproducible cleaning, approximate zones, visit/waiting inference, weather/news connectors and versioned hourly analytical tables with resumable local workflows, operational health and verified recovery. Historical replay works without a live AIS key. Weather is saved; the latest real GDELT request was rate limited, with failure separate from empty results. No frontend or deployed site exists yet. GitHub CI Step05A remains blocked by an account billing lock; the user authorized continuing local stages at $0.
 
 ## Local setup
 
 The planned Step12 frontend is **Next.js with React/TypeScript**, as requested by the user.
 It will read the existing Python/PostGIS system through a query API. The UI is not built yet;
 see [frontend direction and acceptance criteria](docs/FRONTEND_PLAN.md).
+
+Step11 provides a read-only health report and a backup that is verified by restoring into a
+new isolated database. From this project directory:
+
+```powershell
+.\.venv\Scripts\python.exe -m portwatch health --port los_angeles
+.\.venv\Scripts\python.exe -m portwatch --log-json health --port los_angeles --json
+```
+
+Exit1 means a degraded report: saved historical data can remain ready while current context is
+stale/rate limited or live observations are old. See [health/recovery contracts](docs/HEALTH_RECOVERY.md)
+and the [diagnosis, backup and recovery commands](docs/RUNBOOK.md).
 
 Step10 adds complete resumable workflows. With the existing PostgreSQL cluster running, apply
 all seven migrations, then keep this local Prefect server terminal open:

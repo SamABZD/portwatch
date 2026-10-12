@@ -1,5 +1,108 @@
 # PortWatch runbook
 
+## Step11 diagnosis and recovery
+
+Run commands in `C:\Users\samab\dataEngineering\portwatch`. Preserve `.env`, original raw
+files/manifests and the existing database. See [HEALTH_RECOVERY.md](HEALTH_RECOVERY.md) for status,
+latency, logging and guarantee limits. UTC timestamps are labeled in reports; local operator
+dates use Asia/Beirut.
+
+Start with:
+
+```powershell
+Set-Location -LiteralPath 'C:\Users\samab\dataEngineering\portwatch'
+.\.venv\Scripts\python.exe -m portwatch health --port los_angeles
+.\.venv\Scripts\python.exe -m portwatch --log-json health --port los_angeles --json
+.\.venv\Scripts\python.exe -m portwatch doctor
+.\.venv\Scripts\python.exe -m portwatch storage inspect
+```
+
+Health exit1 means the JSON/human report was produced with issues; inspect its fields.
+Exit2 means invalid configuration/report failure. Health is read-only and makes no provider calls.
+An old historical dataset remains valid; a healthy Pong with no recent reports does not prove
+zero traffic. A stopped collector can coexist with a ready historical demo.
+
+| Symptom | Likely cause and diagnostic | Recovery command/action | Validate |
+| --- | --- | --- | --- |
+| Missing/invalid AIS key | `collector.api_key_configured=false`, `not_configured`, or failed subscription; check private `.env` presence without printing its value. | Set/correct private `PORTWATCH_AIS_API_KEY`; run finite capture command below. Use historical demo if live credentials are unavailable. | Confirm subscription/Pong and stopped status after finite capture; reports remain a separate freshness signal. |
+| Disconnect/provider rate limit | `reconnecting`, reconnect counter/gap; context latest HTTP429/cooldown. Existing saved revision remains separate from latest failure. | Allow collector's bounded reconnect; honor source `next_allowed_utc`. After cooldown use the explicit context refresh commands below. Fix a rejected subscription before restarting. | Health shows connection recovery or new successful context receipt; disconnected upstream interval stays unknown. |
+| Database unavailable | Health retains raw/disk checks but marks database unavailable; `doctor` and exact native `pg_ctl status` below. | Restart only the existing PortWatch cluster using README's native command, then `db migrate` and cached pipeline commands below. Do not initialize/reset its data. | `doctor` passes; health connected; saved raw hashes unchanged and backlog drains. |
+| Complete raw file unregistered | `storage inspect` reports complete manifests; health `awaiting_registration>0`. | `storage reconcile`, then the corresponding cached historical/live processing command below. | Registration/backlog counts fall; each clean batch has committed lineage, source bytes remain unchanged. |
+| Corrupt/truncated batch | Invalid checksum/publication state in `storage inspect` and health. | Preserve damaged evidence; restore exact bytes from a verified raw copy and inspect again, or acquire a new immutable source revision. Never rewrite manifests to accept damage. A malformed record is quarantined by cleaning while valid records follow batch policy. | Saved checksum matches; original/reject lineage is preserved, valid records continue, rejected records do not enter positions. |
+| Transform/schema failure | Latest failed attempt/consecutive failures, safe error class; `doctor`, storage inspection and migration checks. | Correct configuration/code, run `db migrate`, then historical `--rebuild --local` below or live processing. Previous valid published metrics remain usable during failure. | Success audit and reconciliation; visits/hours replace obsolete rows without duplicates. |
+| Duplicate batch | Same immutable batch/clean ledger; duplicate count may be legitimate normalized overlap. | Rerun corresponding cached processing command; never delete lineage to force another insertion. | Canonical business counts/hashes stay unchanged, audit may record another safe attempt. |
+| Disk pressure | Health free bytes below `PORTWATCH_STORAGE_MIN_FREE_BYTES`; inspect raw/spool/backup sizes. | Stop collector with Ctrl+C and pause schedules, move verified backup copies to a chosen disk with sufficient space; preserve raw/manifests/private config. No automatic raw deletion. | Free bytes above threshold, storage checks pass, then restart finite processing/collection when wanted. |
+
+Exact recovery commands (select the relevant source/action):
+
+```powershell
+& .\pg-runtime\bin\pg_ctl.exe -D pgdata\portwatch status
+.\.venv\Scripts\python.exe -m portwatch db migrate
+.\.venv\Scripts\python.exe -m portwatch storage reconcile
+.\.venv\Scripts\python.exe -m portwatch pipeline run --port los_angeles --demo --local
+.\.venv\Scripts\python.exe -m portwatch pipeline run --port los_angeles --demo --rebuild --local
+.\.venv\Scripts\python.exe -m portwatch pipeline live --port los_angeles --local
+.\.venv\Scripts\python.exe -m portwatch ingest live --port los_angeles --duration 60
+.\.venv\Scripts\python.exe -m portwatch ingest weather --port los_angeles --refresh
+.\.venv\Scripts\python.exe -m portwatch ingest news --port los_angeles --refresh
+.\.venv\Scripts\python.exe -m portwatch orchestrate pause
+```
+
+The native start command is in [README](../README.md); it uses existing `pgdata/portwatch` and
+private `pg-runtime` at localhost55432. `--rebuild` forces workflow publication/checkpoint work;
+it does not repair manually deleted canonical rows under a processed clean ledger. Restore a
+verified database into a deliberately chosen recovery destination or use a separately scoped
+rebuild from intact raw/configuration. Never casually delete production ledgers or reset the DB.
+Bad archive/source checksums require intact evidence; changing a checksum is not recovery.
+
+### Backup and actual restore check
+
+Use a new archive path each time. Verification creates/drops only a newly owned random test DB;
+the analytical database remains running. Local role needs database-creation privileges and
+PostGIS; client tools are taken from private `pg-runtime/bin` or PATH.
+
+```powershell
+$portwatchBackup = 'artifacts/backups/portwatch-' + [DateTime]::UtcNow.ToString('yyyyMMddTHHmmssZ') + '.dump'
+.\.venv\Scripts\python.exe -m portwatch --log-json db backup --output $portwatchBackup
+.\.venv\Scripts\python.exe -m portwatch db verify-backup --file $portwatchBackup
+```
+
+Creation verifies by default, so the second command demonstrates a later standalone recheck.
+An existing archive/manifest is never overwritten. `--no-verify` is explicitly unverified.
+The measured stage archive can be checked again with:
+
+```powershell
+.\.venv\Scripts\python.exe -m portwatch db verify-backup --file artifacts/step11/portwatch-2026-10-12.dump
+```
+
+Preserve the archive and its matching `.manifest.json` together. Separately preserve original
+`data/raw` files/manifests, configuration/Git revision, private `.env`, native extension/runtime
+references and `data/prefect` metadata. They are not all inside a database dump. Same-disk copies
+are not off-device disaster protection. The verifier compares application table data/columns,
+not global roles/ACLs or every index/sequence contract. Keep backups private and outside Git.
+
+### Repeat the recovery exercises
+
+```powershell
+.\.venv\Scripts\python.exe scripts/verify_recovery.py
+.\.venv\Scripts\python.exe scripts/verify_recovery.py --collector-only
+.\.bootstrap-venv\Scripts\uv.exe run --locked --extra dev python scripts/validate.py
+```
+
+The full drill reruns the real saved historical mart twice, preserving business hashes, then
+uses a newly owned test DB and isolated synthetic raw root for database denial/recovery,
+publication rollback, late reports, malformed records, duplicate replay and checksum damage.
+The connection exercise uses a loopback WebSocket with synthetic frames, no provider request.
+Evidence is in ignored `artifacts/step11`. The main PostgreSQL service is never stopped and
+synthetic fixtures never enter analytical project data. Test DB cleanup is in `finally`; an
+abrupt OS kill may leave resources. Inspect the exact created `pw_step11_<uuid>` DB and its
+ownership before cleanup; never remove another invocation's or unrelated user's database.
+
+Already durable demonstrated inputs survived recovery; unflushed buffers and upstream events
+never received are excluded. Timings are measured small local exercises, not production RTOs.
+Current stage leaves Prefect schedules paused/server and runner stopped; PostgreSQL running;
+real collector stopped. Start only the processes you intend to operate.
+
 ## Step10 local workflows
 
 Use `C:\Users\samab\dataEngineering\portwatch` in each terminal. Restart the existing native
