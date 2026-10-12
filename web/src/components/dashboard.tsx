@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import HarborMap from "./harbor-map";
 import type { Dataset, Frame, Health, Mode, Vessel } from "@/lib/types";
 
+function labelForZone(zone: string) { return zone === "UTC" ? "UTC" : "Pacific"; }
+function coordinate(value: number | null) { return value == null ? "Unknown" : value.toFixed(5); }
 function text(value: string) {
   return value.replaceAll("_", " ");
 }
@@ -62,7 +64,11 @@ async function query<T>(path: string, signal?: AbortSignal): Promise<T> {
 
 export default function Dashboard() {
   const [datasets, setDatasets] = useState<Dataset[]>([]);
-  const [mode, setMode] = useState<Mode>("historical");
+  const [mode, setMode] = useState<Mode>("live");
+  const [port, setPort] = useState("los_angeles");
+  const [ports, setPorts] = useState<{ port_id: string; name: string }[]>([]);
+  const portRef = useRef(port);
+  portRef.current = port;
   const [minute, setMinute] = useState(750);
   const [zone, setZone] = useState("UTC");
   const [playing, setPlaying] = useState(false);
@@ -92,6 +98,7 @@ export default function Dashboard() {
   const shown =
     frame &&
     frame.dataset.mode === mode &&
+    frame.dataset.port_id === port &&
     (mode === "live" ||
       new Date(frame.cutoff_utc).getTime() === new Date(cutoff).getTime()) &&
     frame.staleness_minutes === staleness
@@ -101,13 +108,13 @@ export default function Dashboard() {
 
   const loadCatalog = useCallback(() => {
     setCatalogError(null);
-    query<{ datasets: Dataset[] }>("catalog")
-      .then((data) => setDatasets(data.datasets))
+    query<{ datasets: Dataset[]; ports: { port_id: string; name: string }[] }>(`catalog?port=${port}`)
+      .then((data) => { if (port !== portRef.current) return; setDatasets(data.datasets); setPorts(data.ports); })
       .catch((e) => {
         setCatalogError(e.message);
         setBusy(false);
       });
-  }, []);
+  }, [port]);
   useEffect(() => {
     loadCatalog();
   }, [loadCatalog]);
@@ -122,6 +129,7 @@ export default function Dashboard() {
     setError(null);
     const params = new URLSearchParams({
       mode,
+      port,
       stale: String(staleness),
       trail: "30",
     });
@@ -140,11 +148,11 @@ export default function Dashboard() {
         }
       });
     return () => controller.abort();
-  }, [mode, cutoff, dataset?.revision, staleness, tick]);
+  }, [mode, port, cutoff, dataset?.revision, staleness, tick]);
   useEffect(() => {
     const controller = new AbortController();
     const refresh = () =>
-      query<Health>("health", controller.signal)
+      query<Health>(`health?port=${port}`, controller.signal)
         .then((result) => {
           setHealth(result);
           setHealthError(false);
@@ -158,7 +166,7 @@ export default function Dashboard() {
       controller.abort();
       clearInterval(timer);
     };
-  }, []);
+  }, [port]);
   useEffect(() => {
     if (!playing || mode !== "historical") return;
     const timer = setInterval(() => {
@@ -182,8 +190,8 @@ export default function Dashboard() {
     setError(null);
     setMode(next);
   }
-  const labelZone = zone === "UTC" ? "UTC" : "Los Angeles";
-  const list = (shown?.vessels || []).filter((v) => v.mmsi.includes(search));
+  const labelZone = zone === "UTC" ? "UTC" : "Pacific";
+  const list = (shown?.vessels || []).filter((v) => `${v.mmsi} ${v.reported_profile?.name || ""}`.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <main className="workspace">
@@ -196,7 +204,13 @@ export default function Dashboard() {
         </a>
         <span className="header-divider" />
         <div className="port-label">
-          <strong>Los Angeles</strong>
+          <label className="port-picker">Port
+            <select aria-label="Select port" value={port} onChange={(e) => {
+              setPlaying(false); setSelected(null); setFrame(null); setDatasets([]);
+              setHealth(null); setSearch(""); setPort(e.target.value);
+            }}>
+              {(ports.length ? ports : [{port_id: "los_angeles", name: "Port of Los Angeles"}]).map((p) => <option key={p.port_id} value={p.port_id}>{p.name}</option>)}
+            </select></label>
           <span>Port observation &amp; replay</span>
         </div>
         <div className="header-right">
@@ -210,10 +224,12 @@ export default function Dashboard() {
                 ? `Pipeline ${text(health.overall)}`
                 : "Checking pipeline"}
           </span>
+          <a href="/pipeline" className="subtle-link">Data pipeline</a>
           <a href="#pipeline-health" className="subtle-link">
             View health ↓
           </a>
         </div>
+        <a href="/pipeline" className="compact-pipeline-link">Data pipeline</a>
       </header>
 
       <section className="intro-row" aria-label="Dataset selection">
@@ -222,7 +238,7 @@ export default function Dashboard() {
           <p>
             {mode === "historical"
               ? "Jan 1 → Jan 2, 2024 UTC · saved NOAA OCM AIS · event-time replay"
-              : "Saved AISStream reports · present freshness, no simulated arrivals"}
+              : "Live AISStream collection · received positions refresh every 30 seconds"}
           </p>
         </div>
         <div className="segmented" role="group" aria-label="Data mode">
@@ -385,7 +401,7 @@ export default function Dashboard() {
                 <input
                   type="search"
                   aria-label="Search MMSI"
-                  placeholder="Search by MMSI"
+                  placeholder="Search name or MMSI"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
@@ -403,8 +419,8 @@ export default function Dashboard() {
                       <i
                         className={`legend-point ${v.stale ? "stale-dot" : ""}`}
                       />
-                      {v.mmsi}
-                      <small>{vesselType(v.vessel_type)}</small>
+                      {v.reported_profile?.name || v.mmsi}
+                      <small>{vesselType(v.vessel_type ?? v.reported_profile?.reported_type ?? null)}</small>
                     </span>
                     <span>
                       {v.stale ? "Stale" : `${number(v.speed_knots)} kn`}
@@ -420,7 +436,7 @@ export default function Dashboard() {
                 )}
                 {list.length > 100 && (
                   <p className="list-limit">
-                    Showing first 100. Search any observed MMSI.
+                    Showing first 100. Search any observed name or MMSI.
                   </p>
                 )}
               </div>
@@ -502,7 +518,7 @@ export default function Dashboard() {
                     onChange={(e) => setZone(e.target.value)}
                   >
                     <option value="UTC">UTC</option>
-                    <option value="America/Los_Angeles">Los Angeles</option>
+                    <option value={dataset.port_timezone || "America/Los_Angeles"}>Pacific</option>
                   </select>
                 </label>
               </div>
@@ -780,7 +796,7 @@ export default function Dashboard() {
         )}
       </details>
       <footer>
-        PortWatch · Los Angeles data engineering demonstration{" "}
+        PortWatch · Multi-port data engineering demonstration{" "}
         <span>
           NOAA OCM / MarineCadastre · AISStream · Approximate PortWatch zones
         </span>
@@ -845,8 +861,9 @@ function VesselDetails({
       <div className="vessel-title">
         <div>
           <span>MMSI</span>
-          <strong>{v.mmsi}</strong>
-          <small>{vesselType(v.vessel_type)}</small>
+          <strong>{v.reported_profile?.name || v.mmsi}</strong>
+          {v.reported_profile?.name && <small>MMSI {v.mmsi}</small>}
+          <small>{vesselType(v.vessel_type ?? v.reported_profile?.reported_type ?? null)}</small>
         </div>
         <button onClick={onClear} aria-label="Clear vessel selection">
           ×
@@ -861,6 +878,8 @@ function VesselDetails({
           <dt>Speed</dt>
           <dd>{number(v.speed_knots)} kn</dd>
         </div>
+        <div><dt>Course / heading</dt><dd>{number(v.course_degrees)}° / {number(v.heading_degrees)}°</dd></div>
+        <div><dt>Coordinates</dt><dd>{coordinate(v.latitude)}, {coordinate(v.longitude)}</dd></div>
         <div>
           <dt>Observation age</dt>
           <dd>{number(v.observation_age_seconds / 60)} min</dd>
@@ -869,7 +888,7 @@ function VesselDetails({
           <dt>Last actual report</dt>
           <dd>
             {time(v.last_observation_utc, zone, true)}{" "}
-            {zone === "UTC" ? "UTC" : "Los Angeles"}
+            {zone === "UTC" ? "UTC" : "Pacific"}
           </dd>
         </div>
         <div>
@@ -892,6 +911,17 @@ function VesselDetails({
           <dd>{text(v.visit_status)}</dd>
         </div>
       </dl>
+      <details className="reported-profile"><summary>Reported vessel &amp; voyage details</summary>
+        <dl className="detail-grid">
+          <div><dt>IMO / call sign</dt><dd>{v.reported_profile?.imo || "Unknown"} / {v.reported_profile?.call_sign || "Unknown"}</dd></div>
+          <div><dt>Length / beam</dt><dd>{number(v.reported_profile?.length_m)} m / {number(v.reported_profile?.beam_m)} m</dd></div>
+          <div><dt>Draught</dt><dd>{number(v.reported_profile?.draught_m)} m</dd></div>
+          <div><dt>Reported destination</dt><dd>{v.reported_profile?.destination || "Not received"}</dd></div>
+          <div><dt>Reported ETA</dt><dd>{v.reported_profile?.reported_eta || "Not received"}</dd></div>
+          <div><dt>Properties timestamp</dt><dd>{time(v.profile_available_at_utc, zone, true)} {labelForZone(zone)}</dd></div>
+        </dl>
+        <p className="panel-note">Reported properties may be incomplete or outdated. A destination is not an observed port call; AIS ETA does not include a year.</p>
+      </details>
       {v.partial_reasons.length > 0 && (
         <p className="partial-note">
           Partial: {v.partial_reasons.map(text).join(", ")}.

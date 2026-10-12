@@ -1,6 +1,8 @@
 # PortWatch
 
-PortWatch is a $0, local-first data engineering portfolio project for the Port of Los Angeles. Steps 00–12 provide a Python/PostGIS pipeline, durable historical/live inputs, cleaning, approximate zones, visit/waiting inference, context, hourly marts, local workflows, verified recovery and a **Next.js map/replay frontend**. Historical replay works without a live AIS key; a verified prepared snapshot also works without a database. Weather is saved; the latest real GDELT request was rate limited. No hosted deployment exists. GitHub CI Step05A remains deferred under the user's $0 instruction.
+PortWatch is a $0, local-first data engineering portfolio project for Los Angeles and Oakland. It collects real AISStream vessel reports, preserves immutable evidence, validates and transforms it with Python/PostGIS and Prefect, and serves a Next.js live map, historical replay and public read-only pipeline page. Historical replay works without an AIS key; prepared snapshots also work without a database. No hosted deployment exists; GitHub CI remains billing-blocked.
+
+The app starts in **Live** mode. Select a port, search by vessel name or MMSI, or open **Data pipeline** for real processing measurements and workflow runs. Start continuous collection with `python -m portwatch.runtime`; see [live operation and coverage](docs/LIVE_MULTIPORT.md). The computer must remain awake and connected.
 
 ## Local setup
 

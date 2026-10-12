@@ -114,6 +114,20 @@ def acquire(
         cached = max(candidates, key=lambda item: item.received_at) if candidates else None
     if cached and not refresh:
         return DownloadResult(cached, False)
+    if not cached and not refresh and spec.mode == "historical":
+        shared = [
+            item.manifest
+            for item in store.inspect()
+            if item.state == "complete"
+            and item.manifest.mode == "historical"
+            and (item.manifest.source_id, item.manifest.source_url, item.manifest.source_date)
+            == (spec.source_id, spec.source_url, spec.source_date)
+        ]
+        if shared:
+            parent = max(shared, key=lambda item: item.received_at)
+            result = store.reuse_historical(parent, spec)
+            remember_selection(store, spec, result, None)
+            return DownloadResult(result, False)
     last_code = "transfer_failed"
     for attempt in range(attempts):
         try:

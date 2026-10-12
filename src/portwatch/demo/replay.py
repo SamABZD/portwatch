@@ -57,12 +57,20 @@ class Observation:
     timestamp_quality: str
     zone: str
     memberships: tuple
+    heading: float | None = None
+    navigation_status: int | None = None
 
 
 class ReplayDataset:
-    def __init__(self, metadata, observations, zones, rules, weather, coverage, news=None):
+    def __init__(
+        self, metadata, observations, zones, rules, weather, coverage, news=None, profiles=None
+    ):
         self.metadata, self.zones, self.rules = metadata, zones, rules
         self.weather, self.coverage, self.news = weather, coverage, news or []
+        self.profiles = profiles or []
+        self.profile_groups = defaultdict(list)
+        for mmsi, at, fields in self.profiles:
+            self.profile_groups[mmsi].append((stamp(at), fields))
         self.groups = defaultdict(list)
         for point in observations:
             self.groups[point.mmsi].append(point)
@@ -119,6 +127,11 @@ class ReplayDataset:
             inferred = infer_track(track, self.rules, f"{self.metadata['revision']}:{mmsi}", cutoff)
             visits.extend(inferred.visits)
             latest = points[-1]
+            profile, profile_at = {}, None
+            for at, fields in self.profile_groups[mmsi]:
+                if at <= cutoff:
+                    profile.update(fields)
+                    profile_at = at
             same_time = [p for p in points if p.at == latest.at]
             ambiguous = len({(p.longitude, p.latitude) for p in same_time}) > 1
             stale = latest.at < fresh_limit
@@ -146,6 +159,10 @@ class ReplayDataset:
                     latitude=None if ambiguous else latest.latitude,
                     speed_knots=latest.speed,
                     course_degrees=latest.course,
+                    heading_degrees=latest.heading,
+                    navigation_status=latest.navigation_status,
+                    reported_profile=profile,
+                    profile_available_at_utc=profile_at,
                     vessel_type=latest.vessel_type,
                     last_observation_utc=latest.at,
                     observation_age_seconds=(cutoff - latest.at).total_seconds(),
@@ -290,8 +307,8 @@ def fingerprint(connection, settings, mode, now):
     else:
         spec, _ = live_spec(settings, port.port_id)
         source, dataset = spec.source_id, spec.dataset_id
-        end = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
-        start = end - timedelta(days=2)
+        end = now.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
+        start = end - timedelta(hours=7)
         weather_response = cached_response(
             connection, plan_context(settings, port.port_id, "weather")
         )
@@ -315,7 +332,22 @@ def fingerprint(connection, settings, mode, now):
     )
     revision = hashlib.sha256(
         json.dumps(
-            [ledger, weather, news, fence.content_sha256, version, start, end],
+            [
+                ledger,
+                weather,
+                news,
+                fence.content_sha256,
+                version,
+                start,
+                end,
+                connection.execute(
+                    "SELECT max(i.completed_at) FROM vessel_profile_inputs i "
+                    "JOIN clean_batches c USING(input_id,processing_version) "
+                    "JOIN ingestion_batches b ON b.batch_id=c.raw_batch_id "
+                    "WHERE b.source_id=%s AND b.dataset_id=%s",
+                    (source, dataset),
+                ).fetchone(),
+            ],
             default=json_value,
             sort_keys=True,
         ).encode()
@@ -337,6 +369,7 @@ def fingerprint(connection, settings, mode, now):
             news_batch_id=news[0] if news else None,
             bounds=list(port.bounding_box),
             display_timezone="UTC",
+            port_timezone=port.timezone,
             observation_count=None,
         ),
         fence,
@@ -352,7 +385,8 @@ def load_dataset(connection, metadata, fence, port):
         p.latitude,p.speed_knots,p.course_degrees,p.vessel_type,p.quality_flags,p.timestamp_quality,
         CASE WHEN a.state='outside' THEN 'outside' ELSE a.primary_zone_id END,
         ARRAY(SELECT m.zone_id FROM position_zone_memberships m WHERE m.position_id=p.id
-        AND m.port_id=%s AND m.geofence_version=%s AND m.assignment_version=%s ORDER BY m.zone_id)
+        AND m.port_id=%s AND m.geofence_version=%s AND m.assignment_version=%s ORDER BY m.zone_id),
+        p.heading_degrees,p.navigation_status
         FROM vessel_positions p LEFT JOIN position_zone_assignments a ON a.position_id=p.id
         AND a.port_id=%s AND a.geofence_version=%s AND a.assignment_version=%s
         WHERE p.source_id=%s AND p.dataset_id=%s AND p.processing_version='positions-v1'
@@ -363,10 +397,13 @@ def load_dataset(connection, metadata, fence, port):
     ).fetchall()
     if len(rows) > MAX_POSITIONS:
         raise ReplayError("prepared_position_limit_exceeded")
-    if any(row[11] is None for row in rows):
+    if metadata["mode"] == "historical" and any(row[11] is None for row in rows):
         raise ReplayError("spatial_assignment_missing_run_saved_pipeline")
     observations = [
-        Observation(*row[:9], tuple(row[9]), row[10], row[11], tuple(row[12])) for row in rows
+        Observation(
+            *row[:9], tuple(row[9]), row[10], row[11] or "unknown", tuple(row[12]), row[13], row[14]
+        )
+        for row in rows
     ]
     metadata = public_json(
         dict(
@@ -431,8 +468,16 @@ def load_dataset(connection, metadata, fence, port):
         type="FeatureCollection",
         features=[feature.model_dump(mode="json") for feature in fence.document.features],
     )
+    profiles = connection.execute(
+        "SELECT mmsi,available_at,fields FROM vessel_profile_reports WHERE source_id=%s "
+        "AND dataset_id=%s AND available_at>=%s AND available_at<%s "
+        "ORDER BY available_at,source_record_id LIMIT %s",
+        (source, dataset, start, end, MAX_POSITIONS + 1),
+    ).fetchall()
+    if len(profiles) > MAX_POSITIONS:
+        raise ReplayError("prepared_profile_limit_exceeded")
     return ReplayDataset(
-        metadata, observations, zones, rules_for_port(port), weather, coverage, news
+        metadata, observations, zones, rules_for_port(port), weather, coverage, news, profiles
     )
 
 
@@ -451,6 +496,7 @@ def export_prepared(settings, path):
             zones=dataset.zones,
             rules=asdict(dataset.rules),
             weather=dataset.weather,
+            profiles=dataset.profiles,
             coverage=dataset.coverage,
             observations=[asdict(p) for points in dataset.groups.values() for p in points],
         )
@@ -498,4 +544,5 @@ def load_prepared(path):
         VisitRules(**document["rules"]),
         document["weather"],
         [(stamp(a), stamp(b)) for a, b in document["coverage"]],
+        profiles=document.get("profiles", []),
     )

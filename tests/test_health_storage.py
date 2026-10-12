@@ -21,6 +21,24 @@ connection = pg_connection
 pytestmark = pytest.mark.integration
 
 
+def test_public_run_history_excludes_other_ports_and_unscoped_manual_runs(connection):
+    from portwatch.health import run_health
+
+    identities = {}
+    for port in ("los_angeles", "oakland", "losXangeles", None):
+        run = start_run(connection, "marts")
+        if port:
+            connection.execute(
+                "UPDATE pipeline_runs SET workflow_key=%s WHERE run_id=%s",
+                (f"pipeline-v1:{port}:synthetic", run),
+            )
+        finish_run(connection, run)
+        identities[port] = run
+    for port in ("los_angeles", "oakland"):
+        report = run_health(connection, port, include_unscoped=False)
+        assert [row["run_id"] for row in report["recent"]] == [identities[port]]
+
+
 def test_unregistered_raw_backlog_then_old_historical_input_is_ready_not_stale(
     connection, tmp_path
 ):

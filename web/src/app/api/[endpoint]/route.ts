@@ -5,7 +5,7 @@ export async function GET(
   context: { params: Promise<{ endpoint: string }> },
 ) {
   const { endpoint } = await context.params;
-  if (!["catalog", "frame", "health"].includes(endpoint))
+  if (!["catalog", "frame", "health", "pipeline"].includes(endpoint))
     return NextResponse.json(
       { detail: { code: "unknown_query" } },
       { status: 404 },

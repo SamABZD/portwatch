@@ -1,19 +1,39 @@
 # Handoff
 
-## Stage state
+## Current stage state
 
-- **Frontend preference updated2026-10-12: Next.js/React/TypeScript replaces Streamlit for Step12.**
-  Follow [FRONTEND_PLAN.md](FRONTEND_PLAN.md), reusing the existing Python/PostGIS pipeline via
-  a read-only query API. Keep the original map/replay acceptance criteria. This is a recorded
-  user preference; frontend/API are now implemented. Step13 final audit is next.
-
-- Completed locally: Steps00,00A,01–12, including pipeline/recovery and **Next.js map/replay**. Native PostgreSQL17.11/PostGIS3.6.2 remains healthy;229 tests pass and12 browser checks pass. Historical metrics/source hashes remain unchanged. Frontend at127.0.0.1:3000, read-only query API8000; no hosted site.
-- Project root: `C:\Users\samab\dataEngineering\portwatch`. Current branch: `feat/map-replay`, from Step11 checkpoint `da4c315ae9a381d2c9a3d45ffd353b18c91cafef`. Steps06–12 remain unpushed; use `git log -1` for this stage's local checkpoint.
-- **Step05A remote CI remains blocked by the GitHub account billing lock.** User declined payment and authorized local continuation at$0. [Repository](https://github.com/SamABZD/portwatch), [CI PR#2](https://github.com/SamABZD/portwatch/pull/2); PR stays unmerged and proposed branch rules unapplied. No payment, account change, push or hosted deployment.
-- **Next: Step13 final audit**, sibling prompt `portwatch-prompts/13-final-audit.md`. Stop at Step12 here. Read [REPLAY.md](REPLAY.md), [FRONTEND_PLAN.md](FRONTEND_PLAN.md), [RUNBOOK.md](RUNBOOK.md), [HEALTH_RECOVERY.md](HEALTH_RECOVERY.md), [ORCHESTRATION.md](ORCHESTRATION.md), [ANALYTICS.md](ANALYTICS.md), [VISITS.md](VISITS.md) and [RESULTS.md](RESULTS.md). Full playbook: `C:\Users\samab\dataEngineering\PORTWATCH_BUILD_PLAYBOOK.md`.
-- Five genuine raw batches remain verified. Last real news request remains429; forecast is stale. Collector remains stopped and saved26 live observations stale. All three Prefect deployments paused/runner stopped; existing Prefect API4200 and PostgreSQL PID18824 left running. Frontend3000/query API8000 remain running for user access; temporary prepared server8077 stopped. No Step12 provider acquisition. Verify final process-state evidence when resuming.
+- Project: `C:/Users/samab/dataEngineering/portwatch`; branch `feat/live-multiport`.
+- Steps00,00A,01-12 and Step15 port generalization completed locally. Additional pre-release
+  work includes continuous two-port collection, timed vessel profiles and a public pipeline page.
+- User skips Step14 academy submission and Step17 scale study. Step13 final audit is next,
+  then Step14A portfolio publication. Step16 history/dbt remains an optional unimplemented extension.
+- Frontend3000/API8000, PostgreSQL55432 and existing Prefect API4200 support the local app.
+  An owned runtime collects Los Angeles/Oakland; six Prefect deployments are active.
+  Check `artifacts/live/runtime.json` and current processes before starting another runtime.
+- Read [LIVE_MULTIPORT.md](LIVE_MULTIPORT.md) for commands, scopes, stop/restart and remaining
+  always-on public hosting requirements. Use `git log -1` for the local checkpoint.
+- CI05A remains blocked by account billing. User authorized$0 local continuation. Steps06
+  onward remain unpushed; no public hosting, release, merge, account or payment change.
+- Earlier stage evidence below is historical. Its paused/stopped collector descriptions are
+  superseded by the live runtime. No source observations were invented for this extension.
 
 ## Verified commands and observed outcomes
+
+### Live multiport extension / Step15 (2026-10-12)
+
+- Shared validator:183 unit +56 integration =239 passed, Ruff/format, packages and installed-wheel
+  resources. Eight fresh migrations/repeat zero;001–007 unchanged. Next.js build/TypeScript pass.
+- Existing12 browser checks plus six new multiport checks pass: actual live reports for both ports,
+  timed details, original LA noon99 fresh vessels, source isolation, scoped pipeline runs,
+  disconnect/retry and four viewports; zero page errors. Desktop/mobile screenshots inspected.
+- Genuine canonical history: Los Angeles62,157; Oakland52,783. Shared verified national raw bytes,
+  independent regional derivatives. Profile migration008 applied. Oakland zones are approximations.
+- Runtime graceful stop/restart finalized all received records and reconnected both collectors.
+  Six deployments active; hourly weather/news anchors stagger by port to honor shared cooldowns.
+  Both forecasts available; LA news429, Oakland news not requested at20:04:57UTC. Inspect current
+  health before treating these time-specific results as present status. Public24/7 hosting pending.
+- Evidence: `artifacts/multiport/final-state.json`, browser JSON/screenshots, multiport validation
+  and build logs. Launch/stop commands are in [LIVE_MULTIPORT.md](LIVE_MULTIPORT.md).
 
 ### Step12 Next.js map/replay (2026-10-12)
 

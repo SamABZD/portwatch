@@ -10,7 +10,7 @@ from psycopg import sql
 from psycopg.pq import TransactionStatus
 
 from portwatch.bookkeeping import finish_run, start_run
-from portwatch.settings import Settings, load_port_config
+from portwatch.settings import Settings, for_port, load_port_config
 from portwatch.visits import (
     RULE_VERSION,
     InferenceError,
@@ -301,6 +301,7 @@ def preview_visits(connection, scope, port_id, version, rules, cutoff):
 
 
 def transform_visits(settings: Settings, connection, port_id: str, *, as_of_utc=None, version=None):
+    settings = for_port(settings, port_id)
     port = load_port_config(settings.project_path(settings.port_config))
     if port.port_id != port_id:
         raise InferenceError("select the configured port")

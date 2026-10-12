@@ -1,0 +1,126 @@
+{
+  "type": "FeatureCollection",
+  "schema_version": 1,
+  "port_id": "oakland",
+  "version": "oakland-approx-v1",
+  "authored_on": "2026-10-12",
+  "coordinate_order": "longitude,latitude",
+  "srid": 4326,
+  "approximate": true,
+  "uncertainty": "Manually authored broad harbor vicinity and regional approach polygons. Include land and adjacent water; not official port limits, terminal occupancy, anchorage boundaries or proof of waiting.",
+  "validity": {
+    "status": "approximate",
+    "historical_use": "2024-01-01 demonstration; historical operational validity unverified"
+  },
+  "references": [
+    {
+      "title": "Port of Oakland properties map, RFQ September 2024, page 8",
+      "url": "https://www.portofoakland.com/wp-content/uploads/2024/09/24-25-05-final-RFQ_Howard-Property-2024-_JVFv3.pdf",
+      "reviewed_on": "2026-10-12"
+    }
+  ],
+  "review_points": [
+    {
+      "label": "San Francisco outside Oakland vicinity",
+      "coordinates": [
+        -122.385,
+        37.79
+      ],
+      "expected_zone_ids": []
+    },
+    {
+      "label": "Outer harbor vicinity",
+      "coordinates": [
+        -122.33,
+        37.805
+      ],
+      "expected_zone_ids": [
+        "oakland_harbor_vicinity"
+      ]
+    }
+  ],
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "oakland_harbor_vicinity",
+        "name": "Oakland harbor vicinity",
+        "zone_type": "harbor",
+        "attribution_scope": "port",
+        "uncertainty": "Approximate analytical vicinity only; neither confirmed port activity nor an official waiting area."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -122.342,
+              37.815
+            ],
+            [
+              -122.31,
+              37.827
+            ],
+            [
+              -122.278,
+              37.795
+            ],
+            [
+              -122.278,
+              37.777
+            ],
+            [
+              -122.305,
+              37.786
+            ],
+            [
+              -122.33,
+              37.787
+            ],
+            [
+              -122.342,
+              37.815
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "oakland_regional_approach",
+        "name": "Bay approach candidate area",
+        "zone_type": "waiting_candidate",
+        "attribution_scope": "region",
+        "uncertainty": "Approximate analytical vicinity only; neither confirmed port activity nor an official waiting area."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -122.375,
+              37.755
+            ],
+            [
+              -122.345,
+              37.755
+            ],
+            [
+              -122.345,
+              37.79
+            ],
+            [
+              -122.375,
+              37.79
+            ],
+            [
+              -122.375,
+              37.755
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

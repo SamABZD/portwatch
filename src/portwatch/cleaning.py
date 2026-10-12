@@ -436,6 +436,9 @@ def transform_positions(
             report, reused = load_batch(
                 connection, source, settings.project_path(settings.quarantine_dir)
             )
+            from portwatch.profiles import enrich_input
+
+            enrich_input(connection, source)
             reports.append((source.input_id, report, reused))
         finish_run(
             connection,

@@ -12,7 +12,7 @@ import yaml
 from portwatch.bookkeeping import finish_run, register_batch, start_run
 from portwatch.download import acquire
 from portwatch.historical import DerivedManifest, ExtractParameters, extract
-from portwatch.settings import Settings, load_port_config
+from portwatch.settings import Settings, for_port, load_port_config
 from portwatch.storage import BatchSpec, RawStore
 
 SOURCE_ID = "noaa_ocm_ais_2024_geoparquet"
@@ -41,9 +41,10 @@ def _date(value: str) -> date:
 def plan(
     settings: Settings, port_id: str, demo: bool, start: str | None, end: str | None
 ) -> list[tuple[BatchSpec, ExtractParameters]]:
+    settings = for_port(settings, port_id)
     port = load_port_config(settings.project_path(settings.port_config))
-    if port_id != port.port_id or port_id != "los_angeles":
-        raise ValueError("only configured los_angeles is supported in this stage")
+    if port_id != port.port_id:
+        raise ValueError("select a configured port")
     if port.bounding_box is None:
         raise ValueError("collection bounding box is required")
     configured = yaml.safe_load(settings.project_path(settings.demo_config).read_text("utf-8"))

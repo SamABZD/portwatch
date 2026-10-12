@@ -3,9 +3,9 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "PortWatch — Los Angeles replay",
+  title: "PortWatch — Live ports & vessel replay",
   description:
-    "Explore actual AIS observations and event-time evidence in the Port of Los Angeles.",
+    "Explore received vessel positions, port activity and the data pipelines behind Los Angeles and Oakland.",
 };
 
 export default function RootLayout({

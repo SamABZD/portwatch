@@ -16,7 +16,7 @@ from portwatch.events import emit
 from portwatch.ingest import plan
 from portwatch.live import live_spec
 from portwatch.positions import PROCESSING_VERSION
-from portwatch.settings import Settings, load_port_config
+from portwatch.settings import Settings, for_port, load_port_config
 from portwatch.storage import RawStore
 
 COLLECTOR_STATES = {
@@ -354,7 +354,7 @@ def context_health(connection, port, product, now, settings):
     )
 
 
-def run_health(connection, port):
+def run_health(connection, port, *, include_unscoped=True):
     with connection.cursor(row_factory=dict_row) as cursor:
         cursor.execute(
             """WITH ranked AS (
@@ -363,10 +363,11 @@ def run_health(connection, port):
             workflow_key,attempt_number,duration_seconds,
             row_number() OVER (PARTITION BY stage ORDER BY id DESC) AS sequence
             FROM pipeline_runs
-            WHERE (workflow_key LIKE %s OR workflow_key IS NULL) AND stage<>'pipeline_busy'
+            WHERE (workflow_key LIKE %s ESCAPE '!' OR (%s AND workflow_key IS NULL))
+            AND stage<>'pipeline_busy'
             AND parent_run_id IS NULL)
             SELECT * FROM ranked WHERE sequence<=20 ORDER BY id DESC""",
-            (f"%:{port}:%",),
+            (f"%:{port.replace('_', '!_')}:%", include_unscoped),
         )
         recent = cursor.fetchall()
     consecutive = {}
@@ -389,17 +390,22 @@ def run_health(connection, port):
     return dict(
         recent=recent[:20],
         consecutive_failures_by_stage=consecutive,
-        unscoped_manual_run_note="legacy manual audits are project-wide",
+        unscoped_manual_run_note="legacy manual audits are project-wide"
+        if include_unscoped
+        else "unscoped manual audits excluded from this port view",
         running_attempts=connection.execute(
             "SELECT count(*) FROM pipeline_runs WHERE status='running' "
-            "AND (workflow_key LIKE %s OR workflow_key IS NULL)",
-            (f"%:{port}:%",),
+            "AND (workflow_key LIKE %s ESCAPE '!' OR (%s AND workflow_key IS NULL))",
+            (f"%:{port.replace('_', '!_')}:%", include_unscoped),
         ).fetchone()[0],
         per_stage_history_limit=20,
     )
 
 
-def collect_health(settings: Settings, port="los_angeles", *, now=None, connection=None):
+def collect_health(
+    settings: Settings, port="los_angeles", *, now=None, connection=None, include_unscoped=True
+):
+    settings = for_port(settings, port)
     now = parsed_time(now or datetime.now(UTC))
     if now is None:
         raise ValueError("health requires an aware time")
@@ -464,7 +470,7 @@ def collect_health(settings: Settings, port="los_angeles", *, now=None, connecti
                     product: context_health(conn, port, product, now, settings)
                     for product in ("historical_reanalysis", "current_forecast", "recent_news")
                 }
-                report["runs"] = run_health(conn, port)
+                report["runs"] = run_health(conn, port, include_unscoped=include_unscoped)
     except Exception as error:
         report["database"] = dict(
             status="schema_or_query_failure"

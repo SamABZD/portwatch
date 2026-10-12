@@ -1,5 +1,7 @@
 # Next.js map and replay
 
+Current live/multiport operation, vessel profiles and pipeline page: [LIVE_MULTIPORT.md](LIVE_MULTIPORT.md). Original Step12 results below precede this extension; live queries now contain the current and6 prior UTC hours.
+
 Step12 implements the user's Next.js choice, replacing the original Streamlit/PyDeck launch.
 The single-page UI lives in `web/`; `src/portwatch/demo` provides the read-only FastAPI query
 service. The frozen January1,2024 NOAA day is the default. No render starts collection,

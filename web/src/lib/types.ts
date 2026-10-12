@@ -14,6 +14,8 @@ export type Zone = {
 };
 export type Dataset = {
   mode: Mode;
+  port_id: string;
+  port_timezone?: string;
   available: boolean;
   reason?: string;
   port_name: string;
@@ -31,6 +33,10 @@ export type Dataset = {
   zones: { type: "FeatureCollection"; features: Zone[] };
 };
 export type Vessel = {
+  reported_profile?: {name?: string; imo?: string; call_sign?: string; length_m?: number; beam_m?: number; draught_m?: number; destination?: string; reported_eta?: string; reported_type?: number};
+  heading_degrees?: number | null;
+  navigation_status?: number | null;
+  profile_available_at_utc?: string | null;
   mmsi: string;
   longitude: number | null;
   latitude: number | null;

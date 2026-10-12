@@ -12,7 +12,7 @@ from psycopg.types.json import Jsonb
 from portwatch.bookkeeping import finish_run, start_run
 from portwatch.context import plan_context
 from portwatch.context_storage import cached_response
-from portwatch.settings import Settings, load_port_config
+from portwatch.settings import Settings, for_port, load_port_config
 from portwatch.visit_storage import (
     CONTEXT_FILTER,
     PARTITION_FILTER,
@@ -506,6 +506,7 @@ def read_completed_hours(connection, scope, config, as_of_utc):
 
 
 def configured_marts(settings: Settings, connection, port_id):
+    settings = for_port(settings, port_id)
     port = load_port_config(settings.project_path(settings.port_config))
     if port_id != port.port_id:
         raise MartError("select the configured port")

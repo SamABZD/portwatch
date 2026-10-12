@@ -35,3 +35,10 @@ are real toggles. Local vector map fallback remains usable without tiles or WebG
 
 160ms state/hover transitions. No decorative page entrance. Reduce transitions for reduced
 motion; playback starts only on an explicit user action.
+
+## Live and pipeline extension
+
+Preserve the established map workspace. Add port selection and reported vessel/voyage details;
+live mode is the default. The pipeline route inherits these tokens in Read mode: sequential
+source-to-map flow, flat comparison tables per port, actual scoped workflow history, clear
+failure/retry states and persistent map navigation on mobile. No public mutation controls.

@@ -1,5 +1,42 @@
 # Measured results
 
+## Live multiport extension / Step15 (2026-10-12)
+
+- Implemented on `feat/live-multiport`: independent Los Angeles/Oakland AISStream collectors,
+  six active Prefect deployments, live-by-default Next.js map, timed reported vessel profiles,
+  port switching and the read-only `/pipeline` engineering view. No push, release, public host,
+  payment or account change. Local collection requires an awake, connected computer.
+- Genuine Oakland NOAA extraction reused the verified national file via a hardlink:7,293,408
+  national rows,52,785 regional reports,52,783 canonical positions and two duplicates. Los Angeles
+  retains62,157 canonical positions and its original noon32,632 observations/99 fresh vessels.
+  Oakland noon has27,557 observations/75 fresh vessels. Approximate Oakland vicinity polygons
+  and inferred visits/waiting are experimental; they do not establish terminal calls or queues.
+- Real two-port browser verification at20:04:01UTC measured436 live positions/109 fresh vessels
+  for Los Angeles and311/84 for Oakland. These are time-specific saved observations, not full
+  port coverage. Profiles preserve reported fields and availability times; replay excludes future
+  profile evidence. Missing destination remains unknown and reported ETA has no invented year.
+- Migration008 adds profile evidence/checkpoints;001–007 remain byte-for-byte unchanged.
+  Graceful runtime shutdown/restart was exercised: both collectors stopped, all received records
+  finalized, then both reconnected. Six schedules resumed, with weather/news staggered across
+  ports to respect shared provider cooldowns. The real restart collection gap remains explicit.
+- Both current forecasts and historical reanalysis are available. Los Angeles news returned429;
+  Oakland news had not yet been requested at the final snapshot. These states are reported
+  separately from collector freshness and historical readiness; unavailable news is not empty news.
+- Shared validator: **183 unit18.94s +56 integration44.30s =239 passed**, no selected skips,
+  Ruff/98 formatted Python files, wheel/sdist, installed-wheel CLI/resources, eight fresh migrations
+  and repeat zero. One non-failing upstream Starlette/httpx TestClient warning remains.
+- Next.js production build and TypeScript pass with `/` and `/pipeline`. Existing browser suite
+  **12 checks PASS**; new multiport suite **6 checks PASS**, zero page errors and zero automated
+  external tile fetches. Checks cover actual source separation, timed details, original replay,
+  port switching, pipeline/run measurements, disconnect/retry and four viewport sizes. Final
+  desktop/mobile screenshots were inspected. Impeccable detector found no issues.
+
+Evidence: ignored `artifacts/multiport`, `artifacts/multiport-validation.txt`,
+`artifacts/multiport-web-build.txt`, and both browser logs; current copies are in chat `outputs`.
+Runtime, query API and frontend remain running locally. Step13 final audit is next; Step14 and
+Step17 are skipped at the user's request, Step14A publication is pending, and Step16 is optional.
+Earlier results below retain their original stage-time meaning.
+
 ## Step12: Next.js map/replay (2026-10-12)
 
 - Implemented the user's Next.js preference on `feat/map-replay`, from Step11 checkpoint

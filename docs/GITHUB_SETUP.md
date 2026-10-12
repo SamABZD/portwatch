@@ -1,8 +1,9 @@
 # GitHub setup record
 
-Current Step12 state: local Next.js map/replay validated, Steps06–12 unpushed. The existing
+Current state: Steps00–12 and15/live multiport extension validated locally; Steps06 onward unpushed.
+Step13 audit precedes14A portfolio publication; user skips14 and17. The existing
 CI billing-lock deferral persists: no payment, push, merge or branch-rule/account change.
-See [HANDOFF.md](HANDOFF.md) and [REPLAY.md](REPLAY.md).
+See [HANDOFF.md](HANDOFF.md) and [LIVE_MULTIPORT.md](LIVE_MULTIPORT.md).
 
 ## Verified repository
 

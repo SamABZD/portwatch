@@ -1,5 +1,33 @@
 # Step 01 source audit
 
+## Live multiport extension review (2026-10-12)
+
+Los Angeles and Oakland now have separate genuine AISStream subscriptions, raw identities,
+canonical data, profile evidence, geofence versions and displayed query scopes. This is observed
+regional reception, not exhaustive vessel coverage. Live metadata uses local receipt availability;
+reported destinations/ETA are unverified, ETA year is unspecified, and missing fields stay unknown.
+The bounded live view includes the current UTC hour and six prior hours. Collection gaps remain
+unknown rather than interpolated tracks. Two connections stay within the provider's documented
+three-connection account/IP limit; no availability SLA or durable provider replay is assumed.
+
+Oakland's2024-01-01 demonstration uses the same verified national NOAA artifact as Los Angeles,
+with a distinct port-specific derivation and dataset identity. Actual hardlink inode equality and
+SHA-256 `3124557f70bb216e3a4d5817cf019368a6ca47d86aec8d3d2aa8c8e6d1e92560` were verified.
+The extraction has52,785 reports/52,783 canonical positions and two duplicates. Existing Los Angeles
+observations are preserved. `oakland-approx-v1` is a manually authored analytical vicinity/approach
+approximation, with the official Port of Oakland2024 properties map as a contextual reference.
+It includes land/water and is not surveyed, an official boundary, a berth definition or call proof.
+See the uncertainty and review points in `geo/oakland.geojson`.
+
+Oakland historical weather saved24 genuine hourly reanalysis points. Current forecast requests
+succeeded for both ports (HTTP200,48 hourly points each). Los Angeles GDELT news returned429;
+Oakland news was not yet requested at the20:04:57UTC snapshot. Shared cooldowns are enforced
+and hourly schedules are staggered by port. These outcomes do not claim news coverage or an
+empty-success response. Earlier audits below record the states observed at their original stages.
+
+Evidence: `artifacts/multiport/final-state.json`, `artifacts/multiport/browser-verification.json`,
+immutable raw receipts and the existing source ledgers. No provider content was fabricated.
+
 Step09 review (2026-10-12): no provider requests or source changes. The analytical mart uses the
 saved NOAA series and one selected historical ERA5 revision; recent news/forecast are excluded.
 Known-boundary confirmations and completed midpoint durations remain experimental inference,

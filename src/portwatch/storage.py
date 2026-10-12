@@ -246,6 +246,41 @@ class RawStore:
         finally:
             temporary.unlink(missing_ok=True)
 
+    def reuse_historical(self, parent: Manifest, spec: BatchSpec) -> Manifest:
+        """New regional receipt/identity, same immutable national bytes via a hard link."""
+        if (
+            spec.mode != "historical"
+            or parent.mode != "historical"
+            or (spec.source_id, spec.source_url, spec.source_date)
+            != (parent.source_id, parent.source_url, parent.source_date)
+        ):
+            raise ValueError("only identical historical source artifacts may be shared")
+        source = self._path(parent.local_path)
+        if checksum_file(source) != (parent.content_sha256, parent.byte_count):
+            raise ValueError("shared source integrity failure")
+        identity = batch_identity(spec, parent.content_sha256)
+        manifest = Manifest(
+            **spec.model_dump(),
+            batch_id=identity,
+            content_sha256=parent.content_sha256,
+            byte_count=parent.byte_count,
+            local_path=relative_path(spec, identity).as_posix(),
+        )
+        with _publication_lock(self.root):
+            destination = self._path(manifest.local_path)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            sidecar = Path(str(destination) + ".manifest.json")
+            if sidecar.exists():
+                manifest = Manifest.model_validate_json(sidecar.read_text("utf-8"))
+            else:
+                _publish_json(sidecar, manifest.model_dump_json(indent=2))
+            if not destination.exists():
+                os.link(source, destination)
+                _sync_directory(destination.parent)
+            if checksum_file(destination) != (parent.content_sha256, parent.byte_count):
+                raise ValueError("shared source target integrity failure")
+        return manifest
+
     def inspect(self) -> list[Inspection]:
         inspections = []
         referenced = set()

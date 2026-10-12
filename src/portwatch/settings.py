@@ -128,3 +128,29 @@ def load_port_config(path: Path) -> PortConfig:
         if not geofence.is_file():
             raise ValueError("configured geofence_path does not point to a file")
     return config
+
+
+def for_port(settings: Settings, port_id: str) -> Settings:
+    """Resolve an installed port, preserving explicitly configured paths for that port."""
+    current = load_port_config(settings.project_path(settings.port_config))
+    if current.port_id == port_id:
+        return settings
+    if not port_id or any(c not in "abcdefghijklmnopqrstuvwxyz0123456789_" for c in port_id):
+        raise ValueError("unknown port")
+    path = Path("configs/ports") / f"{port_id}.yaml"
+    demo = (
+        Path("configs/demo.yaml")
+        if port_id == "los_angeles"
+        else Path("configs/demos") / f"{port_id}.yaml"
+    )
+    if not settings.project_path(path).is_file() or not settings.project_path(demo).is_file():
+        raise ValueError("unknown port")
+    if load_port_config(settings.project_path(path)).port_id != port_id:
+        raise ValueError("port configuration identity mismatch")
+    return settings.model_copy(update={"port_config": path, "demo_config": demo})
+
+
+def configured_ports(settings: Settings) -> list[str]:
+    """Only local reviewed configuration files can be selected by HTTP clients."""
+    paths = sorted(settings.project_path(Path("configs/ports")).glob("*.yaml"))
+    return [load_port_config(path).port_id for path in paths]

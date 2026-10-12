@@ -1,5 +1,7 @@
 # PortWatch runbook
 
+For the active two-port live runtime, use [LIVE_MULTIPORT.md](LIVE_MULTIPORT.md), including graceful stop commands and local-machine availability limits.
+
 ## Step12 frontend
 
 Current app: **http://127.0.0.1:3000**. Read-only query API:127.0.0.1:8000. PostgreSQL remains

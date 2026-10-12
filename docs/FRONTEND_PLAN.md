@@ -3,7 +3,7 @@
 The user requested Next.js on2026-10-12. This replaces the original Streamlit/PyDeck choice
 for Step12. Steps00–12 are completed locally. The Next.js UI under `web/` and read-only
 Python API under `src/portwatch/demo` are implemented. See [REPLAY.md](REPLAY.md) for the actual
-launch, data/replay contracts, portable mode and observed verification. Next is Step13 final audit.
+launch, data/replay contracts, portable mode and observed verification. The live/multiport extension is implemented; see [LIVE_MULTIPORT.md](LIVE_MULTIPORT.md). Step13 final audit is next.
 
 ## Architecture for Step12
 

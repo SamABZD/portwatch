@@ -10,13 +10,12 @@ web
 
 ## Users
 
-The project owner and academy reviewers exploring the Los Angeles data engineering demo on
-a laptop. The primary task is to replay a real historical day and inspect the evidence behind
+The project owner and portfolio reviewers exploring Los Angeles/Oakland live observations, replay and pipeline evidence on a laptop. The primary task is to replay a real historical day and inspect the evidence behind
 vessel positions, waiting candidates and completed visits.
 
 ## Product Purpose
 
-Turn the prepared Python/PostGIS data into a readable, interactive map demonstration. Success
+Turn Python/PostGIS pipelines into a readable live vessel map, reproducible replay and inspectable pipeline view. Success
 means a real day can be replayed without future leakage or invented movement and live mode
 reports its actual freshness and unavailable sources.
 

@@ -23,7 +23,7 @@ from portwatch.ingest import plan
 from portwatch.live import live_spec
 from portwatch.marts import MartConfig, recompute_marts, validate_rows
 from portwatch.positions import PROCESSING_VERSION
-from portwatch.settings import Settings, load_port_config
+from portwatch.settings import Settings, for_port, load_port_config
 from portwatch.storage import RawStore
 from portwatch.visit_storage import recompute_visits, rules_for_port
 from portwatch.visits import identity
@@ -237,7 +237,7 @@ def validate_publication(connection, scope, config):
 
 def execute_step(port, day, step, key, parent, *, force=False):
     """Arguments contain public identities only, never Settings or credentials."""
-    settings = Settings()
+    settings = for_port(Settings(), port)
     spec, params = day_request(settings, port, day)
     store = RawStore(settings.project_path(settings.raw_dir))
     with connect_db(settings) as connection:
@@ -300,13 +300,18 @@ def execute_step(port, day, step, key, parent, *, force=False):
                     counts, _ = load_batch(
                         connection, source, settings.project_path(settings.quarantine_dir)
                     )
+                    from portwatch.profiles import enrich_input
+
+                    enrich_input(connection, source)
                 return dict(input_count=counts.input_records, output_count=counts.valid_positions)
 
             return checkpointed(
                 connection,
                 key,
                 step,
-                identity([source.input_id, source.content_sha256, PROCESSING_VERSION]),
+                identity(
+                    [source.input_id, source.content_sha256, PROCESSING_VERSION, "profiles-v1"]
+                ),
                 parent,
                 clean,
                 force=force,
@@ -375,7 +380,7 @@ def execute_step(port, day, step, key, parent, *, force=False):
 def run_day(
     port, day, *, prepare_only=False, stop_after_raw=False, force=False, step_runner=execute_step
 ):
-    settings = Settings()
+    settings = for_port(Settings(), port)
     spec, _ = day_request(settings, port, day)
     key = f"{PIPELINE_VERSION}:{port}:{spec.dataset_id}"
     with connect_db(settings) as connection:
@@ -507,7 +512,7 @@ def run_historical(
 
 
 def run_context(kind, port="los_angeles"):
-    settings = Settings()
+    settings = for_port(Settings(), port)
     with connect_db(settings) as connection:
         request = plan_context(settings, port, kind)
         key = f"{PIPELINE_VERSION}:{port}:{kind}:{request.request_key}"
@@ -536,7 +541,7 @@ def run_context(kind, port="los_angeles"):
 
 
 def run_live(port="los_angeles"):
-    settings = Settings()
+    settings = for_port(Settings(), port)
     spec, _ = live_spec(settings, port)
     key = f"{PIPELINE_VERSION}:{port}:{spec.dataset_id}"
     with connect_db(settings) as connection:

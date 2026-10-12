@@ -9,7 +9,7 @@ from urllib.parse import unquote_plus, urlencode, urlsplit, urlunsplit
 
 import yaml
 
-from portwatch.settings import Settings, load_port_config
+from portwatch.settings import Settings, for_port, load_port_config
 
 ARCHIVE_ENDPOINT = "https://archive-api.open-meteo.com/v1/archive"
 FORECAST_ENDPOINT = "https://api.open-meteo.com/v1/forecast"
@@ -72,6 +72,7 @@ class ContextRequest:
 def plan_context(
     settings: Settings, port_id: str, kind: str, *, demo=False, now: datetime | None = None
 ) -> ContextRequest:
+    settings = for_port(settings, port_id)
     now = utc(now or datetime.now(UTC))
     port = load_port_config(settings.project_path(settings.port_config))
     if port.port_id != port_id:

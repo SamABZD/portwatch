@@ -158,7 +158,10 @@ def news_flow(port: str = "los_angeles"):
 
 
 def deployments(port="los_angeles"):
-    # Hourly providers start at the next UTC hour; no burst of refreshes on runner startup.
+    from portwatch.settings import Settings, configured_ports
+
+    # Provider cooldowns are global across ports: stagger to avoid starving later ports.
+    index = configured_ports(Settings()).index(port)
     next_hour = datetime.now(UTC).replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
     return [
         live_flow.to_deployment(
@@ -166,13 +169,17 @@ def deployments(port="los_angeles"):
         ),
         weather_flow.to_deployment(
             name=f"{port}-hourly",
-            schedule=Interval(timedelta(hours=1), anchor_date=next_hour),
+            schedule=Interval(
+                timedelta(hours=1), anchor_date=next_hour + timedelta(minutes=2 * index)
+            ),
             parameters={"port": port},
             concurrency_limit=1,
         ),
         news_flow.to_deployment(
             name=f"{port}-hourly",
-            schedule=Interval(timedelta(hours=1), anchor_date=next_hour),
+            schedule=Interval(
+                timedelta(hours=1), anchor_date=next_hour + timedelta(minutes=20 * index)
+            ),
             parameters={"port": port},
             concurrency_limit=1,
         ),
@@ -183,8 +190,16 @@ def serve_local(port="los_angeles"):
     from portwatch.live import live_spec
     from portwatch.settings import Settings
 
-    live_spec(Settings(), port)  # Reject a wrong port before registering anything.
-    serve(*deployments(port), limit=3, pause_on_shutdown=True)
+    ports = list(dict.fromkeys(port.split(",")))
+    if not 1 <= len(ports) <= 3:
+        raise ValueError("select one to three configured ports")
+    for selected in ports:
+        live_spec(Settings(), selected)
+    serve(
+        *(deployment for selected in ports for deployment in deployments(selected)),
+        limit=3,
+        pause_on_shutdown=True,
+    )
 
 
 def start_local_server():
@@ -218,12 +233,22 @@ def pause_local():
 
     async def pause():
         async with get_client() as client:
-            for flow_name, deployment_name in (
-                ("portwatch-live", "los_angeles-minute"),
-                ("portwatch-weather", "los_angeles-hourly"),
-                ("portwatch-news", "los_angeles-hourly"),
-            ):
-                deployment = await client.read_deployment_by_name(f"{flow_name}/{deployment_name}")
-                await client.set_deployment_paused_state(deployment.id, True)
+            from prefect.exceptions import ObjectNotFound
+
+            from portwatch.settings import Settings, configured_ports
+
+            for port in configured_ports(Settings()):
+                for flow_name, suffix in (
+                    ("portwatch-live", "minute"),
+                    ("portwatch-weather", "hourly"),
+                    ("portwatch-news", "hourly"),
+                ):
+                    try:
+                        deployment = await client.read_deployment_by_name(
+                            f"{flow_name}/{port}-{suffix}"
+                        )
+                    except ObjectNotFound:
+                        continue
+                    await client.set_deployment_paused_state(deployment.id, True)
 
     asyncio.run(pause())

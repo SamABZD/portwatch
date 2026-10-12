@@ -24,7 +24,7 @@ from websockets.exceptions import ConnectionClosed, InvalidStatus, WebSocketExce
 
 from portwatch.events import emit
 from portwatch.live_spool import MAX_FRAME_BYTES, LiveEnvelope, LiveSpool, collector_lock
-from portwatch.settings import Settings, load_port_config
+from portwatch.settings import Settings, for_port, load_port_config
 from portwatch.storage import BatchSpec, Manifest, RawStore
 
 STREAM_URL = "wss://stream.aisstream.io/v0/stream"
@@ -47,8 +47,9 @@ class CaptureError(RuntimeError):
 
 
 def live_spec(settings: Settings, port_id: str) -> tuple[BatchSpec, tuple]:
+    settings = for_port(settings, port_id)
     port = load_port_config(settings.project_path(settings.port_config))
-    if port_id != "los_angeles" or port_id != port.port_id or port.bounding_box is None:
+    if port_id != port.port_id or port.bounding_box is None:
         raise CaptureError("invalid_port_configuration")
     return BatchSpec(
         source_id="aisstream_v0",

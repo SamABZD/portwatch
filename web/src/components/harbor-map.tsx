@@ -225,7 +225,7 @@ export default function HarborMap(props: Props) {
       map.current?.remove();
       map.current = null;
     };
-  }, [props.basemap, props.dataset.revision]);
+  }, [props.basemap, props.dataset.dataset_id, props.dataset.geofence_version]);
 
   useEffect(() => {
     const instance = map.current;
@@ -270,7 +270,7 @@ export default function HarborMap(props: Props) {
         <span className="map-north">↑ N</span>
         <span>
           {renderer === "tiles"
-            ? "Los Angeles harbor"
+            ? props.dataset.port_name
             : failed
               ? "Basemap unavailable · local geometry active"
               : "Local map · polygons + observations"}

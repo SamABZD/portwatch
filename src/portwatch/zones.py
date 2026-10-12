@@ -16,7 +16,7 @@ from shapely.validation import explain_validity
 from portwatch.bookkeeping import finish_run, start_run
 from portwatch.ingest import plan
 from portwatch.positions import PROCESSING_VERSION
-from portwatch.settings import Settings, load_port_config
+from portwatch.settings import Settings, for_port, load_port_config
 
 ASSIGNMENT_VERSION = "covers-v1"
 PRIORITIES = {"terminal": 10, "harbor": 20, "waiting_candidate": 30}
@@ -158,6 +158,7 @@ def read_geofence(path: Path, port_id: str, bounds: tuple[float, float, float, f
 
 
 def configured_geofence(settings: Settings, port_id: str, path: Path | None = None) -> Geofence:
+    settings = for_port(settings, port_id)
     port = load_port_config(settings.project_path(settings.port_config))
     if port.port_id != port_id or port.bounding_box is None:
         raise ValueError("use the configured port with reviewed collection bounds")
@@ -375,6 +376,7 @@ def demo_scope(settings: Settings, port_id: str) -> AssignmentScope:
 
 
 def transform_zones(settings: Settings, connection, port_id: str, version: str | None = None):
+    settings = for_port(settings, port_id)
     port = load_port_config(settings.project_path(settings.port_config))
     if port.port_id != port_id:
         raise ValueError("use the configured port")
