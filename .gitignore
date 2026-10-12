@@ -33,6 +33,7 @@ data/quarantine/
 data/downloads/
 downloads/
 artifacts/
+data/prefect/
 *.parquet
 *.feather
 *.duckdb

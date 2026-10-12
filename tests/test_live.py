@@ -161,13 +161,16 @@ def test_reconnects_keep_distinct_sessions_and_reset_stable_backoff(tmp_path, mo
         await socket.send(CONFIRMATION)
         await socket.send(POSITION_FRAME)
         if connections == 2:
-            await asyncio.sleep(0.08)  # Exceeds test stable-connection threshold.
+            await asyncio.sleep(0.3)  # Exceeds test stable-connection threshold.
         if connections <= 2:
             await socket.close(code=1011)
         else:
             await socket.wait_closed()
 
-    collector, error = run_server(tmp_path, handler, duration=2, stable_seconds=0.04)
+    # This test targets reconnect/backoff, not sub-30ms heartbeat timing on a busy laptop.
+    collector, error = run_server(
+        tmp_path, handler, duration=2, stable_seconds=0.15, ping_interval=0.1, ping_timeout=0.5
+    )
     assert error is None and connections == 3
     assert collector.status.reconnect_count == 2
     assert collector.status.last_backoff_seconds == pytest.approx(0.01)

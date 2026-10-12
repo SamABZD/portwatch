@@ -234,6 +234,7 @@ class AssignmentScope:
     start_utc: datetime
     end_utc: datetime
     clean_version: str = PROCESSING_VERSION
+    context_dataset_ids: tuple[str, ...] = ()
 
     def __post_init__(self):
         if (
@@ -244,6 +245,15 @@ class AssignmentScope:
             raise ValueError("assignment scope requires ordered, explicit UTC boundaries")
         if not self.source_id or not self.dataset_id or not self.clean_version:
             raise ValueError("assignment scope requires source, dataset and cleaning version")
+        if self.context_dataset_ids and (
+            self.dataset_id not in self.context_dataset_ids
+            or len(set(self.context_dataset_ids)) != len(self.context_dataset_ids)
+        ):
+            raise ValueError("context datasets must be unique and include the output dataset")
+
+    @property
+    def dataset_ids(self):
+        return self.context_dataset_ids or (self.dataset_id,)
 
     @property
     def parameters(self):

@@ -1,5 +1,50 @@
 # Measured results
 
+## Step10: orchestration/backfills (2026-10-12)
+
+- Branch `feat/orchestration-backfills` starts from Step09 checkpoint
+  `5caeeb8badd0e3010f15bb6f39457417a7b638ed`. Local/$0/CI-deferred authorization persists.
+  Added migration007, finite Python workflows, local Prefect server/serving commands,
+  durable step checkpoints, safe audits, bounded retries, owned locks and missing-source gaps.
+- Prefect3.8.8 installed after a transient DNS download failure. Resolved its WebSocket requirement
+  with locked16.1.1. Real scheduling initially failed with SQLAlchemy2.1.4 bulk hybrid setters;
+  pinned2.0.x, locked2.0.54, and verified real execution after restart. Metadata uses separate local
+  SQLite; no Cloud, payment or account change. A service interruption required restarting the
+  existing native PostgreSQL cluster without resetting data; subsequent hashes/doctor passed.
+- Complete genuine frozen NOAA/ERA5 workflow succeeds through Prefect. A controlled stop after
+  raw persistence creates an interrupted audit, then resumes and validates24 hours/62,157 positions,
+  56 entry/35 exit confirmations and14 completed dwell samples. Two exact backfills for
+  `[2024-01-01,2024-01-02)` succeed with reused clean/publication checkpoints.
+  Source business hash remains `355cc069362fd84e7aa27530647bae9f8dbbcbdb0156e9585dfea9b91a8122d4`;
+  historical mart hash remains `6f6ca8ecaa8e3824040aa481cd85d88cd0b52990ba2a0307daf14001ad223112`.
+  Five reconciliation groups have zero violations. Real verifier elapsed78.84s.
+- A competing real request is rejected while its workflow is owned, without checkpoint writes.
+  Synthetic tests cover rollback/checkpoint resumption, raw-only interruption before any analytics,
+  attempts/durations, session-loss lock recovery, failed-date isolation/source404 gap, and midnight
+  context. The synthetic cross-day visit retains its prior-day entry, has no day2 arrival, and
+  one day2 exit/completed sample; canonical dataset lineage stays unchanged.
+- Live workflow processes two saved batches/26 positions, with0 new positions and explicit stale
+  event lag. It publishes20 elapsed-hour rows under a separate forecast product; most earlier
+  unknown empty hours remain null. It never joins historical NOAA or recent articles.
+  Continuous collection was not started, so successful jobs do not imply current AIS coverage.
+- Actual automatically scheduled flow `01a130c2-3367-7c7d-9daa-9860b7ea2012` and its processing task
+  both completed. Started `2026-10-12T15:49:32.882542Z`, ended `15:49:33.825234Z` (UTC), corresponding
+  to18:49:32–18:49:33 in Asia/Beirut. `auto_scheduled=true` is confirmed through the API.
+  Minute executions repeatedly completed; schedule registration alone was not accepted as proof.
+  Independent hourly weather/news deployments are configured; they were paused before their next
+  tick. Their real scheduled success is not claimed. Last real news acquisition remains429.
+- Final shared validator: **143 unit26.71s +51 integration40.25s =194 passed**, no selected skips,
+  lint/format72 Python files, wheel/sdist, actual wheel CLI/resource import and all seven fresh
+  migrations; repeat migration applies zero. A prior30ms heartbeat fixture assumption was widened
+  for the reconnect/backoff test while preserving its connection/session/count assertions.
+  Pipeline locks now include schema to isolate fixture-owned tables from real workflow tables.
+- Prefect schedules paused and temporary runner/server stopped after verification. PostgreSQL stays
+  running; doctor allPASS and five genuine raw batches verify with zero issues. No reset, provider
+  redownload, push, merge, hosted deployment or payment. Ignored evidence:
+  `artifacts/step10/verification.json`, `schedule-verification.json`, `validation.log`.
+  [ORCHESTRATION.md](ORCHESTRATION.md) and [RUNBOOK.md](RUNBOOK.md) give exact recovery/process commands.
+  Next is Step11 monitoring/recovery; stop at Step10 here.
+
 ## Step09: analytical tables (2026-10-12)
 
 - Published24 UTC hourly rows for the frozen January1,2024 NOAA series, on local branch

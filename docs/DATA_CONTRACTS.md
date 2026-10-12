@@ -1,5 +1,15 @@
 # Data contracts
 
+## Step10 workflow state
+
+Migration007 extends the existing pipeline audit with workflow/parent identity, attempts, safe
+details and elapsed duration. `pipeline_checkpoints` references committed audit runs and input
+fingerprints; checkpoints publish after business commits. Missing source404 is a failed
+`pipeline_source_gaps` record, separate from valid empty input. `visit_partition_context` records
+canonical dataset IDs used for a target day's complete-context inference. Original positions keep
+their identities; context-aware metric versions and target-day event attribution prevent midnight
+arrivals. Forecast is an explicitly separate mart product. See [ORCHESTRATION.md](ORCHESTRATION.md).
+
 ## Step09 analytical mart (`marts-v1`)
 
 Migration006 adds `mart_rule_sets`, `mart_partitions` and `port_activity_hourly`. Earlier

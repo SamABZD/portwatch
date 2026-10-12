@@ -31,6 +31,13 @@ from portwatch.zones import (
 )
 
 DATASET_FILTER = "p.source_id=%s AND p.dataset_id=%s AND p.processing_version=%s"
+CONTEXT_FILTER = "p.source_id=%s AND p.dataset_id=ANY(%s) AND p.processing_version=%s"
+
+
+def context_parameters(scope):
+    return (scope.source_id, list(scope.dataset_ids), scope.clean_version)
+
+
 PARTITION_FILTER = """port_id=%s AND source_id=%s AND dataset_id=%s AND clean_version=%s
     AND geofence_version=%s AND assignment_version=%s AND rule_id=%s"""
 
@@ -81,11 +88,11 @@ def track_groups(connection, scope, port_id, version, cutoff=None):
             LEFT JOIN position_zone_assignments a ON a.position_id=p.id
                 AND a.port_id=%s AND a.geofence_version=%s AND a.assignment_version=%s
             WHERE """
-            + DATASET_FILTER
+            + CONTEXT_FILTER
             + " AND (%s::timestamptz IS NULL OR p.effective_at<=%s) "
             "ORDER BY p.mmsi,p.effective_at,p.observation_id",
             (port_id, version, ASSIGNMENT_VERSION) * 2
-            + (scope.source_id, scope.dataset_id, scope.clean_version, cutoff, cutoff),
+            + (*context_parameters(scope), cutoff, cutoff),
         )
         for mmsi, rows in groupby(cursor, key=lambda row: row[2]):
             points = []
@@ -236,6 +243,11 @@ def recompute_visits(
                 _insert_episodes(
                     connection, "vessel_visits", VisitEpisode, partition_id, result.visits
                 )
+                with connection.cursor() as context_cursor:
+                    context_cursor.executemany(
+                        "INSERT INTO visit_partition_context VALUES (%s,%s)",
+                        [(partition_id, dataset) for dataset in scope.dataset_ids],
+                    )
                 _insert_episodes(
                     connection, "waiting_episodes", WaitingEpisode, partition_id, result.waiting
                 )

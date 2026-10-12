@@ -1,5 +1,9 @@
 # GitHub workflow
 
+Current Step10 state: local orchestration/backfills validated, Steps06–10 unpushed. The existing
+CI billing-lock deferral persists: no payment, push, merge or branch-rule/account change.
+See [HANDOFF.md](HANDOFF.md) and [ORCHESTRATION.md](ORCHESTRATION.md).
+
 ## Repository boundary
 
 This repository contains only PortWatch. Its root is the `portwatch` directory, not the parent `dataEngineering` folder. `main` is the default branch. `origin` must identify only `SamABZD/portwatch`; verify it with `git remote -v` before pushing. The public [Flux repository](https://github.com/SamABZD/flux) is a read-only organization reference. Its text-normalization pattern informed `.gitattributes`; Step 05A adapts its [CI pattern](https://github.com/SamABZD/flux/blob/main/.github/workflows/ci.yml) for Python and PostGIS.

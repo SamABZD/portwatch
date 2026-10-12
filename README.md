@@ -1,8 +1,32 @@
 # PortWatch
 
-PortWatch is a $0, local-first data engineering portfolio project for the Port of Los Angeles. Steps 00–09 establish the Python CLI, frozen historical demo, durable storage, PostgreSQL/PostGIS bookkeeping, historical/live AIS, reproducible cleaning, approximate zones, visit/waiting inference, weather/news connectors and versioned hourly analytical tables. Historical replay works without a live AIS key. Weather is saved; the latest real GDELT request was rate limited, with failure separate from empty results. No frontend or deployed site exists yet. GitHub CI Step05A remains blocked by an account billing lock; the user authorized continuing local stages at $0.
+PortWatch is a $0, local-first data engineering portfolio project for the Port of Los Angeles. Steps 00–10 establish the Python CLI, frozen historical demo, durable storage, PostgreSQL/PostGIS bookkeeping, historical/live AIS, reproducible cleaning, approximate zones, visit/waiting inference, weather/news connectors and versioned hourly analytical tables with resumable local workflows. Historical replay works without a live AIS key. Weather is saved; the latest real GDELT request was rate limited, with failure separate from empty results. No frontend or deployed site exists yet. GitHub CI Step05A remains blocked by an account billing lock; the user authorized continuing local stages at $0.
 
 ## Local setup
+
+Step10 adds complete resumable workflows. With the existing PostgreSQL cluster running, apply
+all seven migrations, then keep this local Prefect server terminal open:
+
+```powershell
+.\.bootstrap-venv\Scripts\uv.exe sync --locked --extra dev
+.\.venv\Scripts\python.exe -m portwatch db migrate
+.\.venv\Scripts\python.exe -m portwatch orchestrate server
+```
+
+In another terminal in this project directory:
+
+```powershell
+.\.venv\Scripts\python.exe -m portwatch pipeline run --port los_angeles --demo
+.\.venv\Scripts\python.exe -m portwatch pipeline backfill --port los_angeles --start 2024-01-01 --end 2024-01-02
+.\.venv\Scripts\python.exe -m portwatch orchestrate serve --port los_angeles
+```
+
+The backfill selects one frozen UTC day, with exclusive end. `--local` on either pipeline
+command provides recovery without Prefect; matching checkpoints reuse committed work.
+The API/UI is `http://127.0.0.1:4200`, with its own local SQLite metadata. The serving process
+runs finite live processing every minute and weather/news hourly. Continuous AIS collection
+needs the separate collector below. Sleep/shutdown stops execution; these are local processes.
+See [orchestration contracts](docs/ORCHESTRATION.md) and [start/stop/recovery runbook](docs/RUNBOOK.md).
 
 Use Python 3.11 (the version installed on this machine). `uv` was installed into an ignored project-local bootstrap environment. From this directory on the current machine:
 

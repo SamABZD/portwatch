@@ -1,5 +1,11 @@
 # Visit and candidate-waiting inference
 
+Step10 adds explicit contiguous daily context through `visit_partition_context`, preserving
+canonical source dataset lineage while inferring across midnight. Each target day's episode
+projection may contain neighboring-day points; metrics attribute only target-day confirmation
+hours. Missing context remains partial rather than inventing arrival. The frozen one-day results
+below are unchanged. See [ORCHESTRATION.md](ORCHESTRATION.md).
+
 Step07 uses saved normalized observations and versioned analytical zones. It makes deterministic
 experimental inferences, not a census of vessel calls or a measured port queue. Current results
 are **retrospective** and describe the 2024-01-01 UTC historical dataset.

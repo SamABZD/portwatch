@@ -54,7 +54,9 @@ def inspect_invariants(connection, target, rules):
             JOIN pw_check_partitions t USING(partition_id)
             JOIN visit_inference_partitions i USING(partition_id)
             JOIN vessel_positions p ON p.id=s.position_id
-            WHERE p.source_id<>i.source_id OR p.dataset_id<>i.dataset_id OR p.mmsi<>i.mmsi
+            WHERE p.source_id<>i.source_id OR p.mmsi<>i.mmsi OR NOT EXISTS (
+                SELECT 1 FROM visit_partition_context c WHERE c.partition_id=i.partition_id
+                AND c.dataset_id=p.dataset_id)
                 OR p.processing_version<>i.clean_version OR p.effective_at<>s.observed_at"""
         ).fetchone()[0]
         checks["partition_reconciliation"] = connection.execute(

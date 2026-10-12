@@ -1,5 +1,86 @@
 # PortWatch runbook
 
+## Step10 local workflows
+
+Use `C:\Users\samab\dataEngineering\portwatch` in each terminal. Restart the existing native
+PostgreSQL cluster with the command in [README](../README.md) if `pg_ctl status` reports stopped.
+Keep the existing `.env`, native runtime and databases.
+
+Terminal1 (keep local API/UI open):
+
+```powershell
+Set-Location -LiteralPath 'C:\Users\samab\dataEngineering\portwatch'
+.\.bootstrap-venv\Scripts\uv.exe sync --locked --extra dev
+.\.venv\Scripts\python.exe -m portwatch db migrate
+.\.venv\Scripts\python.exe -m portwatch orchestrate server
+```
+
+Terminal2 (demo/backfill, then keep serving open):
+
+```powershell
+Set-Location -LiteralPath 'C:\Users\samab\dataEngineering\portwatch'
+.\.venv\Scripts\python.exe -m portwatch pipeline run --port los_angeles --demo
+.\.venv\Scripts\python.exe -m portwatch pipeline backfill --port los_angeles --start 2024-01-01 --end 2024-01-02
+.\.venv\Scripts\python.exe -m portwatch orchestrate serve --port los_angeles
+```
+
+Terminal3 when continuous collection is wanted (existing private key needed):
+
+```powershell
+Set-Location -LiteralPath 'C:\Users\samab\dataEngineering\portwatch'
+.\.venv\Scripts\python.exe -m portwatch ingest live --port los_angeles
+```
+
+Finite jobs process finalized raw batches; they never launch the collector. Metadata stays in
+`data/prefect/prefect.db`, separate from analytics. API/UI: `http://127.0.0.1:4200`.
+Minute/hour intervals use UTC; hourly providers start at the next UTC hour.
+
+Without Prefect, recover directly:
+
+```powershell
+.\.venv\Scripts\python.exe -m portwatch pipeline run --port los_angeles --demo --local
+.\.venv\Scripts\python.exe -m portwatch pipeline backfill --port los_angeles --start 2024-01-01 --end 2024-01-02 --local
+.\.venv\Scripts\python.exe -m portwatch pipeline live --port los_angeles --local
+```
+
+Repeat after a transient failure; successful checkpoints are reused. Add `--rebuild` to rerun
+publication/validation wrappers; clean source ledgers remain idempotent. The controlled boundary
+check below first exits1 with an interrupted audit, then resumes normally:
+
+```powershell
+.\.venv\Scripts\python.exe -m portwatch pipeline run --port los_angeles --demo --stop-after-raw
+.\.venv\Scripts\python.exe -m portwatch pipeline run --port los_angeles --demo
+.\.venv\Scripts\python.exe scripts/verify_pipeline.py
+```
+
+Inspect PostgreSQL audits/checkpoints/gaps:
+
+```sql
+SELECT stage,status,attempt_number,duration_seconds,input_count,output_count,error_summary,details
+FROM pipeline_runs WHERE workflow_key IS NOT NULL ORDER BY id DESC LIMIT 30;
+SELECT workflow_key,step,committed_at,result FROM pipeline_checkpoints ORDER BY workflow_key,step;
+SELECT port_id,source_id,dataset_id,start_utc,end_utc,reason,resolved_at
+FROM pipeline_source_gaps ORDER BY start_utc;
+```
+
+Busy means another owner holds the workflow/port lock: wait and repeat. Source404 remains a
+failed gap. Credentials/schema errors require correcting configuration/migrations, not repeated
+retries. News429 requires waiting for its recorded cooldown; do not loop refresh calls.
+
+To stop, Ctrl+C the collector and allow draining. In a spare terminal:
+
+```powershell
+.\.venv\Scripts\python.exe -m portwatch orchestrate pause
+```
+
+Then Ctrl+C in the serving terminal, followed by Ctrl+C in the server terminal. Graceful serving
+shutdown pauses schedules too. Stop PostgreSQL only when finished with analytics, using its
+existing `pg_ctl -m fast -w stop` command. Do not delete/reset databases to recover.
+After sleep/shutdown, start PostgreSQL/server/runner again and repeat recovery commands.
+Raw/checkpoints survive; abandoned attempts become interrupted when ownership is reacquired.
+Queued missed ticks may run using current saved input; they do not prove coverage during downtime.
+Read [ORCHESTRATION.md](ORCHESTRATION.md) for context, retries, bounds and audit semantics.
+
 ## Step09 analytical tables
 
 ```powershell

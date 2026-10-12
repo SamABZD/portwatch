@@ -1,5 +1,9 @@
 # GitHub setup record
 
+Current Step10 state: local orchestration/backfills validated, Steps06–10 unpushed. The existing
+CI billing-lock deferral persists: no payment, push, merge or branch-rule/account change.
+See [HANDOFF.md](HANDOFF.md) and [ORCHESTRATION.md](ORCHESTRATION.md).
+
 ## Verified repository
 
 - Project root: `C:\Users\samab\dataEngineering\portwatch`. The parent `dataEngineering` folder is unrelated and is not a Git repository.

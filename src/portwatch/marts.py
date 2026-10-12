@@ -1,7 +1,7 @@
 """Transactional SQL marts and event-time prefix reconstruction over existing contracts."""
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import timedelta
 from importlib.resources import files
 
@@ -14,9 +14,10 @@ from portwatch.context import plan_context
 from portwatch.context_storage import cached_response
 from portwatch.settings import Settings, load_port_config
 from portwatch.visit_storage import (
-    DATASET_FILTER,
+    CONTEXT_FILTER,
     PARTITION_FILTER,
     _insert_episodes,
+    context_parameters,
     partition_identity,
     partition_parameters,
     recompute_visits,
@@ -47,13 +48,16 @@ class MartConfig:
     visit_rules: VisitRules
     snapshot_staleness_seconds: int = 900
     weather_batch_id: str | None = None
+    weather_product: str = "historical_reanalysis"
 
     def __post_init__(self):
         if not 60 <= self.snapshot_staleness_seconds <= 3600:
             raise MartError("snapshot staleness must be 60 to 3600 seconds")
+        if self.weather_product not in {"historical_reanalysis", "current_forecast"}:
+            raise MartError("unsupported weather product")
 
-    def document(self, clean_version):
-        return dict(
+    def document(self, clean_version, context_dataset_ids=()):
+        document = dict(
             metric_version=METRIC_VERSION,
             port_id=self.port_id,
             geofence_version=self.geofence_version,
@@ -65,12 +69,15 @@ class MartConfig:
             transition_hour="confirmation_time",
             waiting_duration_hour="last_observed_time",
             dwell="completed_interval_midpoint",
-            weather_product="historical_reanalysis",
+            weather_product=self.weather_product,
             weather_batch_id=self.weather_batch_id,
         )
+        if len(context_dataset_ids) > 1:
+            document["context_dataset_ids"] = list(context_dataset_ids)
+        return document
 
     def analytical_version(self, scope):
-        return identity(self.document(scope.clean_version))
+        return identity(self.document(scope.clean_version, scope.context_dataset_ids))
 
     def partition_id(self, scope):
         return identity(
@@ -102,17 +109,15 @@ def validate_scope(scope):
 def expanded_scope(connection, scope):
     first, last = connection.execute(
         "SELECT min(p.effective_at),max(p.effective_at) FROM vessel_positions p WHERE "
-        + DATASET_FILTER,
-        (scope.source_id, scope.dataset_id, scope.clean_version),
+        + CONTEXT_FILTER,
+        context_parameters(scope),
     ).fetchone()
     if first is None:
-        raise MartError("clean the saved historical positions first")
-    return AssignmentScope(
-        scope.source_id,
-        scope.dataset_id,
-        min(scope.start_utc, first),
-        max(scope.end_utc, last + timedelta(microseconds=1)),
-        scope.clean_version,
+        return scope
+    return replace(
+        scope,
+        start_utc=min(scope.start_utc, first),
+        end_utc=max(scope.end_utc, last + timedelta(microseconds=1)),
     )
 
 
@@ -125,8 +130,8 @@ def _weather_request(connection, config):
         WHERE c.batch_id=%s""",
         (config.weather_batch_id,),
     ).fetchone()
-    if not row or row[1] != "historical_reanalysis" or row[2] != config.port_id:
-        raise MartError("historical marts require a matching-port saved reanalysis revision")
+    if not row or row[1] != config.weather_product or row[2] != config.port_id:
+        raise MartError(f"marts require a matching-port saved {config.weather_product} revision")
     units = row[3].get("hourly_units", {})
     if units.get("wind_speed_10m") not in {None, "m/s"} or units.get("precipitation") not in {
         None,
@@ -146,14 +151,14 @@ def _prepare_points(connection, scope, config, cutoff):
             AND a.port_id=%s AND a.geofence_version=%s AND a.assignment_version=%s
         LEFT JOIN port_zones z ON z.port_id=a.port_id AND z.version=a.geofence_version
             AND z.zone_id=a.primary_zone_id WHERE """
-        + DATASET_FILTER
+        + CONTEXT_FILTER
         + " AND (%s::timestamptz IS NULL OR p.effective_at<=%s)",
         (
             config.port_id,
             config.geofence_version,
             ASSIGNMENT_VERSION,
             scope.source_id,
-            scope.dataset_id,
+            list(scope.dataset_ids),
             scope.clean_version,
             cutoff,
             cutoff,
@@ -181,8 +186,8 @@ def _prepare_health(connection, scope):
             (WHERE cb.status='processed' AND b.source_start_utc IS NOT NULL
                 AND b.source_end_utc IS NOT NULL) AS available
         FROM ingestion_batches b JOIN clean_batches cb ON cb.raw_batch_id=b.batch_id
-        WHERE b.source_id=%s AND b.dataset_id=%s AND cb.processing_version=%s""",
-        (scope.source_id, scope.dataset_id, scope.clean_version),
+        WHERE b.source_id=%s AND b.dataset_id=ANY(%s) AND cb.processing_version=%s""",
+        context_parameters(scope),
     )
     count, processed, modes = connection.execute(
         """SELECT count(*),count(*) FILTER (WHERE cb.status='processed'),array_agg(DISTINCT b.mode)
@@ -273,6 +278,7 @@ def _hour_rows(connection, scope, config, cutoff=None):
         rejected=rejected,
         collector=collector,
         weather=config.weather_batch_id,
+        weather_product=config.weather_product,
         processing_complete=health["clean_inputs"] > 0 and health["pending_or_failed_inputs"] == 0,
     )
     with connection.cursor(row_factory=dict_row) as cursor:
@@ -317,7 +323,13 @@ def recompute_marts(
     validate_scope(scope)
     # Append classifications separately; publication of visits and marts is atomic together.
     expanded = expanded_scope(connection, scope)
-    assign_zones(connection, config.port_id, config.geofence_version, expanded)
+    for dataset in expanded.dataset_ids:
+        single = replace(expanded, dataset_id=dataset, context_dataset_ids=())
+        if connection.execute(
+            "SELECT 1 FROM vessel_positions p WHERE " + CONTEXT_FILTER + " LIMIT 1",
+            context_parameters(single),
+        ).fetchone():
+            assign_zones(connection, config.port_id, config.geofence_version, single)
     run_id = start_run(connection, "marts")
     try:
         with connection.transaction():
@@ -331,7 +343,7 @@ def recompute_marts(
             weather_request = _weather_request(connection, config)
             version = config.analytical_version(scope)
             partition_id = config.partition_id(scope)
-            document = config.document(scope.clean_version)
+            document = config.document(scope.clean_version, scope.context_dataset_ids)
             connection.execute(
                 "INSERT INTO mart_rule_sets VALUES (%s,%s,%s,%s) ON CONFLICT DO NOTHING",
                 (version, METRIC_VERSION, config.visit_rules.rule_id, Jsonb(document)),
@@ -362,7 +374,7 @@ def recompute_marts(
                 ),
             ).fetchall()
             input_hash = identity([inputs, health, document, scope.start_utc, scope.end_utc])
-            input_as_of = max(row[2] for row in inputs)
+            input_as_of = max((row[2] for row in inputs), default=scope.end_utc)
             connection.execute("DELETE FROM mart_partitions WHERE partition_id=%s", (partition_id,))
             connection.execute(
                 """INSERT INTO mart_partitions (

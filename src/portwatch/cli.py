@@ -1,6 +1,7 @@
 """PortWatch command line interface."""
 
 import asyncio
+import json
 import time
 from datetime import datetime
 from pathlib import Path
@@ -30,11 +31,132 @@ storage_app = typer.Typer(help="Verify raw files and recover database registrati
 ingest_app = typer.Typer(help="Acquire historical AIS or collect live AIS independently.")
 transform_app = typer.Typer(help="Normalize saved source batches with deterministic lineage.")
 geo_app = typer.Typer(help="Load immutable approximate analytical geofences.")
+pipeline_app = typer.Typer(help="Finite historical, live and context workflows; local recovery.")
+orchestrate_app = typer.Typer(help="Local Prefect server and scheduled finite jobs.")
 app.add_typer(db_app, name="db")
 app.add_typer(storage_app, name="storage")
 app.add_typer(ingest_app, name="ingest")
 app.add_typer(transform_app, name="transform")
 app.add_typer(geo_app, name="geo")
+app.add_typer(pipeline_app, name="pipeline")
+app.add_typer(orchestrate_app, name="orchestrate")
+
+
+def pipeline_command(
+    kind, port, demo=False, start=None, end=None, stop_after_raw=False, rebuild=False, local=False
+):
+    from portwatch.pipeline import PipelineError, run_context, run_historical, run_live, sanitized
+
+    try:
+        if kind in {"run", "backfill"}:
+            # Validate dates and configured port before making a Prefect API request.
+            plan(Settings(), port, demo, start, end)
+        if local:
+            if kind in {"run", "backfill"}:
+                result = run_historical(
+                    port,
+                    demo=demo,
+                    start=start,
+                    end=end,
+                    stop_after_raw=stop_after_raw,
+                    force=rebuild,
+                )
+            elif kind == "live":
+                result = run_live(port)
+            else:
+                result = run_context(kind, port)
+        else:
+            from portwatch.orchestration import (
+                backfill_flow,
+                historical_flow,
+                live_flow,
+                news_flow,
+                weather_flow,
+            )
+
+            if kind == "run":
+                result = historical_flow(port, stop_after_raw, rebuild)
+            elif kind == "backfill":
+                result = backfill_flow(port, start, end, rebuild)
+            else:
+                result = {"live": live_flow, "weather": weather_flow, "news": news_flow}[kind](port)
+        typer.echo(json.dumps(result, indent=2, default=str))
+        if result.get("status") in {"failed", "busy"}:
+            raise PipelineError("pipeline_" + result["status"])
+    except Exception as error:
+        typer.echo(f"Pipeline stopped: {sanitized(error).code}", err=True)
+        raise typer.Exit(code=1) from None
+
+
+@pipeline_app.command("run")
+def pipeline_run(
+    port: str = "los_angeles",
+    demo: bool = False,
+    rebuild: bool = False,
+    local: bool = False,
+    stop_after_raw: bool = False,
+):
+    """Run the frozen demo; --local bypasses Prefect for recovery; --rebuild republishes."""
+    if not demo:
+        typer.echo("Select --demo for the frozen historical workflow.", err=True)
+        raise typer.Exit(code=2)
+    pipeline_command(
+        "run", port, demo=True, stop_after_raw=stop_after_raw, rebuild=rebuild, local=local
+    )
+
+
+@pipeline_app.command("backfill")
+def pipeline_backfill(
+    start: Annotated[str, typer.Option(help="Inclusive UTC date, YYYY-MM-DD.")],
+    end: Annotated[str, typer.Option(help="Exclusive UTC date, YYYY-MM-DD.")],
+    port: str = "los_angeles",
+    rebuild: bool = False,
+    local: bool = False,
+):
+    """Process 1–7 NOAA 2024 UTC days, inclusive start and exclusive end."""
+    pipeline_command("backfill", port, start=start, end=end, rebuild=rebuild, local=local)
+
+
+@pipeline_app.command("live")
+def pipeline_live(port: str = "los_angeles", local: bool = False):
+    """Process completed saved live batches and report event freshness."""
+    pipeline_command("live", port, local=local)
+
+
+@pipeline_app.command("weather")
+def pipeline_weather(port: str = "los_angeles", local: bool = False):
+    """Finite current forecast fetch, independent of AIS and news."""
+    pipeline_command("weather", port, local=local)
+
+
+@pipeline_app.command("news")
+def pipeline_news(port: str = "los_angeles", local: bool = False):
+    """Finite recent article fetch, independent of AIS and weather."""
+    pipeline_command("news", port, local=local)
+
+
+@orchestrate_app.command("server")
+def orchestrate_server():
+    """Run the local Prefect API/UI and SQLite metadata; stop with Ctrl+C."""
+    from portwatch.orchestration import start_local_server
+
+    start_local_server()
+
+
+@orchestrate_app.command("serve")
+def orchestrate_serve(port: str = "los_angeles"):
+    """Keep minute live processing and independent hourly context deployments running."""
+    from portwatch.orchestration import serve_local
+
+    serve_local(port)
+
+
+@orchestrate_app.command("pause")
+def orchestrate_pause():
+    """Pause our schedules before stopping the serving process."""
+    from portwatch.orchestration import pause_local
+
+    pause_local()
 
 
 @transform_app.command("marts")

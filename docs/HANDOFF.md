@@ -2,11 +2,53 @@
 
 ## Stage state
 
-- Completed: Steps00,00A,01–05, **06 zones**, **07 visits/waiting**, **08 weather/news connectors**, and **09 analytical tables locally**. Native PostgreSQL17.11/PostGIS3.6.2 remains healthy. The24-hour mart reconciles62,157 positions,56 inferred entry/35 exit confirmations and14 completed dwell samples. One pilot-vessel candidate contributes two candidate-vessel hours, not a cargo queue. Weather is saved; last real GDELT request was429. No frontend/deployment exists.
-- Published repository: [SamABZD/portwatch](https://github.com/SamABZD/portwatch), public, default branch `main`, only remote `origin`. See [GITHUB_SETUP.md](GITHUB_SETUP.md) for the recorded account, foundation commit SHA, metadata, and publication checks.
-- Current: **Step09 implemented/validated locally; Step05A remains blocked remotely**. Project root is `C:\Users\samab\dataEngineering\portwatch`; prompts are in sibling `portwatch-prompts`, playbook `C:\Users\samab\dataEngineering\PORTWATCH_BUILD_PLAYBOOK.md`. The $0/local/CI-deferred authorization persists. Branch `feat/analytics-marts` starts from Step08 checkpoint `8dd89ba51922cf972504a7bc188e67e558072886`; Steps06–09 remain unpushed. [CI PR#2](https://github.com/SamABZD/portwatch/pull/2) stays unmerged and branch rules unapplied. **Next: Step10 orchestration/backfills**, prompt `portwatch-prompts/10-orchestration-backfills.md`. Read [ANALYTICS.md](ANALYTICS.md) before querying. Historical inference/weather remain retrospective; live-context failures do not block replay. No paid resource, deployment, account change or external message was created.
+- Completed locally: Steps00,00A,01–10, including zones, visits/waiting, context, marts and **orchestration/backfills**. Native PostgreSQL17.11/PostGIS3.6.2 remains healthy;194 tests pass. Historical24-hour metrics/source hashes remain unchanged. No frontend or deployed site exists.
+- Project root: `C:\Users\samab\dataEngineering\portwatch`. Current branch: `feat/orchestration-backfills`, from Step09 checkpoint `5caeeb8badd0e3010f15bb6f39457417a7b638ed`. Steps06–10 remain unpushed; use `git log -1` for this stage's local checkpoint.
+- **Step05A remote CI remains blocked by the GitHub account billing lock.** User declined payment and authorized local continuation at$0. [Repository](https://github.com/SamABZD/portwatch), [CI PR#2](https://github.com/SamABZD/portwatch/pull/2); PR stays unmerged and proposed branch rules unapplied. No payment, account change, push or hosted deployment.
+- **Next: Step11 monitoring/recovery**, sibling prompt `portwatch-prompts/11-monitoring-recovery.md`. Stop at Step10 here. Read [ORCHESTRATION.md](ORCHESTRATION.md), [RUNBOOK.md](RUNBOOK.md), [ANALYTICS.md](ANALYTICS.md), [VISITS.md](VISITS.md) and [RESULTS.md](RESULTS.md). Full playbook: `C:\Users\samab\dataEngineering\PORTWATCH_BUILD_PLAYBOOK.md`.
+- Five genuine raw batches remain verified. Last real news request remains429. Collector was not started; live tasks process the saved26 observations and report stale lag. Prefect schedules paused and temporary runner/server stopped after actual automatic-run verification; PostgreSQL stays running. Keep these process states explicit when resuming.
 
 ## Verified commands and observed outcomes
+
+### Step10 orchestration/backfills (2026-10-12)
+
+- `.\.bootstrap-venv\Scripts\uv.exe sync --locked --extra dev`: Prefect3.8.8,
+  websockets16.1.1 and SQLAlchemy2.0.54. Initial SQLAlchemy2.1 scheduler failure was diagnosed
+  from actual execution, constrained to2.0.x and retested. Local SQLite metadata lives in
+  ignored `data/prefect`; no global profiles, Cloud or analytical DB repurposing.
+- `.\.venv\Scripts\python.exe -m portwatch db migrate`: only007 applied; prior001–006 unchanged.
+  Durable workflow/child audit fields, checkpoints, source gaps and explicit visit context lineage.
+- `.\.venv\Scripts\python.exe -m portwatch orchestrate server` and `orchestrate serve --port
+  los_angeles`: real local API and runner. Minute live, separate hourly weather/news deployments,
+  one run/deployment and three runner slots. The long-lived collector remains independent.
+- `.\.venv\Scripts\python.exe scripts/verify_pipeline.py`: complete genuine cached demo,
+  controlled raw-only interruption and successful resumption, same Jan1→Jan2 backfill twice,
+  checkpoint reuse, actual competing request excluded, five reconciliation groups allzero.
+ 78.84s; source hash `355cc069362fd84e7aa27530647bae9f8dbbcbdb0156e9585dfea9b91a8122d4`,
+  mart hash `6f6ca8ecaa8e3824040aa481cd85d88cd0b52990ba2a0307daf14001ad223112` unchanged.
+- `.\.venv\Scripts\python.exe scripts/verify_schedule.py`: API confirms `auto_scheduled=true`,
+  flow `01a130c2-3367-7c7d-9daa-9860b7ea2012` and its task completed, started15:49:32.882542Z
+  on2026-10-12 (18:49:32 Asia/Beirut). Repeated minute runs also completed. Hourly deployments
+  were paused before their next tick; their scheduled provider success is not claimed.
+- `.\.bootstrap-venv\Scripts\uv.exe run --locked --extra dev python scripts/validate.py`:
+  **143 unit26.71s +51 integration40.25s =194 passed**, no selected skips, lint/format72 files,
+  actual wheel CLI/resources, wheel/sdist, seven fresh migrations/repeatzero. Synthetic tests
+  cover checkpoint rollback/resume, real extraction after raw-only interruption, safe attempts/
+  errors, schema-scoped exclusion/session loss, missing-date isolation and midnight context.
+- Historical workflow results24 hours/62,157 positions/56 entry/35 exit confirmations/14 completed
+  dwell samples unchanged. Live wrapper handles two saved batches/26 positions,0 new,20 hourly
+  rows with unknown-empty intervals and stale lag. Source/weather versions remain separate.
+  Midnight context does not invent arrival, and canonical dataset IDs are preserved.
+- `.\.venv\Scripts\python.exe -m portwatch orchestrate pause`, then Ctrl+C runner/server:
+  schedules paused and temporary processes stopped. Doctor allPASS; storage inspect five complete,
+  zero issues. PostgreSQL remains running. Current weather/news provider data was not refreshed.
+
+Evidence: ignored `artifacts/step10/verification.json`, `schedule-verification.json`,
+`verification.log`, `validation.log`. User-facing copies and the updated project locator are in
+the chat's `outputs/`. Step11 must preserve$0, CI deferral, separate sources/products, complete
+context/partial inference, and exact process/freshness states.
+
+
 
 ### Step09 analytical tables (2026-10-12)
 

@@ -1,5 +1,11 @@
 # Analytical metrics
 
+Step10 wraps these functions in resumable workflows. The frozen series/version below remains
+unchanged. Multi-day backfills pin contiguous input dataset context and still publish each target
+UTC day separately; contextual episode projections must not be summed as independent port calls.
+Live hourly outputs use a separate current-forecast product/version and only elapsed hours.
+See [ORCHESTRATION.md](ORCHESTRATION.md) for audit, context and recovery semantics.
+
 Step 09 adds `marts-v1` SQL output over the existing positions, zones, visits, waiting episodes,
 raw/cleaning ledger and weather contracts. It does not introduce a congestion score, a ground
 truth port-call table or an estimate of total AIS coverage. All vessel types remain included.
