@@ -87,7 +87,7 @@ def finish_batch_processing(
 
 
 def start_run(connection: psycopg.Connection, stage: str) -> UUID:
-    if stage not in {"storage_reconcile", "historical_ingest", "live_collect", "clean"}:
+    if stage not in {"storage_reconcile", "historical_ingest", "live_collect", "clean", "zones"}:
         raise ValueError("unknown pipeline stage")
     run_id = uuid4()
     connection.execute("INSERT INTO pipeline_runs (run_id, stage) VALUES (%s, %s)", (run_id, stage))

@@ -4,6 +4,14 @@ Checked 2026-10-11. Scope: $0, local-first Port of Los Angeles demo. Step 01 che
 
 ## Frozen historical demo
 
+Step06 update (2026-10-12): reviewed the official
+[2023 Port of Los Angeles terminal schematic](https://kentico.portoflosangeles.org/getmedia/07e1377d-b452-4ecb-a629-9a0c69410805/pola_terminals_map)
+visually and compared six manually authored vicinity polygons with saved 2024 AIS tracks.
+`geo/los_angeles.geojson` records version, uncertainty, references and reviewed exclusion points.
+The schematic does not supply surveyed coordinates or establish historical operational validity.
+The shared offshore candidate is regional; no anchorage, waiting or visit evidence is claimed.
+See [GEO_ZONES.md](GEO_ZONES.md) for the exact approximation and source limitations.
+
 [`configs/demo.yaml`](../configs/demo.yaml) is the single source of truth for later commands: NOAA OCM 2024-01-01, from `2024-01-01T00:00:00Z` inclusive to `2024-01-02T00:00:00Z` exclusive, with the same UTC weather period and a 5-minute replay interval. The interval controls presentation; it does not create five-minute AIS observations. `America/Los_Angeles` is display time only. All stored event times remain UTC. The one UTC day spans portions of two Los Angeles calendar dates.
 
 ## Source status

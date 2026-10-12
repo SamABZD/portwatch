@@ -51,3 +51,8 @@ Both jobs use uv 0.13.0, Python 3.11, locked development dependencies, and only 
 Remote run, PR, and branch-rule evidence is recorded in [GITHUB_SETUP.md](GITHUB_SETUP.md) and [HANDOFF.md](HANDOFF.md). Reading YAML or passing local tests alone does not establish a GitHub pass.
 
 Current Step05A status: CI PR#2 is open; account billing lock prevented both hosted jobs from starting. Required check settings are proposed but unapplied until an actual baseline succeeds. The account owner must clear that lock before PR/main execution can be verified.
+
+On 2026-10-12 the user declined paying for the account lock and authorized continuing locally.
+Step06 is a local checkpoint on `feat/geospatial-zones`, based on pending CI head `35b230c`.
+Run the shared local validation command for each stage and preserve CI as a separate pending gate.
+No unchecked merge, paid runner, plan/payment change, or deployment is authorized by this deferral.

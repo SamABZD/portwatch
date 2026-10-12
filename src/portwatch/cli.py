@@ -16,16 +16,67 @@ from portwatch.ingest import artifact_path, ingest_historical, plan
 from portwatch.live import CaptureError, LiveCollector, live_spec
 from portwatch.settings import Settings
 from portwatch.storage import RawStore
+from portwatch.zones import configured_geofence, load_geofence, transform_zones
 
 app = typer.Typer(help="PortWatch local data engineering commands.")
 db_app = typer.Typer(help="PostgreSQL schema commands.")
 storage_app = typer.Typer(help="Verify raw files and recover database registration.")
 ingest_app = typer.Typer(help="Acquire historical AIS or collect live AIS independently.")
 transform_app = typer.Typer(help="Normalize saved source batches with deterministic lineage.")
+geo_app = typer.Typer(help="Load immutable approximate analytical geofences.")
 app.add_typer(db_app, name="db")
 app.add_typer(storage_app, name="storage")
 app.add_typer(ingest_app, name="ingest")
 app.add_typer(transform_app, name="transform")
+app.add_typer(geo_app, name="geo")
+
+
+@geo_app.command("load")
+def geo_load(
+    port: Annotated[str, typer.Option(help="Configured port ID.")] = "los_angeles",
+    file: Annotated[Path | None, typer.Option(help="Versioned GeoJSON override.")] = None,
+) -> None:
+    """Validate polygons without repair and load or reuse an immutable version."""
+    try:
+        settings = Settings()
+        geofence = configured_geofence(settings, port, file)
+        with connect_db(settings) as connection:
+            created = load_geofence(connection, geofence)
+        typer.echo(
+            f"Geofence {geofence.document.version}: {'loaded' if created else 'reused'}; "
+            f"zones: {len(geofence.document.features)}; SHA-256: {geofence.content_sha256}"
+        )
+        typer.echo("Approximate analytical zones; candidate waiting areas are regional.")
+    except Exception as error:
+        detail = str(error) if isinstance(error, ValueError) else type(error).__name__
+        typer.echo(f"Geofence load failed: {detail}", err=True)
+        raise typer.Exit(code=1) from None
+
+
+@transform_app.command("zones")
+def zones_transform(
+    port: Annotated[str, typer.Option(help="Configured port ID.")] = "los_angeles",
+    demo: Annotated[bool, typer.Option(help="Classify the saved historical demo.")] = False,
+    version: Annotated[str | None, typer.Option(help="Previously loaded geofence version.")] = None,
+) -> None:
+    """Preserve every membership and an explicit outside state for each saved position."""
+    if not demo:
+        typer.echo("Select --demo; this stage classifies the saved historical dataset.", err=True)
+        raise typer.Exit(code=2)
+    try:
+        settings = Settings()
+        with connect_db(settings) as connection:
+            selected, counts = transform_zones(settings, connection, port, version)
+        typer.echo(
+            f"Geofence: {selected}; positions: {counts.input_positions}; "
+            f"newly assigned: {counts.newly_assigned}; inside: {counts.inside}; "
+            f"outside: {counts.outside}; memberships: {counts.memberships}; "
+            f"overlapping positions: {counts.overlaps}"
+        )
+    except Exception as error:
+        detail = str(error) if isinstance(error, ValueError) else type(error).__name__
+        typer.echo(f"Zone transform failed: {detail}", err=True)
+        raise typer.Exit(code=1) from None
 
 
 @transform_app.command("positions")

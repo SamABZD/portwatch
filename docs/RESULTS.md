@@ -1,5 +1,29 @@
 # Measured results
 
+## Step 06: versioned approximate geospatial zones (2026-10-12)
+
+Local implementation completed with the user's authorization to continue at $0 while the
+GitHub account lock remains unresolved. Six approximate polygons in `la-approx-v1` classify all
+62,157 historical positions: **61,712 inside**, **445 outside**, **72,237 memberships**, and
+**10,525 overlapping positions**. Candidate offshore memberships are regional. None of these
+counts establish visits, berth occupancy or waiting time.
+
+Two replays independently checked every membership with Shapely: zero mismatches and no new rows.
+Assignment SHA-256: `be40f26d8b7786456f876e7b969c00201527888b1fc3417ddab34f5fab7740a4`.
+Original clean business SHA-256 remains `355cc069362fd84e7aa27530647bae9f8dbbcbdb0156e9585dfea9b91a8122d4`.
+The original raw batches remain preserved. Report, plan and visually reviewed 4,782-point plot
+are in ignored `artifacts/step06/`; detailed approximation/reference limits are in [GEO_ZONES.md](GEO_ZONES.md).
+
+The first bulk load exposed stale-statistics FK probes and timed out; its transaction rolled back.
+Refreshing bulk-table statistics resolved the measured bottleneck. The two-command load/reuse and
+classification invocation then completed in9.70s. A representative spatial join used the existing
+position GiST index and executed in83.753ms on the initial verified run. These are local timings.
+
+Full shared validation passed: **96 unit tests in24.29s** and **16 integration tests in9.25s**, no
+selected skips; lint/format (47 Python files), sdist/wheel import and all three migration-resource
+checks, fresh schema migration and repeat no-op all passed. Live and historical data are separate.
+No provider downloads, frontend, deployment, paid service or remote CI pass was added.
+
 ## Step 05A: deterministic local CI gates
 
 On 2026-10-11, `.\.venv\Scripts\python.exe scripts/validate.py --group all` passed against the existing native PostgreSQL17/PostGIS3.6.2 installation:

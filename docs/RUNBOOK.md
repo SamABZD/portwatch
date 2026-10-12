@@ -1,5 +1,24 @@
 # PortWatch runbook
 
+## Local geofence and zone checks
+
+From the project root `C:\Users\samab\dataEngineering\portwatch`, use the running native
+PostGIS cluster and saved historical inputs:
+
+```powershell
+.\.venv\Scripts\python.exe -m portwatch db migrate
+.\.venv\Scripts\python.exe -m portwatch geo load --port los_angeles
+.\.venv\Scripts\python.exe -m portwatch transform zones --port los_angeles --demo
+.\.venv\Scripts\python.exe scripts/verify_zones.py
+```
+
+Changed-content errors require a new reviewed geofence version. Invalid geometry is rejected;
+inspect the named ring/zone rather than applying an unrecorded repair. `--version <loaded-version>`
+reproduces earlier stored polygons. A failed assignment rolls back all rows for that transaction;
+rerunning inserts missing assignments. If large-load FK probes are slow, inspect table statistics
+and plans before changing integrity constraints. [GEO_ZONES.md](GEO_ZONES.md) records the resolved
+initial statistics issue and limitations. CLI classification does not acquire provider data.
+
 ## Step 04: live collector
 
 The collector runs independently of the dashboard and analytical jobs. PostgreSQL bookkeeping must be migrated and running; PostGIS is not used in this stage. The existing native cluster can be restarted using [README.md](../README.md). Historical replay remains available when live credentials or service access are unavailable.

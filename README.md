@@ -1,6 +1,6 @@
 # PortWatch
 
-PortWatch is a $0, local-first data engineering portfolio project for the Port of Los Angeles. Steps 00–05 establish the Python CLI, source audit and frozen demo, durable raw storage, PostgreSQL/PostGIS bookkeeping, historical ingestion, a verified live collector, and reproducible position cleaning. Historical replay works without a live AIS key. No frontend or deployed site exists yet.
+PortWatch is a $0, local-first data engineering portfolio project for the Port of Los Angeles. Steps 00–06 establish the Python CLI, source audit and frozen demo, durable raw storage, PostgreSQL/PostGIS bookkeeping, historical ingestion, a verified live collector, reproducible position cleaning, and versioned approximate spatial zones. Historical replay works without a live AIS key. No frontend or deployed site exists yet. GitHub CI Step 05A remains blocked by an account billing lock; the user authorized continuing local stages at $0.
 
 ## Local setup
 
@@ -71,6 +71,21 @@ Omit `--duration` for continuous capture; Ctrl+C drains and finalizes the batch.
 ```
 
 These commands use saved inputs without provider downloads. Historical inputs reconcile to 62,157 clean positions and two duplicates; live inputs to 26 positions and 12 explicit skips, including 11 separately preserved static messages. Reruns reuse identical counts and business rows. Contracts, timestamp choices, source-record lineage and quarantine reasons are in [docs/DATA_CONTRACTS.md](docs/DATA_CONTRACTS.md). The verifier checks two replays and writes ignored `artifacts/step05/verification.json`.
+
+## Spatial demo
+
+```powershell
+.\.venv\Scripts\python.exe -m portwatch db migrate
+.\.venv\Scripts\python.exe -m portwatch geo load --port los_angeles
+.\.venv\Scripts\python.exe -m portwatch transform zones --port los_angeles --demo
+.\.venv\Scripts\python.exe scripts/verify_zones.py
+```
+
+Six reviewed approximate zones classify all 62,157 historical positions: 61,712 inside and 445
+outside, with all 72,237 memberships retained. Replays preserve original positions and existing
+geofence versions. Offshore candidate membership is regional and does not establish waiting or
+a Los Angeles visit. See [zone provenance and rules](docs/GEO_ZONES.md); the ignored
+`artifacts/step06/los-angeles-zones.png` is a diagnostic plot, not a dashboard.
 
 PostgreSQL is the primary database; Railway is the preferred future deployment target. Deployment remains outside the current stage and subject to the $0 budget.
 

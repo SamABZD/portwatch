@@ -1,5 +1,27 @@
 # Data contracts
 
+## Versioned geofences and memberships (Step06)
+
+GeoJSON polygons are approximate analytical vicinity zones, in 2D longitude/latitude EPSG:4326.
+`geofence_versions` owns the canonical document SHA-256, reference, review date, uncertainty and
+validity metadata. `port_zones` owns valid nonempty versioned MultiPolygons. Updates/deletes are
+refused; changing geometry or metadata requires a new version. Earlier versions remain queryable.
+Operational effective dates are unknown, and the frozen-day application is an approximation.
+
+`position_zone_assignments` has grain `(position_id, port_id, geofence_version, assignment_version)`.
+Position ID identifies the unchanged source observation/cleaning version. `position_zone_memberships`
+adds zone ID to that key and preserves every matching polygon. `covers-v1` uses boundary-inclusive
+ST_Covers. Outside observations have no primary zone and zero memberships. Primary priority is
+terminal (10), harbor (20), regional waiting candidate (30); equal priorities sort zone ID.
+Overlap is preserved independently from primary display choice. Candidate membership is neither
+waiting nor an LA visit. Source/dataset/cleaning version/UTC filters scope the demo; live stays separate.
+
+Assignments insert missing keys transactionally; failure exposes no partial summary/membership
+rows. The CLI default requires a configured/loaded checksum match; `--version` explicitly selects
+a previously loaded version. Geographic areas and distances use PostGIS geography units, never
+degrees as meters. [GEO_ZONES.md](GEO_ZONES.md) records approximation evidence, reference checks,
+schema, observed results and limitations. The collection filter is not an analytical port boundary.
+
 ## Raw batch and manifest v1 (Step 02)
 
 Raw payload bytes are immutable provider output. Storage does not parse or rewrite them. Synthetic data is used only in tests and is identified by `synthetic_*` source and dataset IDs. Each completed payload has a sidecar `<payload>.manifest.json` with `schema_version: 1`. Sidecars describe acquisition; they are not a copy of current database processing status.
