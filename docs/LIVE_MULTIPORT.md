@@ -95,7 +95,10 @@ low-speed candidates are experimental vicinity metrics, not verified calls or qu
 ## Public pipeline view
 
 The page explains collect → preserve → validate → transform → serve with code/documentation
-links. It shows collector/context status, historical/live canonical counts, duplicates,
+links. Its selectable architecture drawing connects NOAA, AISStream and context connectors to
+raw files, Python validation, PostgreSQL/PostGIS, FastAPI and Next.js. Dashed lines distinguish
+Prefect scheduling from saved-data flow; mobile uses a vertical drawing. Component explanations
+remain available when current health is disconnected. It shows collector/context status, historical/live canonical counts, duplicates,
 quarantine, backlog, commit times, measured receipt-to-clean latency and recent workflows.
 Only workflows scoped to that port appear under its heading; unscoped manual audits are excluded.
 Source failures and unavailable context stay visible. The view exposes no mutation controls,

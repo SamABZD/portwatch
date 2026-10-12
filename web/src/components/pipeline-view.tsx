@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import PipelineDiagram from "@/components/pipeline-diagram";
 
 type Series = {
   status: string;
@@ -57,14 +58,10 @@ export default function PipelineView() {
       <p>Inspect the collection, validation and analytical work behind PortWatch. These are current operational measurements, separate from the historical replay.</p>
       <p className="panel-note">Refreshes every 30 seconds. Live coverage depends on received AIS reports; gaps never establish that the sea is empty.</p>
     </section>
+    <PipelineDiagram />
     {error && <div role="alert" className="query-error">Pipeline status is disconnected. {report && "The last received results below are stale."} <button onClick={() => setRetry(v => v + 1)}>Retry pipeline</button></div>}
     {!report && !error && <p role="status">Reading pipeline measurements…</p>}
     {report && <>
-      <section aria-labelledby="flow-heading" className="pipeline-section">
-        <h2 id="flow-heading">How the data travels</h2>
-        <ol className="pipeline-flow">{report.stages.map(stage => <li key={stage.name}><h3>{stage.name}</h3><p>{stage.description}</p><a href={`${report.repository}/blob/main/${stage.path}`} target="_blank" rel="noreferrer">Read the code</a></li>)}</ol>
-        <p>Prefect schedules finite processing every minute and weather/news hourly. Independent collectors preserve live reports continuously; the website only reads prepared data.</p>
-      </section>
       {report.ports.map(port => <section className="pipeline-section" key={port.port_id} aria-label={`${port.name} pipeline`}>
         <div className="panel-heading"><h2>{port.name}</h2><span>{words(port.overall)}</span></div>
         <p>Collector: <strong>{words(port.collector.status)}</strong> · Last AIS report received: {date(port.collector.last_observed_ais_message_utc)}</p>

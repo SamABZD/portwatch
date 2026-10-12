@@ -23,16 +23,67 @@
 .pipeline-intro h1 { font-size: 32px; line-height: 1.2; text-wrap: balance; }
 .pipeline-section { padding: 28px 0; border-top: 1px solid var(--line); }
 .pipeline-section p { max-width: 75ch; }
-.pipeline-flow { display: grid; grid-template-columns: repeat(5, 1fr); list-style: decimal; gap: 28px; padding-left: 20px; margin: 28px 0; }
-.pipeline-flow h3 { margin: 0; font-size: 16px; }
-.pipeline-flow p { color: var(--muted); margin: 8px 0 12px; }
+.architecture-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; }
+.architecture-heading h2 { margin-bottom: 4px; }
+.architecture-heading p { margin: 0; color: var(--muted); }
+.architecture-figure { margin: 28px 0 20px; }
+.architecture-scheduler { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 32px; align-items: center; margin-bottom: 0; }
+.architecture-scheduler .architecture-node { grid-column: 3 / 5; min-height: 78px; flex-direction: row; text-align: left; padding: 12px 20px; background: var(--primary-soft); }
+.architecture-scheduler-note { grid-column: 5 / 7; color: var(--muted); font-size: 12px; }
+.architecture-board { position: relative; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 32px; align-items: center; height: 344px; margin-top: 0; }
+.architecture-wires { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--teal); pointer-events: none; }
+.architecture-schedule-wires { color: var(--primary); }
+.architecture-sources { display: flex; flex-direction: column; gap: 16px; position: relative; }
+.architecture-node { position: relative; width: 100%; min-height: 164px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px 8px; border-radius: 12px; background: var(--bg); text-align: center; }
+.architecture-node[aria-pressed="true"] { border-color: var(--primary); background: var(--primary-soft); }
+.architecture-node:hover { border-color: var(--primary); }
+.architecture-node-copy { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.architecture-node strong { font-size: 15px; font-weight: 650; line-height: 1.25; }
+.architecture-node-copy > span { font-size: 12px; color: var(--ink); }
+.architecture-node small { font-size: 11px; color: var(--muted); line-height: 1.4; }
+.architecture-glyph { display: block; width: 36px; height: 36px; color: var(--teal); flex-shrink: 0; }
+.architecture-glyph svg { width: 100%; height: 100%; }
+.architecture-raw .architecture-glyph, .architecture-prefect .architecture-glyph { color: var(--primary); }
+.architecture-api .architecture-glyph, .architecture-web .architecture-glyph { color: var(--ink); }
+.architecture-sources .architecture-node { min-height: 104px; height: 104px; flex-direction: row; justify-content: flex-start; gap: 10px; padding: 12px; text-align: left; }
+.architecture-sources .architecture-glyph { width: 28px; height: 28px; }
+.architecture-sources strong { font-size: 13px; }
+.architecture-sources small { font-size: 11px; }
+.architecture-figure figcaption { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 24px; color: var(--muted); font-size: 12px; margin-top: 16px; }
+.architecture-key { display: inline-flex; align-items: center; gap: 8px; }
+.architecture-key i { width: 28px; border-top: 1.5px solid var(--teal); }
+.architecture-key i.dashed { border-top: 1.5px dashed var(--primary); }
+.architecture-details { display: flex; justify-content: space-between; align-items: flex-start; gap: 28px; border-top: 1px solid var(--line); padding-top: 20px; min-height: 130px; }
+.architecture-details h3 { font-size: 16px; margin: 0 0 8px; }
+.architecture-details p { margin: 0; color: var(--muted); }
+.architecture-details a { flex-shrink: 0; font-size: 12px; margin-top: 4px; }
+@media (max-width: 1100px) {
+  .architecture-heading { align-items: flex-start; flex-direction: column; gap: 8px; }
+  .architecture-scheduler { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; }
+  .architecture-scheduler .architecture-node { max-width: 380px; }
+  .architecture-board { height: auto; grid-template-columns: 1fr; gap: 28px; max-width: 600px; margin: auto; }
+  .architecture-wires { display: none; }
+  .architecture-sources { gap: 12px; padding-bottom: 0; }
+  .architecture-node, .architecture-sources .architecture-node { min-height: 88px; height: auto; flex-direction: row; justify-content: flex-start; padding: 16px 20px; text-align: left; }
+  .architecture-node strong, .architecture-sources strong { font-size: 15px; }
+  .architecture-node small, .architecture-sources small { font-size: 12px; }
+  .architecture-sources .architecture-glyph { width: 36px; height: 36px; }
+  .architecture-board > .architecture-node::before { content: ""; position: absolute; top: -29px; left: 50%; width: 1px; height: 22px; background: var(--teal); }
+  .architecture-board > .architecture-node::after { content: ""; position: absolute; top: -9px; left: calc(50% - 3px); width: 6px; height: 6px; border-right: 1.5px solid var(--teal); border-bottom: 1.5px solid var(--teal); transform: rotate(45deg); }
+  .architecture-details { flex-direction: column; gap: 12px; }
+}
+@media (max-width: 560px) {
+  .architecture-scheduler { flex-direction: column; align-items: stretch; gap: 8px; padding-bottom: 16px; border-bottom: 1px dashed var(--primary); }
+  .architecture-scheduler .architecture-node { max-width: none; }
+  .architecture-scheduler-note { margin: 0; }
+}
 .table-scroll { overflow-x: auto; }
 .pipeline-table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; text-align: left; }
 .pipeline-table caption { text-align: left; padding: 10px 0; color: var(--muted); }
 .pipeline-table td, .pipeline-table th { padding: 12px 16px 12px 0; border-bottom: 1px solid var(--line); }
 .pipeline-table thead { background: var(--surface); }
 .pipeline-table th { font-weight: 600; }
-@media (max-width: 760px) { .pipeline-flow { grid-template-columns: 1fr; gap: 22px; } .port-picker { flex-wrap: wrap; } .pipeline-table { font-size: 13px; } .pipeline-intro { padding-top: 24px; } }
+@media (max-width: 760px) { .port-picker { flex-wrap: wrap; } .pipeline-table { font-size: 13px; } .pipeline-intro { padding-top: 24px; } }
 @media (max-width: 1000px) { .compact-pipeline-link { display: block; margin-left: auto; font-size: 12px; } }
 @media (max-width: 720px) { .app-header { flex-wrap: wrap; padding: 12px 0; gap: 10px; } .port-label { order: 3; flex-basis: 100%; } .header-divider { display: none; } }
 * {
