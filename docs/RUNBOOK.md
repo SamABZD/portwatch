@@ -1,5 +1,48 @@
 # PortWatch runbook
 
+## Step08 context connectors
+
+From the project directory, with the existing database running:
+
+```powershell
+.\.venv\Scripts\python.exe -m portwatch db migrate
+.\.venv\Scripts\python.exe -m portwatch ingest weather --port los_angeles --demo
+.\.venv\Scripts\python.exe -m portwatch ingest weather --port los_angeles
+.\.venv\Scripts\python.exe -m portwatch ingest news --port los_angeles
+.\.venv\Scripts\python.exe scripts/verify_context.py
+```
+
+Historical default verifies/reuses the chosen saved response without HTTP. `--refresh` on either
+connector explicitly selects a fresh successfully normalized response; old bytes/rows remain.
+Current context has a15-minute cache for the same request key. News uses explicit recent windows,
+configured in `configs/ports/los_angeles.yaml`. There is no historical news command or auto-poller.
+
+`source_rate_limited`, `source_timeout`, `source_http_failure` and normalization errors exit1 and
+leave failed attempts separately from any previous successes. `local_poll_cooldown` reports the
+next allowed UTC time without connecting; changed windows and refresh do not bypass it. News
+waits at least15minutes, weather at least60seconds, and Retry-After can extend either. Run the
+historical weather/AIS replay independently; never fill unavailable articles or measurements with
+synthetic analytical data. Both source products preserve original successful HTTP bodies as
+`.json` in shared raw storage; `storage inspect/reconcile` handles them alongside AIS.
+
+Use [CONTEXT.md](CONTEXT.md) and [DATA_CONTRACTS.md](DATA_CONTRACTS.md) before querying. Retain
+one exact request/revision/product for weather joins and keep recent articles out of2024. A failed
+fresh fetch does not erase prior selected weather. Prefix reading is retrospective reanalysis,
+with wind valid instants and precipitation preceding-hour intervals. The weather issue time is
+unknown in the actual responses, even when retrieval time is available.
+
+Provider health can be inspected without treating an empty table as a successful empty fetch:
+
+```sql
+SELECT r.kind, r.product, r.start_utc, r.end_utc, a.started_at, a.retrieved_at,
+       a.status, a.http_status, a.error_code, a.next_allowed_at
+FROM context_attempts a JOIN context_requests r USING (request_key)
+ORDER BY a.started_at DESC;
+```
+
+No new paid credentials or account changes are required. Source unavailability and the separate
+GitHub billing lock remain explicit; only local checks currently pass.
+
 ## Visit inference and read-only prefixes
 
 ```powershell

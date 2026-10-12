@@ -10,6 +10,8 @@ import typer
 
 from portwatch.bookkeeping import finish_run, reconcile, register_batch, start_run
 from portwatch.cleaning import transform_positions
+from portwatch.context import ContextError, plan_context
+from portwatch.context_storage import ingest_context
 from portwatch.db import connect_db, migrate
 from portwatch.doctor import diagnose, required_checks_pass
 from portwatch.download import DownloadError
@@ -32,6 +34,60 @@ app.add_typer(storage_app, name="storage")
 app.add_typer(ingest_app, name="ingest")
 app.add_typer(transform_app, name="transform")
 app.add_typer(geo_app, name="geo")
+
+
+def context_ingest(kind: str, port: str, demo: bool, refresh: bool) -> None:
+    try:
+        settings = Settings()
+        request = plan_context(settings, port, kind, demo=demo)
+        with connect_db(settings) as connection:
+            result = ingest_context(settings, connection, request, refresh=refresh)
+        typer.echo(
+            f"Product: {request.product}; UTC interval: {request.start_utc} to {request.end_utc}"
+        )
+        typer.echo(
+            f"Response: {'reused' if result.reused else 'stored'}; rows: {result.rows}; "
+            f"retrieved UTC: {result.retrieved_at}; batch: {result.batch_id}"
+        )
+        typer.echo("Quality: " + str(result.quality))
+        if kind == "news":
+            typer.echo(
+                "Potential disruption mentions; coverage is not exhaustive. "
+                "First seen is not publication time. Excluded from the historical demo."
+            )
+        else:
+            typer.echo(
+                "Model output; retrieval time is not model issue time. Wind m/s; precipitation mm."
+            )
+    except Exception as error:
+        detail = error.code if isinstance(error, ContextError) else type(error).__name__
+        typer.echo(f"{kind.title()} ingestion failed: {detail}", err=True)
+        if isinstance(error, ContextError) and error.next_allowed_at:
+            typer.echo(f"Next allowed UTC: {error.next_allowed_at}", err=True)
+        raise typer.Exit(code=1) from None
+
+
+@ingest_app.command("weather")
+def weather_ingest(
+    port: Annotated[str, typer.Option(help="Configured port ID.")] = "los_angeles",
+    demo: Annotated[bool, typer.Option(help="Frozen historical reanalysis period.")] = False,
+    refresh: Annotated[
+        bool, typer.Option(help="Select a fresh saved revision; respects cooldown.")
+    ] = False,
+) -> None:
+    """Acquire historical ERA5 or the current UTC day plus next-day forecast."""
+    context_ingest("weather", port, demo, refresh)
+
+
+@ingest_app.command("news")
+def news_ingest(
+    port: Annotated[str, typer.Option(help="Configured port ID.")] = "los_angeles",
+    refresh: Annotated[
+        bool, typer.Option(help="Refresh bounded recent window; respects cooldown.")
+    ] = False,
+) -> None:
+    """Acquire recent GDELT article metadata, preserving empty and failed states."""
+    context_ingest("news", port, False, refresh)
 
 
 @transform_app.command("visits")

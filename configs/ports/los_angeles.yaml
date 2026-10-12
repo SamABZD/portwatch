@@ -13,3 +13,9 @@ max_observation_gap_minutes: 15
 # Experimental hysteresis: at least two distinct event times spanning two minutes.
 visit_persistence_minutes: 2
 visit_min_consistent_observations: 2
+weather_latitude: 33.71466
+weather_longitude: -118.24239
+news_query: '("Port of Los Angeles" OR "Los Angeles Harbor") (disruption OR closure OR strike OR congestion OR storm)'
+news_lookback_hours: 24
+news_max_records: 100
+news_keywords: [disruption, closure, strike, congestion, storm]

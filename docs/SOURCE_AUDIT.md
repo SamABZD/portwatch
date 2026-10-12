@@ -1,5 +1,36 @@
 # Step 01 source audit
 
+## Step08 recheck and real requests (2026-10-12)
+
+Primary [archive](https://open-meteo.com/en/docs/historical-weather-api),
+[forecast](https://open-meteo.com/en/docs), [terms](https://open-meteo.com/en/terms),
+[licence](https://open-meteo.com/en/licence) and
+[GDELT DOC](https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/) documentation were rechecked.
+Free non-commercial weather terms still list fewer than600/minute,5,000/hour and10,000/day calls.
+Local policies are much lower; no key/payment was used. Attribution and interpretation are
+documented for future presentation in [CONTEXT.md](CONTEXT.md).
+
+- Archive GET200 at12:25:00.890960UTC: latitude33.71466, longitude−118.24239; date2024-01-01,
+  hourly wind_speed_10m/precipitation, models=era5, UTC/unixtime, ms/mm, sea preference.
+  Saved24 points00:00–23:00UTC; actual cell33.5 / −118.25. ERA5 has no archive gusts in the audited
+  matrix, so gusts were not requested. Wind model values0.85–3.92m/s. Returned precipitation
+  values sum0.2mm over their preceding-hour intervals, not a claimed calendar-day rainfall total.
+- Forecast GET200 at12:26:18.591898UTC: same requested location/units, dates2026-10-12 through
+  2026-10-13, best_match and wind/gusts/precipitation. Saved48 points; actual cell33.72767 / −118.24222.
+  Neither response provided model issue/run time; generationtime_ms remains computation duration.
+- GDELT bounded ArticleList request: query `("Port of Los Angeles" OR "Los Angeles Harbor")
+  (disruption OR closure OR strike OR congestion OR storm)`, maxrecords100, explicit interval
+  2026-10-11T12:15:00Z to2026-10-12T12:15:00Z. **HTTP429**, recorded `source_rate_limited`; no
+  immediate retry, no real articles and no empty-success claim. Earliest local retry12:40:00.277470UTC.
+  Its docs allow explicit recent intervals and a maximum250-record cap. First-seen metadata is
+  separate from unknown publication time. News is excluded from the2024 replay.
+
+Exact public parameter maps, response metadata, original bytes, raw checksums and attempts are
+retained locally. Real news nonempty/empty responses remain externally unverified in Step08;
+synthetic tests cover both shapes and throttling. Existing Step01 `{}` evidence remains historical
+probe evidence, not a fresh2026 feed success. Weather is model context, not on-site observations
+or causal evidence for queueing.
+
 Step07 review (2026-10-12): historical source and saved observations were preserved. The single
 low-speed candidate reports vessel type50 on all 57 eligible records. Verified the
 [USCG AIS type table](https://navcen.uscg.gov/ais-class-a-reports): code50 denotes pilot vessel.

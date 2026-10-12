@@ -1,6 +1,6 @@
 # PortWatch
 
-PortWatch is a $0, local-first data engineering portfolio project for the Port of Los Angeles. Steps 00–07 establish the Python CLI, source audit and frozen demo, durable raw storage, PostgreSQL/PostGIS bookkeeping, historical ingestion, a verified live collector, reproducible position cleaning, versioned approximate spatial zones, and deterministic visit/candidate-waiting inference. Historical replay works without a live AIS key. No frontend or deployed site exists yet. GitHub CI Step 05A remains blocked by an account billing lock; the user authorized continuing local stages at $0.
+PortWatch is a $0, local-first data engineering portfolio project for the Port of Los Angeles. Steps 00–08 establish the Python CLI, frozen historical demo, durable raw storage, PostgreSQL/PostGIS bookkeeping, historical/live AIS, reproducible cleaning, approximate spatial zones, visit/candidate-waiting inference, and weather/news connectors. Historical replay works without a live AIS key. Real historical and forecast weather are saved; GDELT's latest real request was rate limited, with the failure recorded separately from empty results. No frontend or deployed site exists yet. GitHub CI Step 05A remains blocked by an account billing lock; the user authorized continuing local stages at $0.
 
 ## Local setup
 
@@ -31,7 +31,7 @@ $portwatchPg.WaitForExit(15000) | Out-Null
 
 Skip `docker compose up` when using this native cluster. Check status with `& .\pg-runtime\bin\pg_ctl.exe -D pgdata\portwatch status`; stop cleanly with `& .\pg-runtime\bin\pg_ctl.exe -D pgdata\portwatch -m fast -w stop`. These commands target only PortWatch's cluster. Use `$portwatchPg.WaitForExit(15000)` as above; `Start-Process -Wait` also waits for server descendants and can remain blocked. On this machine the runtime is already prepared. To reproduce preparation with installed PG17, run `.\.venv\Scripts\python.exe scripts/prepare_postgis.py` before starting the private runtime; it verifies the pinned official bundle hash and never restarts a server. Keep the private runtime with this cluster because PostGIS libraries resolve through it.
 
-The reviewed collection bounding box and one-day UTC demo are in `configs/ports/los_angeles.yaml` and `configs/demo.yaml`. The analytical geofence remains pending. `doctor` reports database connectivity and PostGIS separately and exits nonzero if a required check fails. Raw storage and recovery rules are in [docs/DATA_CONTRACTS.md](docs/DATA_CONTRACTS.md). Default tests run without a database; setting `PORTWATCH_TEST_DB=1` enables real PostgreSQL tests in newly created isolated test schemas.
+The reviewed collection box, approximate geofence and one-day UTC demo are in `configs/ports/los_angeles.yaml` and `configs/demo.yaml`. `doctor` reports database connectivity and PostGIS separately and exits nonzero if a required check fails. Raw storage and recovery rules are in [docs/DATA_CONTRACTS.md](docs/DATA_CONTRACTS.md). Default tests run without a database; setting `PORTWATCH_TEST_DB=1` enables real PostgreSQL tests in newly created isolated test schemas.
 
 ## Historical demo
 
@@ -103,6 +103,24 @@ reporting gaps split continuity, and missing arrival/departure remain unknown. R
 affected histories transactionally, including obsolete IDs after late reports. `--as-of` is read-only
 and excludes future event times. Full-history rows are retrospective. The sole candidate reports
 pilot-vessel type50 and does not establish a cargo queue; see [inference contracts and track review](docs/VISITS.md).
+
+## Weather and recent news
+
+```powershell
+.\.venv\Scripts\python.exe -m portwatch ingest weather --port los_angeles --demo
+.\.venv\Scripts\python.exe -m portwatch ingest weather --port los_angeles
+.\.venv\Scripts\python.exe -m portwatch ingest news --port los_angeles
+.\.venv\Scripts\python.exe scripts/verify_context.py
+```
+
+The real demo has24 ERA5 hourly values for2024-01-01; current forecast has48 hours over the
+current/next UTC day. Both preserve exact raw responses, request parameters, units, actual grid
+coordinates and immutable revisions. Historical default uses verified cache; explicit `--refresh`
+selects another successful revision and respects rate limits. Retrieval time is not issue time.
+News keeps article metadata only, separates first seen/publication, preserves URL IDs and marks
+capped results truncated. Latest real GDELT request was429, so real articles remain unverified;
+historical replay works independently and excludes recent news. See [CONTEXT.md](docs/CONTEXT.md)
+for source health, attribution, retrospective interpretation and revision-safe queries.
 
 Project decisions and the current state are in [docs/DECISIONS.md](docs/DECISIONS.md) and [docs/HANDOFF.md](docs/HANDOFF.md).
 Contributions follow [CONTRIBUTING.md](CONTRIBUTING.md) and the [GitHub workflow](docs/GITHUB_WORKFLOW.md). The verified publication details are in [docs/GITHUB_SETUP.md](docs/GITHUB_SETUP.md).

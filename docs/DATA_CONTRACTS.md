@@ -1,5 +1,40 @@
 # Data contracts
 
+## Step08 weather/news (`context-v1`)
+
+See [CONTEXT.md](CONTEXT.md) for acquisition, field semantics, revisions and attribution.
+Migration005 appends five tables without changing migrations001–004 or AIS data.
+
+| Table / grain | Contract |
+| --- | --- |
+| `context_requests` / request SHA256 | Kind, port, source, product, endpoint, complete public API parameters, UTC bounds, parser/keyword configuration, selected raw batch and actual selection retrieval time. The key includes the full configuration; changing a request produces another partition. |
+| `context_responses` / raw batch | FK to verified immutable raw and request; normalized row count, missing/truncation/relevance quality and available provider metadata including response grid coordinates and units. |
+| `context_attempts` / UUID | Request/run FKs; start/end/retrieval times, raw batch if available, HTTP status, safe error code, durable next-attempt time; explicit running, valid_empty, valid_nonempty or failed. Actual duplicate fetches keep their own receipts. |
+| `weather_values` / batch + valid UTC hour | Nullable wind speed/gusts m/s and precipitation mm, with quality flags. Units and grid provenance live on the parent response. Exact hourly coverage is validated. Precipitation ends the preceding-hour interval; gusts depend on product availability. |
+| `news_mentions` / batch + conservative URL | Original URL/title/domain/language; publication UTC only if supplied as `published_at`; independent first-seen UTC from `seendate`; configurable title substring tags and flags. No article bodies. |
+
+Products are distinct: `historical_reanalysis` (archive ERA5), `current_forecast` (forecast
+best_match selector) and `recent_news` (GDELT). Source issue/run times remain unknown unless
+explicitly provided; retrieval and `generationtime_ms` are not issue time. Requested coordinates
+and actual provider grid coordinates remain distinct. Historical gusts are null/not requested,
+not zero. Source failures and missing variables never become measured zero or successful empty.
+
+Raw `.json` API bodies are saved unchanged through `RawStore`; existing live AIS `.jsonl` storage
+is unchanged. The first identical-byte raw receipt is immutable. Explicit refresh can select a
+different saved revision; normalized values never overwrite older revisions. A new successful
+fetch of identical bytes updates selection retrieval time while preserving raw first receipt.
+Failed normalization retains raw evidence, publishes no partial rows, and leaves prior valid
+selection intact. HTTP failures have no normalized response. A capped news response is truncated;
+no request establishes exhaustive coverage. URL tracking removal preserves meaningful IDs.
+
+The historical replay helper selects the exact demo request/product (or its explicit pinned batch),
+restricts valid time to the demo and cutoff, and returns news status `excluded_recent_source` with
+no articles. It labels reanalysis retrospective; it does not assert2024 receipt/issue chronology.
+Missing historical weather is `unavailable`. A replay prefix restricts valid time, not retrieval
+time. New analytical outputs must record the selected batch ID and filter **one exact request and
+revision** before joining. Selecting all current requests can duplicate overlapping forecast
+days; weather revisions and news must never multiply AIS counts.
+
 ## Visit and waiting inference (Step07)
 
 `visit_rule_sets` stores algorithm/versioned parameters by canonical content identity.

@@ -2,11 +2,62 @@
 
 ## Stage state
 
-- Completed: Steps 00, 00A, 01, 02, 03, 04, **05 cleaning/deduplication**, **06 geospatial zones locally** and **07 visits/waiting locally**. Real 60.843-second AISStream capture and original cleaned inputs remain preserved. Native PostgreSQL17.11/PostGIS3.6.2 is healthy; key stays only in ignored `.env`. Historical data yields 62,157 canonical positions and 141 tracks. Step07 produces 230 retrospective inferred visits (14 completed under experimental rules, 216 partial) and one low-speed candidate, with reported pilot-vessel type50; no cargo queue is established. No frontend or deployment exists yet.
+- Completed: Steps00,00A,01–05, **06 zones locally**, **07 visits/waiting locally**, and **08 weather/news connectors locally**. Native PostgreSQL17.11/PostGIS3.6.2 remains healthy. Historical AIS still has62,157 positions/141 tracks,230 visit episodes (14 completed/216 partial) and one pilot-vessel low-speed candidate; no cargo queue is established. Real historical weather24 hours and current forecast48 hours are saved. Latest real GDELT request was429; news responses are tested synthetically, and real article acquisition remains unverified. No frontend/deployment exists.
 - Published repository: [SamABZD/portwatch](https://github.com/SamABZD/portwatch), public, default branch `main`, only remote `origin`. See [GITHUB_SETUP.md](GITHUB_SETUP.md) for the recorded account, foundation commit SHA, metadata, and publication checks.
-- Current: **Step 07 completed locally; Step 05A remains blocked remotely**. Project root is `C:\Users\samab\dataEngineering\portwatch`; prompts are in sibling `portwatch-prompts`, and the playbook is `C:\Users\samab\dataEngineering\PORTWATCH_BUILD_PLAYBOOK.md`. The user's authorization to continue local stages at $0 with CI deferred persists. Branch `feat/visits-waiting` starts from Step06 checkpoint `a068ef69d055eb1cf3dd7bbd88fa3bcbab882c05`; neither Step06 nor Step07 changes have been pushed. [CI PR #2](https://github.com/SamABZD/portwatch/pull/2) stays open/unmerged, proposed branch rules remain unapplied, and no remote/main pass is claimed. **Step08 weather/news is next**, using `portwatch-prompts/08-weather-news.md`. Stored inference is retrospective; use the read-only event-time prefix for replay. No frontend, deployment or paid resource exists.
+- Current: **Step08 implemented/validated locally; Step05A remains blocked remotely**. Project root is `C:\Users\samab\dataEngineering\portwatch`; prompts are in sibling `portwatch-prompts`, playbook `C:\Users\samab\dataEngineering\PORTWATCH_BUILD_PLAYBOOK.md`. The user's $0/local/CI-deferred authorization persists. Branch `feat/weather-news` starts at Step07 checkpoint `ac684739f794997d67a63a9a97d403a99c1c1477`; Steps06–08 remain unpushed. [CI PR#2](https://github.com/SamABZD/portwatch/pull/2) stays unmerged; branch rules remain unapplied. **Next: Step09 analytical tables**, prompt `portwatch-prompts/09-analytical-tables.md`. Stored inference and historical weather are retrospective. News unavailability does not block historical AIS/weather. No paid account, CI workaround, deployment or external message was created.
 
 ## Verified commands and observed outcomes
+
+### Step08 weather/news (2026-10-12)
+
+- Read the exact prompt, contracts/source audit, working agreement and existing storage/config.
+  Created `feat/weather-news` from the clean Step07 checkpoint. Rechecked official API/terms/
+  licence documentation. Used the existing PostgreSQL and Python dependencies; no key/payment.
+- Added `context.py`, bounded `context_http.py`, durable `context_storage.py`, migration005,
+  `ingest weather --port los_angeles [--demo] [--refresh]`, and `ingest news --port los_angeles`.
+  Full request keys preserve public parameters, port, product, bounds, parser and relevance config.
+  Shared raw bodies remain exact. Same-byte replay is idempotent; changed revisions persist and
+  selection moves only after successful normalization. Failed/empty/nonempty are separate;
+  interrupted attempts recover; transaction failure retains prior valid selection.
+- `.\.venv\Scripts\python.exe -m portwatch db migrate`: applied only005; doctor allPASS.
+  `.\.venv\Scripts\python.exe -m portwatch ingest weather --port los_angeles --demo`: GET200,
+  24 saved hourly points for2024-01-01UTC. Repeated command reused the verified saved revision
+  without HTTP. ERA5 gusts are null/not requested, units m/s and mm, issue time unknown. Actual
+  grid33.5 / −118.25 is coarse regional context. See [CONTEXT.md](CONTEXT.md) for precipitation's
+  preceding-hour convention and historical reanalysis's retrospective interpretation.
+- `.\.venv\Scripts\python.exe -m portwatch ingest news --port los_angeles`: bounded current
+  24-hour narrow query, **exit1/HTTP429**; persisted failed attempt, no immediate retry and no
+  successful-empty or real article result. Earliest local retry2026-10-12T12:40:00.277470Z. This
+  source limitation remains; it does not stop the saved historical demo. First seen is separate
+  from publication; URL IDs are preserved; cap implies truncated, never exhaustive coverage.
+- `.\.venv\Scripts\python.exe -m portwatch ingest weather --port los_angeles`: GET200,
+  48 current-forecast points over2026-10-12/13UTC, including gusts; separate product/request.
+  Actual cell33.72767 / −118.24222; no model issue time supplied. Both successful response
+  bodies/manifests are preserved in ignored shared raw storage; details/checksums in [RESULTS.md](RESULTS.md).
+- `.\.venv\Scripts\python.exe scripts/verify_context.py`: two network-free historical cached
+  replays,24 full hours/13 noon-prefix hours, recent news excluded, zero integrity failures,
+  five verified real raw batches; original AIS and visit hashes unchanged. Source/forecast products
+  are isolated. Verification report retained in ignored `artifacts/step08/verification.json`.
+- `.\.bootstrap-venv\Scripts\uv.exe run --locked --extra dev python scripts/validate.py`:
+  **PASS**,134 unit tests28.60s/32 integration20.63s, zero selected skips, lint/format61 files,
+  wheel/sdist, actual isolated-wheel CLI/import, five packaged SQL resources and fresh/repeat
+  migrations. Synthetic cases cover duplicate/changed revisions, missing weather variables,
+  empty articles, timeout/429, missing publication time, cap, conservative URLs, current exclusion,
+  corruption refusal, interrupted recovery, incomplete transfers and rollback. Old migration bytes unchanged.
+- Final reviewer check added declared transfer-length verification: partial bytes cannot succeed
+  merely because they form valid JSON. Connector unit subset25 passed in4.14s; final full shared
+  validation above passed after that change. Repeated news command before cooldown returned
+  `local_poll_cooldown`/next allowed time without another HTTP request. Final storage inspection:
+  five complete/zero issues; repeat migration applied zero.
+- Final explicit23-path staged diff check passed; scanned staged bytes for the actual configured
+  AIS key: zero matches. Compared all four earlier SQL migrations against the parent checkpoint:
+  unchanged. Private `.env`, native runtime/database and provider artifacts remain ignored.
+
+Step08 changed paths: three context modules, CLI/bookkeeping/settings/raw JSON suffix support,
+port config, migration005, two context test modules and migration-count fixture, verifier,
+README plus context/contracts/audit/results/decisions/runbook/handoff/GitHub status docs.
+Generated data stays ignored. Follow Step09 prompt exactly and retain the experimental visit/zone
+limits, one chosen weather request/revision per join, metadata-only news and explicit source health.
 
 ### Step 07 visits/waiting (2026-10-12)
 

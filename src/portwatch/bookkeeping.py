@@ -94,6 +94,8 @@ def start_run(connection: psycopg.Connection, stage: str) -> UUID:
         "clean",
         "zones",
         "visits",
+        "weather_ingest",
+        "news_ingest",
     }:
         raise ValueError("unknown pipeline stage")
     run_id = uuid4()

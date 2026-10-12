@@ -66,6 +66,26 @@ class PortConfig(BaseModel):
     max_observation_gap_minutes: int = Field(gt=0)
     visit_persistence_minutes: float = Field(default=2, gt=0)
     visit_min_consistent_observations: int = Field(default=2, ge=2, le=100)
+    weather_latitude: float = Field(default=33.71466, ge=-90, le=90)
+    weather_longitude: float = Field(default=-118.24239, ge=-180, le=180)
+    news_query: str = Field(
+        default='("Port of Los Angeles" OR "Los Angeles Harbor") '
+        "(disruption OR closure OR strike OR congestion OR storm)",
+        min_length=1,
+        max_length=1000,
+    )
+    news_lookback_hours: int = Field(default=24, ge=1, le=168)
+    news_max_records: int = Field(default=100, ge=1, le=250)
+    news_keywords: list[str] = Field(
+        default_factory=lambda: ["disruption", "closure", "strike", "congestion", "storm"]
+    )
+
+    @field_validator("news_keywords")
+    @classmethod
+    def valid_news_keywords(cls, value: list[str]) -> list[str]:
+        if not value or len(value) > 30 or any(not word.strip() for word in value):
+            raise ValueError("select 1 to 30 nonblank relevance keywords")
+        return sorted(set(word.strip().casefold() for word in value))
 
     @field_validator("timezone")
     @classmethod

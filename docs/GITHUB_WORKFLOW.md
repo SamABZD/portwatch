@@ -61,3 +61,8 @@ Step07 is also complete locally on `feat/visits-waiting`, based on Step06 checkp
 Both local stages remain unpushed; CI PR#2 and main remain unchanged. Shared local validation
 passes 109 unit/22 integration tests with four migrations. This evidence does not establish a
 remote GitHub execution pass.
+
+Step08 context connectors are complete locally on `feat/weather-news`, based on Step07
+`ac684739f794997d67a63a9a97d403a99c1c1477`. Shared validation passes134 unit/32 integration
+tests and five migrations. Steps06–08 remain unpushed; the existing CI deferral persists.
+Real GDELT429 is a provider availability limit, separate from the GitHub account lock.

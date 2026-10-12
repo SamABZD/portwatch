@@ -49,6 +49,10 @@ Step07 has subsequently completed locally on `feat/visits-waiting`, based on Ste
 passes 109 unit/22 integration tests with four migrations. The CI deferral and $0 authorization
 remain in force; local checks do not establish hosted GitHub execution.
 
+Step08 now adds local weather/news connectors on `feat/weather-news`, based on Step07
+`ac684739f794997d67a63a9a97d403a99c1c1477`. Local checks pass134 unit/32 integration tests
+with five migrations. No pushes, unchecked CI merge, protection changes or payments were made.
+
 Apply using `PUT /repos/SamABZD/portwatch/branches/main/protection`, after rechecking for any stricter rules and observing actual successful check names:
 
 ```json

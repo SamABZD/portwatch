@@ -1,5 +1,39 @@
 # Measured results
 
+## Step08: weather/news context (2026-10-12)
+
+- Historical Open-Meteo ERA5 GET200 at12:25:00.890960UTC: **24 hourly points**, January1,2024
+  00:00–23:00UTC, matching the frozen AIS interval. Wind values0.85–3.92m/s; all gusts null/not
+  requested for this product; missing issue time stays null. Actual coarse cell33.5 / −118.25.
+  Raw batch `0a5dd14b907ec067c4e16a4780ef17101bc4e61d78f4c95de03ee38db00287e2`.
+- Current forecast GET200 at12:26:18.591898UTC: **48 hourly points**, October12–13,2026 UTC,
+  speed/gusts/precipitation, requested best_match; actual cell33.72767 / −118.24222. No issue/run
+  timestamp returned. Raw batch `0629b82d62047dc355289145fb2282776f5fa5475576e6f083a1a5d5c396c127`.
+- GDELT's narrow 24-hour query for October11–12,2026 returned **429**. Attempt status failed,
+  error `source_rate_limited`; no saved article response and no successful-empty claim. Local next
+  attempt no earlier than12:40:00.277470UTC. Successful nonempty/empty news handling is covered
+  synthetically; real2026 article retrieval remains unverified. No immediate retries or paid service.
+- Both historical cached replay passes reused the same batch/24 rows with no HTTP and unchanged
+  weather business hash `5a2005506deaa95b4c5d053ebef1a31c2b1d79616557d8ed7b843724916e519f`.
+  Read-only12:30UTC prefix returns13 hours and no future valid timestamp. Recent news is always
+  `excluded_recent_source`; current forecast cannot enter the historical partition.
+- Verifier checks: zero wrong-partition selections, zero weather timestamps outside request bounds,
+  zero failed responses mislabelled empty, zero unfinished context attempts. All **five real raw
+  batches** verify complete, including the original three AIS batches. Source hash remains
+  `355cc069362fd84e7aa27530647bae9f8dbbcbdb0156e9585dfea9b91a8122d4`; visit hash remains
+  `76f96085b195058b60af35ad72b4b33de761dcbf61a3069baa1b67f73cb525da`.
+- Final shared validator: **134 unit tests in28.60s and32 database integration tests in20.63s**,
+  zero selected skips/failures. Ruff lint/format passed61 Python files. Wheel/sdist build, isolated
+  wheel import/CLI, all five SQL resources and fresh/repeated migrations passed. Focused initial
+  context suite31 passed; subsequent context/bookkeeping36 passed before recovery/corruption/
+  transaction and incomplete-transfer regressions were added. Final connector unit subset25 passed.
+
+Original responses remain ignored under `data/raw/`; request parameters, attempts, selection and
+normalized rows reside in the native PostgreSQL. `artifacts/step08/verification.json` records the
+exact acquisitions, periods, receipts, units, grid coordinates, values, hashes and invariants.
+Interpretation, attribution, cache/cooldown and revision policies are in [CONTEXT.md](CONTEXT.md).
+No causal delay claim, confirmed disruption, mart, frontend, deployment, paid spend, push or merge.
+
 ## Step 07: visits and candidate waiting (2026-10-12)
 
 All 62,157 frozen historical positions were processed in 141 source-separated vessel histories.
