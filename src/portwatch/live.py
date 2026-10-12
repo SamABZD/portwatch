@@ -218,7 +218,16 @@ class LiveCollector:
                 stream.flush()
                 os.fsync(stream.fileno())
             try:
-                os.replace(temporary, self.status_path)
+                for attempt in range(5):
+                    try:
+                        os.replace(temporary, self.status_path)
+                        break
+                    except PermissionError as error:
+                        # Windows readers may briefly deny replacement of the status file.
+                        # Retry only its sharing/access codes, in this joined I/O worker.
+                        if getattr(error, "winerror", None) not in {5, 32, 33} or attempt == 4:
+                            raise
+                        time.sleep(0.01 * 2**attempt)
             finally:
                 temporary.unlink(missing_ok=True)
 

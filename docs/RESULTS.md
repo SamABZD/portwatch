@@ -1,5 +1,63 @@
 # Measured results
 
+## Step12: Next.js map/replay (2026-10-12)
+
+- Implemented the user's Next.js preference on `feat/map-replay`, from Step11 checkpoint
+  `da4c315ae9a381d2c9a3d45ffd353b18c91cafef`. Next16.4.0/React19.3.0/TypeScript frontend,
+  MapLibre6.14.0 plus local vector fallback, and loopback FastAPI0.143/Uvicorn0.54 query API.
+  Restrained map direction was confirmed; PRODUCT/DESIGN capture the scope and interface.
+  No migration, provider acquisition, account/payment change, remote push or deployment.
+- `npm ci`/install, `npm run typecheck` and `npm run build`: production app compiles and serves
+  `/`, read-only query proxy and SVG icon. `npm audit --omit=dev --audit-level=high`:0 vulnerabilities.
+  Existing Node24.15.0 satisfies the20.9+ requirement. MapLibre's default bundler worker URL
+  failed during actual browser use; an explicitly served installed module worker/BSD license
+  fixes loading. Failed tile rendering now disposes its worker/map and preserves local geometry.
+- `python scripts/verify_replay.py`: PASS. Real event-time cutoffs00:00,12:30,20:40,20:45 and
+  end-of-day have no future positions/trail times/weather/chart hours. Noon32,632 observations,
+  124 vessels seen,99 fresh/harbor reporting vessels,6 completed dwell samples; full day62,157
+  observations/14 completed dwell samples. At00:00 there are3 actual reports, not an empty prefix.
+  Activity reconciles exactly to completed `read_prefix_hours` SQL output. Current snapshots at
+  the cutoff differ deliberately from mart hour-start snapshots (noon12:30=99 vs12:00=98).
+- A deliberately uncached fractional-second HTTP frame took **1.070s** and its cached repeat
+  **0.049s**. Five other cached HTTP cutoffs remained under2s; first-request cache-hit flags are
+  recorded rather than assuming every first request is cold. Current live query0.154s,26 saved
+  positions stale, fresh occupancy/waiting unknown. These are local measurements, not production SLAs.
+- Database/source business hash stays
+  `355cc069362fd84e7aa27530647bae9f8dbbcbdb0156e9585dfea9b91a8122d4`; mart hash stays
+  `6f6ca8ecaa8e3824040aa481cd85d88cd0b52990ba2a0307daf14001ad223112`; SQL audit count unchanged.
+  API uses prepared bounded data, prefix inference and revision-aware caches, never starts ingestion.
+- `demo export --output data/demo/los-angeles-2024-01-01.json`:22,749,112-byte regional export
+  plus SHA-256 sidecar, ignored/private. Round-trip noon vessels and metrics match. Actual HTTP
+  server verification with database set to closed port9 and AIS key unset succeeded with
+  `database=not_used`; live/current health explicitly unavailable. Temporary8077 server stopped.
+- `python -X utf8 scripts/verify_demo_browser.py`: **12 interaction/state checks PASS**,
+  Chromium151.0.7922.34, production app;0 page errors,0 external tiles fetched in automation.
+  Actual map/list selection/search, overlays/trails/stale/basemap, keyboard slider/reset, complete
+  day/no-completed-hour prefix, speed/play/stable pause, timezone/staleness, live empty fresh window,
+  historical news exclusion, source429, disconnected/failed-frame retry, reduced motion and
+  desktop1365x900/laptop1280x720/tablet834x1112/mobile390x844. One isolated response-status fixture
+  verifies valid-empty news independently of provider failure; no invented project records.
+  Eight actual screenshots saved and visually inspected for desktop/laptop/mobile layout.
+- Unit/integration cases verify future qualification/association/completion exclusion, observed
+  gap-broken trails, conflicting positions withheld, unknown intervals, cache revision/display
+  parameters, read-only SQL/source isolation, missing preparation and checksum/error masking.
+  Error middleware catches exceptions before Uvicorn can log original private exception text.
+- A final concurrent validation exposed a Windows status-file reader/replacement collision.
+  Reproduced `PermissionError`/WinError5 with an owned synthetic file held open. Publisher now
+  retries only Windows5/32/33, bounded to5 attempts/150ms of joined-thread waits; persistent and
+  other failures still raise and preserve previous status. Actual30ms reader recovered in0.037s.
+  Five regression cases added; focused collector suite **31 passed in8.56s**. Real collector not started.
+- Final shared validator: **174 unit18.26s +55 integration46.19s =229 passed**, no selected
+  skips, lint/format93 files, wheel/sdist and installed-wheel CLI/resources, seven fresh migrations/
+  repeat zero. One upstream Starlette TestClient/httpx deprecation warning remains; no test failures.
+  Migrations001–007 and genuine source data remain unchanged.
+
+Evidence: ignored `artifacts/step12` replay/browser/prepared verification JSON, build/validation
+logs and screenshots; public copies in chat `outputs`. Current frontend3000 and query API8000
+remain running for the user, alongside preexisting PostgreSQL/Prefect API. Prefect deployments
+paused; runner/real collector stopped. Historical replay remains ready despite stale forecast and
+news429. Stop at Step12; next Step13 final audit. No online publication or automatic boot service.
+
 ## Step11: monitoring/recovery (2026-10-12)
 
 - Branch `feat/monitoring-recovery` starts at Next.js preference checkpoint

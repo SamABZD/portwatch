@@ -22,11 +22,14 @@ dependencies = [
   "prefect==3.8.8",
   # Prefect 3.8.8 scheduler bulk inserts fail with SQLAlchemy 2.1 hybrid setters.
   "sqlalchemy[asyncio]>=2.0,<2.1",
+  "fastapi==0.143.0",
+  "uvicorn==0.54.0",
 ]
 
 [project.optional-dependencies]
 dev = [
   "matplotlib>=3.10,<4",
+  "playwright>=1.58,<2",
   "pytest>=8,<10",
   "ruff>=0.9,<1",
 ]

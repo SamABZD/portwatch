@@ -1,12 +1,29 @@
 # PortWatch
 
-PortWatch is a $0, local-first data engineering portfolio project for the Port of Los Angeles. Steps 00–11 establish the Python CLI, frozen historical demo, durable storage, PostgreSQL/PostGIS bookkeeping, historical/live AIS, reproducible cleaning, approximate zones, visit/waiting inference, weather/news connectors and versioned hourly analytical tables with resumable local workflows, operational health and verified recovery. Historical replay works without a live AIS key. Weather is saved; the latest real GDELT request was rate limited, with failure separate from empty results. No frontend or deployed site exists yet. GitHub CI Step05A remains blocked by an account billing lock; the user authorized continuing local stages at $0.
+PortWatch is a $0, local-first data engineering portfolio project for the Port of Los Angeles. Steps 00–12 provide a Python/PostGIS pipeline, durable historical/live inputs, cleaning, approximate zones, visit/waiting inference, context, hourly marts, local workflows, verified recovery and a **Next.js map/replay frontend**. Historical replay works without a live AIS key; a verified prepared snapshot also works without a database. Weather is saved; the latest real GDELT request was rate limited. No hosted deployment exists. GitHub CI Step05A remains deferred under the user's $0 instruction.
 
 ## Local setup
 
-The planned Step12 frontend is **Next.js with React/TypeScript**, as requested by the user.
-It will read the existing Python/PostGIS system through a query API. The UI is not built yet;
-see [frontend direction and acceptance criteria](docs/FRONTEND_PLAN.md).
+The **Next.js/React/TypeScript frontend is implemented** under `web/`, backed by a read-only
+Python query API. Open **http://127.0.0.1:3000** while the local demo processes are running.
+See [map/replay launch, controls and contracts](docs/REPLAY.md). For a fresh launch:
+
+```powershell
+# Terminal1 in this project directory; keep it running.
+.\.venv\Scripts\python.exe -m portwatch demo serve --listen-port 8000
+```
+
+```powershell
+# Terminal2; keep the frontend running.
+Set-Location -LiteralPath 'C:\Users\samab\dataEngineering\portwatch\web'
+npm ci
+npm run build
+npm run start
+```
+
+To edit the frontend while the saved production demo runs on3000, use `npm run dev -- --port
+3001` and open127.0.0.1:3001. The app reads prepared port data; collection remains separate.
+Optional basemap tiles need internet; local polygons/points remain usable without tiles/WebGL.
 
 Step11 provides a read-only health report and a backup that is verified by restoring into a
 new isolated database. From this project directory:

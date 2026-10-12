@@ -1,8 +1,8 @@
 # GitHub setup record
 
-Current Step11 state: local monitoring/recovery validated, Steps06–11 unpushed. The existing
+Current Step12 state: local Next.js map/replay validated, Steps06–12 unpushed. The existing
 CI billing-lock deferral persists: no payment, push, merge or branch-rule/account change.
-See [HANDOFF.md](HANDOFF.md) and [HEALTH_RECOVERY.md](HEALTH_RECOVERY.md).
+See [HANDOFF.md](HANDOFF.md) and [REPLAY.md](REPLAY.md).
 
 ## Verified repository
 

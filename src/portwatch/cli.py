@@ -40,6 +40,44 @@ app.add_typer(transform_app, name="transform")
 app.add_typer(geo_app, name="geo")
 app.add_typer(pipeline_app, name="pipeline")
 app.add_typer(orchestrate_app, name="orchestrate")
+demo_app = typer.Typer(help="Read-only Next.js query API and portable historical preparation.")
+app.add_typer(demo_app, name="demo")
+
+
+@demo_app.command("serve")
+def demo_serve(
+    listen_port: Annotated[int, typer.Option(min=1024, max=65535)] = 8000,
+    prepared: Annotated[
+        Path | None, typer.Option(help="Verified prepared JSON; no database needed.")
+    ] = None,
+):
+    """Serve bounded queries on localhost; never start collection or migrations."""
+    import uvicorn
+
+    from portwatch.demo.api import create_app
+
+    try:
+        settings = Settings()
+        application = create_app(
+            settings, prepared=settings.project_path(prepared) if prepared else None
+        )
+    except Exception as error:
+        typer.echo(f"Replay unavailable: {type(error).__name__}", err=True)
+        raise typer.Exit(code=1) from None
+    uvicorn.run(application, host="127.0.0.1", port=listen_port, access_log=False)
+
+
+@demo_app.command("export")
+def demo_export(output: Annotated[Path, typer.Option(help="New prepared historical JSON path.")]):
+    """Export only cleaned port data, zones and matching context; preserve a checksum."""
+    from portwatch.demo.replay import ReplayError, export_prepared
+
+    try:
+        typer.echo(json.dumps(export_prepared(Settings(), output), indent=2))
+    except Exception as error:
+        reason = str(error) if isinstance(error, ReplayError) else type(error).__name__
+        typer.echo(f"Preparation failed: {reason}", err=True)
+        raise typer.Exit(code=1) from None
 
 
 def operational_logs(

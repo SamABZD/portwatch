@@ -1,8 +1,9 @@
 # Frontend choice: Next.js
 
 The user requested Next.js on2026-10-12. This replaces the original Streamlit/PyDeck choice
-for Step12. Steps00–11 are completed locally; Step12 map/replay is now next. This records
-the implementation direction; no frontend or API has been implemented yet.
+for Step12. Steps00–12 are completed locally. The Next.js UI under `web/` and read-only
+Python API under `src/portwatch/demo` are implemented. See [REPLAY.md](REPLAY.md) for the actual
+launch, data/replay contracts, portable mode and observed verification. Next is Step13 final audit.
 
 ## Architecture for Step12
 

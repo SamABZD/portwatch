@@ -3,6 +3,7 @@
 import asyncio
 import base64
 import json
+import os
 import threading
 import time
 from contextlib import suppress
@@ -536,6 +537,64 @@ def test_periodic_status_updates_during_connected_idle_capture(tmp_path):
                 await asyncio.wait_for(task, timeout=3)
 
     asyncio.run(scenario())
+
+
+@pytest.mark.parametrize("winerror", [5, 32, 33])
+def test_status_publication_retries_transient_windows_reader_collision(
+    tmp_path, monkeypatch, winerror
+):
+    collector = make_collector(tmp_path)
+    replace = os.replace
+    attempts = []
+
+    def briefly_locked(source, target):
+        attempts.append(target)
+        if len(attempts) == 1:
+            error = PermissionError("synthetic Windows status reader collision")
+            error.winerror = winerror
+            raise error
+        replace(source, target)
+
+    monkeypatch.setattr("portwatch.live.os.replace", briefly_locked)
+    asyncio.run(collector.publish_status())
+    assert attempts == [collector.status_path] * 2
+    assert json.loads(collector.status_path.read_text())["state"] == "starting"
+
+
+def test_permanent_status_access_denial_is_bounded_and_keeps_previous_snapshot(
+    tmp_path, monkeypatch
+):
+    collector = make_collector(tmp_path)
+    asyncio.run(collector.publish_status())
+    original = collector.status_path.read_bytes()
+    attempts, waits = [], []
+
+    def denied(source, target):
+        attempts.append(target)
+        error = PermissionError("synthetic persistent denial")
+        error.winerror = 5
+        raise error
+
+    monkeypatch.setattr("portwatch.live.os.replace", denied)
+    monkeypatch.setattr("portwatch.live.time.sleep", waits.append)
+    with pytest.raises(PermissionError):
+        asyncio.run(collector.publish_status())
+    assert len(attempts) == 5 and waits == [0.01, 0.02, 0.04, 0.08]
+    assert collector.status_path.read_bytes() == original
+
+
+def test_other_status_permission_failure_is_not_retried(tmp_path, monkeypatch):
+    collector = make_collector(tmp_path)
+    attempts = []
+
+    def denied(*_):
+        attempts.append(True)
+        raise PermissionError("synthetic non-Windows error")
+
+    monkeypatch.setattr("portwatch.live.os.replace", denied)
+    with pytest.raises(PermissionError):
+        asyncio.run(collector.publish_status())
+    assert len(attempts) == 1
 
 
 def test_cancelled_recovery_joins_worker_before_releasing_collector_lock(tmp_path, monkeypatch):

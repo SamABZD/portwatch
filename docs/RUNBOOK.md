@@ -1,5 +1,53 @@
 # PortWatch runbook
 
+## Step12 frontend
+
+Current app: **http://127.0.0.1:3000**. Read-only query API:127.0.0.1:8000. PostgreSQL remains
+running; no Prefect runner or live collector is needed for the frozen historical replay.
+Detailed contracts, development/portable mode and interaction checks: [REPLAY.md](REPLAY.md).
+
+For a fresh start, keep both terminals open:
+
+```powershell
+Set-Location -LiteralPath 'C:\Users\samab\dataEngineering\portwatch'
+.\.venv\Scripts\python.exe -m portwatch demo serve --listen-port 8000
+```
+
+```powershell
+Set-Location -LiteralPath 'C:\Users\samab\dataEngineering\portwatch\web'
+npm ci
+npm run typecheck
+npm run build
+npm run start
+```
+
+For frontend work while3000 is occupied, `npm run dev -- --port 3001` supplies hot reload.
+Use `web/.env.example` for an alternative server-only query URL. Stop only the app's owning
+processes with Ctrl+C; leave the preexisting PostgreSQL/Prefect services alone.
+
+If the API is disconnected, start its process and use Retry connection. If prepared data is
+unavailable, inspect `doctor`, `health` and the existing saved pipeline preparation; rendering
+never repairs/migrates/ingests. Live empty fresh-data windows remain unknown, not zero traffic.
+For verified historical mode without DB/AIS credentials, replace the stopped API process with:
+
+```powershell
+.\.venv\Scripts\python.exe -m portwatch demo serve --listen-port 8000 --prepared data/demo/los-angeles-2024-01-01.json
+```
+
+That ignored export and SHA-256 sidecar were created in Step12. Live/current health is
+explicitly unavailable in portable mode. Use a NEW path for another `demo export`.
+
+Verification with API/frontend running:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/verify_replay.py
+.\.venv\Scripts\python.exe -X utf8 scripts/verify_demo_browser.py
+.\.bootstrap-venv\Scripts\uv.exe run --locked --extra dev python scripts/validate.py
+```
+
+Browser automation blocks external tiles and checks the fallback/controls. Normal manual
+basemap use follows OSM's caching, attribution and no-bulk-download policy.
+
 ## Step11 diagnosis and recovery
 
 Run commands in `C:\Users\samab\dataEngineering\portwatch`. Preserve `.env`, original raw

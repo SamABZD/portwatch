@@ -43,5 +43,15 @@ data/prefect/
 pgdata/
 pg-runtime/
 postgres-data/
+data/demo/
+
+# Next.js dependencies/builds and browser test artifacts
+web/node_modules/
+web/.next/
+web/out/
+web/test-results/
+web/playwright-report/
+web/public/vendor/maplibre/
+*.tsbuildinfo
 
 # Keep small synthetic test fixtures under tests/fixtures/ trackable.

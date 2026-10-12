@@ -5,15 +5,42 @@
 - **Frontend preference updated2026-10-12: Next.js/React/TypeScript replaces Streamlit for Step12.**
   Follow [FRONTEND_PLAN.md](FRONTEND_PLAN.md), reusing the existing Python/PostGIS pipeline via
   a read-only query API. Keep the original map/replay acceptance criteria. This is a recorded
-  user preference; frontend/API implementation has not started. Step12 is now next.
+  user preference; frontend/API are now implemented. Step13 final audit is next.
 
-- Completed locally: Steps00,00A,01–11, including zones, visits/waiting, context, marts, orchestration/backfills and **monitoring/recovery**. Native PostgreSQL17.11/PostGIS3.6.2 remains healthy;209 tests pass. Historical24-hour metrics/source hashes remain unchanged. No frontend or deployed site exists.
-- Project root: `C:\Users\samab\dataEngineering\portwatch`. Current branch: `feat/monitoring-recovery`, from Next.js preference checkpoint `a140c4baa5b4e638595609d283f20f4c36889126` (Step10 code `71d36b2`). Steps06–11 remain unpushed; use `git log -1` for this stage's local checkpoint.
+- Completed locally: Steps00,00A,01–12, including pipeline/recovery and **Next.js map/replay**. Native PostgreSQL17.11/PostGIS3.6.2 remains healthy;229 tests pass and12 browser checks pass. Historical metrics/source hashes remain unchanged. Frontend at127.0.0.1:3000, read-only query API8000; no hosted site.
+- Project root: `C:\Users\samab\dataEngineering\portwatch`. Current branch: `feat/map-replay`, from Step11 checkpoint `da4c315ae9a381d2c9a3d45ffd353b18c91cafef`. Steps06–12 remain unpushed; use `git log -1` for this stage's local checkpoint.
 - **Step05A remote CI remains blocked by the GitHub account billing lock.** User declined payment and authorized local continuation at$0. [Repository](https://github.com/SamABZD/portwatch), [CI PR#2](https://github.com/SamABZD/portwatch/pull/2); PR stays unmerged and proposed branch rules unapplied. No payment, account change, push or hosted deployment.
-- **Next: Step12 map/replay**, sibling prompt `portwatch-prompts/12-map-replay.md`. Its original Streamlit/PyDeck requirement is superseded by the user's Next.js choice; retain all data/replay acceptance checks and follow [FRONTEND_PLAN.md](FRONTEND_PLAN.md). Stop at Step11 here. Read [HEALTH_RECOVERY.md](HEALTH_RECOVERY.md), [RUNBOOK.md](RUNBOOK.md), [ORCHESTRATION.md](ORCHESTRATION.md), [ANALYTICS.md](ANALYTICS.md), [VISITS.md](VISITS.md) and [RESULTS.md](RESULTS.md). Full playbook: `C:\Users\samab\dataEngineering\PORTWATCH_BUILD_PLAYBOOK.md`.
-- Five genuine raw batches remain verified. Last real news request remains429; forecast is stale. Collector remains stopped and saved26 live observations are stale. All three Prefect deployments are paused and runner stopped; the local Prefect API server is already running at127.0.0.1:4200 (PIDs8568/24468), confirmed by a final read-only API check and left running. PostgreSQL PID18824 stays running. No Step11 provider request. Keep process/freshness states explicit when resuming.
+- **Next: Step13 final audit**, sibling prompt `portwatch-prompts/13-final-audit.md`. Stop at Step12 here. Read [REPLAY.md](REPLAY.md), [FRONTEND_PLAN.md](FRONTEND_PLAN.md), [RUNBOOK.md](RUNBOOK.md), [HEALTH_RECOVERY.md](HEALTH_RECOVERY.md), [ORCHESTRATION.md](ORCHESTRATION.md), [ANALYTICS.md](ANALYTICS.md), [VISITS.md](VISITS.md) and [RESULTS.md](RESULTS.md). Full playbook: `C:\Users\samab\dataEngineering\PORTWATCH_BUILD_PLAYBOOK.md`.
+- Five genuine raw batches remain verified. Last real news request remains429; forecast is stale. Collector remains stopped and saved26 live observations stale. All three Prefect deployments paused/runner stopped; existing Prefect API4200 and PostgreSQL PID18824 left running. Frontend3000/query API8000 remain running for user access; temporary prepared server8077 stopped. No Step12 provider acquisition. Verify final process-state evidence when resuming.
 
 ## Verified commands and observed outcomes
+
+### Step12 Next.js map/replay (2026-10-12)
+
+- Launch: `python -m portwatch demo serve --listen-port 8000`; in `web`, `npm ci`,
+  `npm run typecheck`, `npm run build`, `npm run start`. Current app127.0.0.1:3000.
+  For frontend edits without a port collision, `npm run dev -- --port 3001`.
+- `python scripts/verify_replay.py`: source/mart hashes and audit counts unchanged; exact SQL
+  activity reconciliation, no future positions/trails/weather/hours. Noon32,632 observations/
+  99 fresh vessels/6 completed samples; full62,157/14. Genuine uncached frame1.070s, repeat0.049s.
+- `python -X utf8 scripts/verify_demo_browser.py`:12 checks PASS, no page errors, automated
+  tiles blocked; actual controls, selection, retry, live unknown/429, completed-hour boundaries,
+  reduced motion and four viewports. Eight screenshots saved. Valid-empty news uses an isolated
+  response-status fixture; all project records remain genuine. Installed Chromium151 used.
+- Verified portable22,749,112-byte export/sidecar round-trip; actual HTTP requests with closed
+  DB port9 and no AIS key work without DB. Only historical data; current live/health unavailable.
+- Shared validator174 unit18.26s +55 integration46.19s =229 passed, no selected skips;
+ 93 formatted files, packages/installed wheel CLI/resources and seven migrations/repeat zero.
+  Immutable001–007. Upstream Starlette/httpx TestClient warning is non-failing.
+- Actual Windows status reader collision fixed with bounded5/32/33 replace retries; synthetic
+  real held-reader recovery0.037s and five regression cases, collector suite31 passed8.56s.
+
+Evidence: ignored `artifacts/step12`; public screenshots/reports and updated locator in chat
+`outputs`. UI/API code is `web/src` and `src/portwatch/demo`; PRODUCT/DESIGN record confirmed
+restraint. Read `web/AGENTS.md` and installed Next.js guides before future frontend edits.
+Snapshots at cutoff differ from mart hour-start snapshots; waiting/dwell remain proxy/incomplete
+evidence. Live static types without reliable prefix timing remain unknown. Optional internet
+tiles have a working local geometry fallback. No hosted deployment, CI/payment/account change.
 
 ### Step11 monitoring/recovery (2026-10-12)
 
