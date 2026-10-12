@@ -11,7 +11,7 @@
 - Project root: `C:\Users\samab\dataEngineering\portwatch`. Current branch: `feat/monitoring-recovery`, from Next.js preference checkpoint `a140c4baa5b4e638595609d283f20f4c36889126` (Step10 code `71d36b2`). Steps06–11 remain unpushed; use `git log -1` for this stage's local checkpoint.
 - **Step05A remote CI remains blocked by the GitHub account billing lock.** User declined payment and authorized local continuation at$0. [Repository](https://github.com/SamABZD/portwatch), [CI PR#2](https://github.com/SamABZD/portwatch/pull/2); PR stays unmerged and proposed branch rules unapplied. No payment, account change, push or hosted deployment.
 - **Next: Step12 map/replay**, sibling prompt `portwatch-prompts/12-map-replay.md`. Its original Streamlit/PyDeck requirement is superseded by the user's Next.js choice; retain all data/replay acceptance checks and follow [FRONTEND_PLAN.md](FRONTEND_PLAN.md). Stop at Step11 here. Read [HEALTH_RECOVERY.md](HEALTH_RECOVERY.md), [RUNBOOK.md](RUNBOOK.md), [ORCHESTRATION.md](ORCHESTRATION.md), [ANALYTICS.md](ANALYTICS.md), [VISITS.md](VISITS.md) and [RESULTS.md](RESULTS.md). Full playbook: `C:\Users\samab\dataEngineering\PORTWATCH_BUILD_PLAYBOOK.md`.
-- Five genuine raw batches remain verified. Last real news request remains429; forecast is stale. Collector remains stopped and saved26 live observations are stale. Prefect schedules remain paused and temporary runner/server stopped; PostgreSQL PID18824 stays running. No Step11 provider request. Keep process/freshness states explicit when resuming.
+- Five genuine raw batches remain verified. Last real news request remains429; forecast is stale. Collector remains stopped and saved26 live observations are stale. All three Prefect deployments are paused and runner stopped; the local Prefect API server is already running at127.0.0.1:4200 (PIDs8568/24468), confirmed by a final read-only API check and left running. PostgreSQL PID18824 stays running. No Step11 provider request. Keep process/freshness states explicit when resuming.
 
 ## Verified commands and observed outcomes
 
@@ -34,6 +34,9 @@
 - `uv run --locked --extra dev python scripts/validate.py`:156 unit17.31s +53 integration42.55s
   =209 passed, zero selected skips, lint/format81 files, packages/installed-wheel CLI and seven
   fresh migrations/repeat zero. No dependencies/migrations added;001–007 unchanged.
+- Final process check corrected the older stopped-server record: Prefect API health passes,
+  all three deployments have `paused=true`, no runner/collector process; existing server left
+  running. Do not start a second server on4200. Public final-process evidence accompanies reports.
 
 Evidence: ignored `artifacts/step11` logs, JSON report and backup/manifest; public copies and
 project locator in chat `outputs`. Restore verifies application data/columns, not global

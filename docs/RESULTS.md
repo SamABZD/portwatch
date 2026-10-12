@@ -46,7 +46,9 @@
   Saved live26 positions are stale with0 backlog. Collector explicitly stopped with last genuine
   receipt2026-10-11T19:26:03.039308Z; old snapshot has no PID identity. Historical reanalysis
   remains available. `doctor` allPASS; raw inspection5 verified/0 issues; PostgreSQL PID18824
-  remains running at localhost55432. Prefect schedules remain paused/server and runner stopped.
+  remains running at localhost55432. Final read-only check found the existing Prefect API server
+  running at127.0.0.1:4200 (PIDs8568/24468), correcting the older stopped-server record. API health
+  passes and all three deployments have `paused=true`; runner/collector stopped. Server left running.
 
 Evidence: ignored `artifacts/step11/backup.log`, archive/manifest, `recovery-verification.json`,
 `recovery.log`, `collector-check.json`, `collector-check.log`, `validation.log`, `health.json` and

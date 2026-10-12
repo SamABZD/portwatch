@@ -100,8 +100,9 @@ ownership before cleanup; never remove another invocation's or unrelated user's 
 
 Already durable demonstrated inputs survived recovery; unflushed buffers and upstream events
 never received are excluded. Timings are measured small local exercises, not production RTOs.
-Current stage leaves Prefect schedules paused/server and runner stopped; PostgreSQL running;
-real collector stopped. Start only the processes you intend to operate.
+Final process check confirms all three Prefect deployments paused and runner/real collector
+stopped. PostgreSQL and the existing Prefect API server at127.0.0.1:4200 remain running;
+do not start a second API server on4200. Start only the processes you intend to operate.
 
 ## Step10 local workflows
 
