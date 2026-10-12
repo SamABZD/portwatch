@@ -1,5 +1,50 @@
 # Measured results
 
+## Step09: analytical tables (2026-10-12)
+
+- Published24 UTC hourly rows for the frozen January1,2024 NOAA series, on local branch
+  `feat/analytics-marts` from Step08 checkpoint `8dd89ba51922cf972504a7bc188e67e558072886`.
+  Partition `44c6625e37b5c9dc4c61bfc54d4183c3bc1d9f7dfe86f6ef7e43596f15c49081`, analytical
+  version `ec3a3ebb7379e176f87f343e69474da992b3aa069bea9816e44f58f064f8a016`.
+- Canonical source count equals hourly observation sum: **62,157**. **56 known-boundary entry
+  confirmations**, **35 exit confirmations**, **14 completed dwell samples** reconcile exactly
+  to the selected visit rules. These are inferred observation transitions, not official port calls.
+  Overall completed midpoint median from raw completed episodes: **4,495.5 seconds**; do not
+  average hourly medians. The216 partial episodes stay outside completed-duration medians.
+- Hour00 reports111 distinct MMSIs during the hour versus3 fresh reporting vessels at00:00; snapshot
+  lookback is incomplete without preceding-day input. Hour01 reports104 distinct MMSIs versus102
+  fresh reporting vessels,97 within primary port zones. Thus hourly activity and simultaneous
+  observed occupancy are measurably different, and the first snapshot is a partial lower bound.
+- One pilot-vessel candidate contributes **two candidate-vessel hours**,19 and20, with one
+  last-observed-hour duration sample at20:00: **3,724 seconds**, completed under candidate boundary
+  rules. Hour19 remains regional; by hour20's end the association is known. This is no cargo queue
+  or delay-causality evidence. Actual replay at20:40 is regional; at20:43:02 association appears.
+- All24 hours join the exact saved ERA5 batch from Step08, with unsupported gusts null. Recent
+  forecast/news are excluded. Dataset quarantined-record count is0; hourly reject zeros reconcile.
+  Five independent reconciliation groups report zero failures: observations, distinct snapshot,
+  weather revision/values, visit events/dwell samples and dataset rejects.
+- Two complete reruns have identical business hash
+  `6f6ca8ecaa8e3824040aa481cd85d88cd0b52990ba2a0307daf14001ad223112`.
+  Read-only12:30 prefix:13 rows/12 completed hours,32,632 observations; partial hour12 has1,317
+  reports. Prefix20:40 has53,436 reports;20:43:02 has53,566. Source, visits, stored marts and run
+  audit counts remain unchanged by prefix reads. Full stored data is withheld at noon replay.
+- Shared validator **PASS**:139 unit tests31.97s and44 database integration tests34.07s,
+  zero selected skips/failures. Lint/format passed65 Python files. Wheel/sdist, actual isolated-wheel
+  CLI import (which loads the packaged hourly SQL resource), six migrations and fresh/repeated
+  migration checks passed. Focused final mart/visit/migration subset:28 passed in18.78s.
+
+Real evidence is retained in ignored `artifacts/step09/verification.json`; validation transcript
+in `artifacts/step09/validation.log`. Original source hash is still
+`355cc069362fd84e7aa27530647bae9f8dbbcbdb0156e9585dfea9b91a8122d4`, visit hash still
+`76f96085b195058b60af35ad72b4b33de761dcbf61a3069baa1b67f73cb525da`; five raw batches remain
+verified. [ANALYTICS.md](ANALYTICS.md) defines every field and provides five executable SQL examples.
+No provider requests, dependency additions, frontend, deployment, paid resources, push or merge.
+
+The final verifier also executes all five documented SQL examples:24 activity,2 waiting,
+24 dwell,24 freshness and1 reject-summary rows, with exact source/version filters. Latest full
+real verification took37.40s. Final lint/format passed66 files, doctor allPASS and repeat migration
+applied zero; original raw storage still has five complete batches/zero issues.
+
 ## Step08: weather/news context (2026-10-12)
 
 - Historical Open-Meteo ERA5 GET200 at12:25:00.890960UTC: **24 hourly points**, January1,2024

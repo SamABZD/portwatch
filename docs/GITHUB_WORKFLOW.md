@@ -66,3 +66,7 @@ Step08 context connectors are complete locally on `feat/weather-news`, based on 
 `ac684739f794997d67a63a9a97d403a99c1c1477`. Shared validation passes134 unit/32 integration
 tests and five migrations. Steps06–08 remain unpushed; the existing CI deferral persists.
 Real GDELT429 is a provider availability limit, separate from the GitHub account lock.
+
+Step09 analytical tables are complete locally on `feat/analytics-marts`, based on Step08 `8dd89ba`.
+Shared validation passes139 unit/44 integration tests, six migrations and the packaged hourly SQL
+resource. Steps06–09 remain unpushed; no remote check, protection change or CI merge is claimed.

@@ -66,6 +66,7 @@ class PortConfig(BaseModel):
     max_observation_gap_minutes: int = Field(gt=0)
     visit_persistence_minutes: float = Field(default=2, gt=0)
     visit_min_consistent_observations: int = Field(default=2, ge=2, le=100)
+    snapshot_staleness_minutes: int = Field(default=15, ge=1, le=60)
     weather_latitude: float = Field(default=33.71466, ge=-90, le=90)
     weather_longitude: float = Field(default=-118.24239, ge=-180, le=180)
     news_query: str = Field(

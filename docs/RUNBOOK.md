@@ -1,5 +1,35 @@
 # PortWatch runbook
 
+## Step09 analytical tables
+
+```powershell
+.\.venv\Scripts\python.exe -m portwatch db migrate
+.\.venv\Scripts\python.exe -m portwatch transform marts --port los_angeles --demo
+.\.venv\Scripts\python.exe -m portwatch transform marts --port los_angeles --demo --as-of 2024-01-01T12:30:00Z
+.\.venv\Scripts\python.exe scripts/verify_marts.py
+```
+
+Use saved canonical positions and loaded geofences; no provider acquisition occurs. Weather is
+optional: a missing revision produces null context. Recent news/forecast never enter this demo.
+After cleaning late reports, run the full transform again; visits and affected hours are replaced
+atomically, including obsolete rows. A failure leaves the earlier visit/mart snapshot available.
+Configuration/rule/weather changes create a separate analytical version. Snapshot age is
+`snapshot_staleness_minutes` in the public port config, default15. All previous migrations remain
+immutable; apply migration006 before invoking the new command.
+
+Stored hourly rows are retrospective completed-hour output. Read [ANALYTICS.md](ANALYTICS.md)
+before interpreting counts, medians or source health. Every chart query must select one exact
+source/dataset/cleaning/analytical version. During replay use the event-time prefix helper or
+`--as-of`, which reconstructs visits without future reports and marks the current hour partial.
+The stored query helper withholds rows until the entire input inference cutoff is reached.
+Prefix mode writes only temporary objects and creates no persistent audit or derived rows.
+
+`verify_marts.py` checks duplicate reruns, source and visit hashes, independent observation,
+snapshot, weather, event/dwell and reject reconciliation, real prefix knowledge times, unchanged
+stored/audit rows and the five SQL examples. Reports remain ignored under `artifacts/step09/`.
+Dataset reject totals are not hourly timestamps; never fill their unknown allocation or a missing
+source interval with zeros. Midpoint dwell and low-speed waiting remain proxies with sample sizes.
+
 ## Step08 context connectors
 
 From the project directory, with the existing database running:

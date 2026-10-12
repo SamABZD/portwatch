@@ -1,5 +1,48 @@
 # Data contracts
 
+## Step09 analytical mart (`marts-v1`)
+
+Migration006 adds `mart_rule_sets`, `mart_partitions` and `port_activity_hourly`. Earlier
+migrations and source rows are unchanged. The explicit hourly key is port + source + dataset +
+analytical version + UTC hour. Partition FKs enforce descriptor consistency; parameters retain
+cleaning/geofence/assignment/visit-rule versions, snapshot age and one weather revision. Different
+sources, live/historical input modes and analytical versions do not share an output series.
+
+Hours are half-open UTC intervals. Snapshots use the latest report group per vessel at hour start,
+at most15 minutes old by default. Primary zones are disjoint for counts, retaining all earlier
+spatial memberships separately. Conflicting latest-time zones become one `unknown` vessel.
+Hourly distinct activity and instantaneous observed occupancy are separate fields.
+
+Known-boundary arrival/exit confirmations are counted in their confirmation hour. Completed dwell
+uses only completed episodes, attributed to exit confirmation hour, with midpoint/lower/upper
+medians and sample counts. Incomplete episodes stay separate. Waiting counts are qualified
+candidate vessels intersecting an hour; association requires knowledge by period end. Observed
+duration proxies are sampled once in the last-observed hour, with partial sample counts. Counts
+are experimental observation/inference quantities, not total ships, official port calls or queues.
+
+Available input periods come from processed raw/cleaning ledger intervals. Empty unavailable
+hours yield unknown, while available empty intervals permit measured zeros. Reject timestamps
+cannot be invented: dataset rejects are stored on the partition; hourly rejects are null when any
+exist. Current collector state is not projected onto2024. Event-time freshness is relative to the
+hour end or prefix cutoff. Named flags retain gaps, ambiguity, incomplete inputs and proxy limits.
+
+Weather joins one pinned saved reanalysis batch at its UTC valid hour. Missing hours/variables stay
+null. Precipitation describes the preceding hour ending at the row's hour start. News remains in
+the context tables and is excluded from this historical series. No many-to-many join multiplies
+position counts. Field definitions, units, inclusion rules and examples are in [ANALYTICS.md](ANALYTICS.md).
+
+Each mart build recomputes full selected vessel histories and replaces their visits and mart
+partition in one repeatable-read transaction. Missing spatial assignments are appended first.
+Late-data reruns remove obsolete visits/hours; a publication error retains the previous valid
+visit/mart snapshot. Rule/weather changes produce another analytical version. Computation time
+and run audits are excluded from business-hash comparison.
+
+Stored output is retrospective and contains completed hours only. Its query helper withholds a
+partition until its full input inference cutoff is reached. During replay, the prefix helper
+reconstructs episodes from event times <= cutoff, returns source/version/weather identifiers,
+and labels the current hour partial. It writes temporary objects only and preserves persistent
+rows/audits. Historical weather remains retrospective reanalysis, not2024 issue/receipt chronology.
+
 ## Step08 weather/news (`context-v1`)
 
 See [CONTEXT.md](CONTEXT.md) for acquisition, field semantics, revisions and attribution.

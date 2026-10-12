@@ -53,6 +53,10 @@ Step08 now adds local weather/news connectors on `feat/weather-news`, based on S
 `ac684739f794997d67a63a9a97d403a99c1c1477`. Local checks pass134 unit/32 integration tests
 with five migrations. No pushes, unchecked CI merge, protection changes or payments were made.
 
+Step09 analytical tables now run locally on `feat/analytics-marts`, based on Step08 checkpoint
+`8dd89ba51922cf972504a7bc188e67e558072886`. Shared validation passes139 unit/44 integration
+tests and six migrations. Original remote CI/account state has not been changed by this stage.
+
 Apply using `PUT /repos/SamABZD/portwatch/branches/main/protection`, after rechecking for any stricter rules and observing actual successful check names:
 
 ```json

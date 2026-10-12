@@ -17,6 +17,7 @@ from portwatch.doctor import diagnose, required_checks_pass
 from portwatch.download import DownloadError
 from portwatch.ingest import artifact_path, ingest_historical, plan
 from portwatch.live import CaptureError, LiveCollector, live_spec
+from portwatch.marts import MartError, transform_marts
 from portwatch.settings import Settings
 from portwatch.storage import RawStore
 from portwatch.visit_storage import transform_visits
@@ -34,6 +35,60 @@ app.add_typer(storage_app, name="storage")
 app.add_typer(ingest_app, name="ingest")
 app.add_typer(transform_app, name="transform")
 app.add_typer(geo_app, name="geo")
+
+
+@transform_app.command("marts")
+def marts_transform(
+    port: Annotated[str, typer.Option(help="Configured port ID.")] = "los_angeles",
+    demo: Annotated[
+        bool, typer.Option(help="Build the historical hourly analytical partition.")
+    ] = False,
+    as_of: Annotated[
+        str | None, typer.Option(help="Read-only event-time prefix; explicit UTC ISO.")
+    ] = None,
+) -> None:
+    """Publish source-separated metrics or reconstruct a prefix without persistent writes."""
+    if not demo:
+        typer.echo("Select --demo for the saved historical dataset.", err=True)
+        raise typer.Exit(code=2)
+    try:
+        cutoff = datetime.fromisoformat(as_of.replace("Z", "+00:00")) if as_of else None
+        if cutoff:
+            utc(cutoff)
+        with connect_db(Settings()) as connection:
+            config, result = transform_marts(Settings(), connection, port, as_of_utc=cutoff)
+        if cutoff:
+            typer.echo(
+                f"Event-time prefix: {cutoff}; hours: {len(result)}; "
+                f"completed hours: {sum(row['complete_hour'] for row in result)}"
+            )
+            if result:
+                last = result[-1]
+                typer.echo(
+                    f"Last hour: {last['hour_utc']}; complete: {last['complete_hour']}; "
+                    f"observations: {last['observation_count']}; "
+                    f"snapshot: {last['snapshot_vessel_count']}"
+                )
+        else:
+            typer.echo(
+                f"Partition: {result.partition_id}; analytical version: {result.analytical_version}"
+            )
+            typer.echo(
+                f"Hours: {result.hours}; observations: {result.observations}; "
+                f"confirmed arrivals: {result.arrivals}; departures: {result.departures}; "
+                f"completed dwell samples: {result.completed_dwell_samples}; "
+                f"candidate-vessel hours: {result.waiting_vessel_hours}"
+            )
+        typer.echo(
+            f"Weather revision: {config.weather_batch_id or 'unavailable'}; "
+            "metrics describe observed reports and experimental inference, not total coverage."
+        )
+    except Exception as error:
+        detail = (
+            str(error) if isinstance(error, (MartError, InferenceError)) else type(error).__name__
+        )
+        typer.echo(f"Mart transform failed: {detail}", err=True)
+        raise typer.Exit(code=1) from None
 
 
 def context_ingest(kind: str, port: str, demo: bool, refresh: bool) -> None:

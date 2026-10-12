@@ -1,5 +1,15 @@
 # Step 01 source audit
 
+Step09 review (2026-10-12): no provider requests or source changes. The analytical mart uses the
+saved NOAA series and one selected historical ERA5 revision; recent news/forecast are excluded.
+Known-boundary confirmations and completed midpoint durations remain experimental inference,
+not verified port calls/dwell. Counts include all vessel types and all reporting points in the
+collection region. The sole candidate remains reported pilot-vessel type50, contributing two
+candidate-vessel hours and one duration sample; it is not a demonstrated cargo queue. Coarse
+weather, approximate zones, gaps and unknown boundaries remain explicit. Processed source
+intervals and event-time recency do not establish total AIS coverage or today's collector health.
+All original source/visit business hashes and raw checksums remain unchanged.
+
 ## Step08 recheck and real requests (2026-10-12)
 
 Primary [archive](https://open-meteo.com/en/docs/historical-weather-api),

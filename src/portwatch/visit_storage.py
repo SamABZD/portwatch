@@ -7,6 +7,7 @@ from datetime import timedelta
 from itertools import groupby
 
 from psycopg import sql
+from psycopg.pq import TransactionStatus
 
 from portwatch.bookkeeping import finish_run, start_run
 from portwatch.settings import Settings, load_port_config
@@ -180,11 +181,14 @@ def recompute_visits(
     before_commit: Callable[[], None] | None = None,
 ) -> InferenceCounts:
     """Atomically replace this dataset/rule/geofence's complete affected vessel histories."""
+    owns_transaction = connection.info.transaction_status == TransactionStatus.IDLE
     run_id = start_run(connection, "visits")
     counts = InferenceCounts()
     try:
         with connection.transaction():
-            connection.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ")
+            # A mart caller can publish visits and hours in its own repeatable-read transaction.
+            if owns_transaction:
+                connection.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ")
             connection.execute("SELECT set_config('statement_timeout','120s',true)")
             connection.execute("SELECT set_config('lock_timeout','15s',true)")
             connection.execute("SELECT pg_advisory_xact_lock(734920028)")

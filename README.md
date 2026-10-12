@@ -1,6 +1,6 @@
 # PortWatch
 
-PortWatch is a $0, local-first data engineering portfolio project for the Port of Los Angeles. Steps 00–08 establish the Python CLI, frozen historical demo, durable raw storage, PostgreSQL/PostGIS bookkeeping, historical/live AIS, reproducible cleaning, approximate spatial zones, visit/candidate-waiting inference, and weather/news connectors. Historical replay works without a live AIS key. Real historical and forecast weather are saved; GDELT's latest real request was rate limited, with the failure recorded separately from empty results. No frontend or deployed site exists yet. GitHub CI Step 05A remains blocked by an account billing lock; the user authorized continuing local stages at $0.
+PortWatch is a $0, local-first data engineering portfolio project for the Port of Los Angeles. Steps 00–09 establish the Python CLI, frozen historical demo, durable storage, PostgreSQL/PostGIS bookkeeping, historical/live AIS, reproducible cleaning, approximate zones, visit/waiting inference, weather/news connectors and versioned hourly analytical tables. Historical replay works without a live AIS key. Weather is saved; the latest real GDELT request was rate limited, with failure separate from empty results. No frontend or deployed site exists yet. GitHub CI Step05A remains blocked by an account billing lock; the user authorized continuing local stages at $0.
 
 ## Local setup
 
@@ -121,6 +121,26 @@ News keeps article metadata only, separates first seen/publication, preserves UR
 capped results truncated. Latest real GDELT request was429, so real articles remain unverified;
 historical replay works independently and excludes recent news. See [CONTEXT.md](docs/CONTEXT.md)
 for source health, attribution, retrospective interpretation and revision-safe queries.
+
+## Hourly analytical tables
+
+```powershell
+.\.venv\Scripts\python.exe -m portwatch transform marts --port los_angeles --demo
+.\.venv\Scripts\python.exe -m portwatch transform marts --port los_angeles --demo --as-of 2024-01-01T12:30:00Z
+.\.venv\Scripts\python.exe scripts/verify_marts.py
+```
+
+The saved demo produces24 hourly rows reconciling62,157 canonical observations,56 inferred entry/
+35 exit confirmations and14 completed dwell samples. Hourly distinct activity is separate from
+hour-start snapshots, which use one fresh latest report group per vessel with a15-minute age limit.
+Completed dwell has midpoint/bound medians; partial episodes, waiting sample/completeness flags,
+source gaps, reject allocation and model weather remain explicit. News never multiplies counts.
+
+Visits and affected mart hours publish together, including replacement after late data; failures
+retain the previous valid partition. `--as-of` reconstructs a prefix without future reports or
+persistent writes and labels its partial hour. No congestion baseline or confirmed cargo queue is
+claimed. [ANALYTICS.md](docs/ANALYTICS.md) defines every field and provides five executable SQL
+queries. Next stage is orchestration/backfills; no scheduler has been introduced yet.
 
 Project decisions and the current state are in [docs/DECISIONS.md](docs/DECISIONS.md) and [docs/HANDOFF.md](docs/HANDOFF.md).
 Contributions follow [CONTRIBUTING.md](CONTRIBUTING.md) and the [GitHub workflow](docs/GITHUB_WORKFLOW.md). The verified publication details are in [docs/GITHUB_SETUP.md](docs/GITHUB_SETUP.md).

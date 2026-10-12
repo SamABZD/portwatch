@@ -2,11 +2,71 @@
 
 ## Stage state
 
-- Completed: Steps00,00A,01–05, **06 zones locally**, **07 visits/waiting locally**, and **08 weather/news connectors locally**. Native PostgreSQL17.11/PostGIS3.6.2 remains healthy. Historical AIS still has62,157 positions/141 tracks,230 visit episodes (14 completed/216 partial) and one pilot-vessel low-speed candidate; no cargo queue is established. Real historical weather24 hours and current forecast48 hours are saved. Latest real GDELT request was429; news responses are tested synthetically, and real article acquisition remains unverified. No frontend/deployment exists.
+- Completed: Steps00,00A,01–05, **06 zones**, **07 visits/waiting**, **08 weather/news connectors**, and **09 analytical tables locally**. Native PostgreSQL17.11/PostGIS3.6.2 remains healthy. The24-hour mart reconciles62,157 positions,56 inferred entry/35 exit confirmations and14 completed dwell samples. One pilot-vessel candidate contributes two candidate-vessel hours, not a cargo queue. Weather is saved; last real GDELT request was429. No frontend/deployment exists.
 - Published repository: [SamABZD/portwatch](https://github.com/SamABZD/portwatch), public, default branch `main`, only remote `origin`. See [GITHUB_SETUP.md](GITHUB_SETUP.md) for the recorded account, foundation commit SHA, metadata, and publication checks.
-- Current: **Step08 implemented/validated locally; Step05A remains blocked remotely**. Project root is `C:\Users\samab\dataEngineering\portwatch`; prompts are in sibling `portwatch-prompts`, playbook `C:\Users\samab\dataEngineering\PORTWATCH_BUILD_PLAYBOOK.md`. The user's $0/local/CI-deferred authorization persists. Branch `feat/weather-news` starts at Step07 checkpoint `ac684739f794997d67a63a9a97d403a99c1c1477`; Steps06–08 remain unpushed. [CI PR#2](https://github.com/SamABZD/portwatch/pull/2) stays unmerged; branch rules remain unapplied. **Next: Step09 analytical tables**, prompt `portwatch-prompts/09-analytical-tables.md`. Stored inference and historical weather are retrospective. News unavailability does not block historical AIS/weather. No paid account, CI workaround, deployment or external message was created.
+- Current: **Step09 implemented/validated locally; Step05A remains blocked remotely**. Project root is `C:\Users\samab\dataEngineering\portwatch`; prompts are in sibling `portwatch-prompts`, playbook `C:\Users\samab\dataEngineering\PORTWATCH_BUILD_PLAYBOOK.md`. The $0/local/CI-deferred authorization persists. Branch `feat/analytics-marts` starts from Step08 checkpoint `8dd89ba51922cf972504a7bc188e67e558072886`; Steps06–09 remain unpushed. [CI PR#2](https://github.com/SamABZD/portwatch/pull/2) stays unmerged and branch rules unapplied. **Next: Step10 orchestration/backfills**, prompt `portwatch-prompts/10-orchestration-backfills.md`. Read [ANALYTICS.md](ANALYTICS.md) before querying. Historical inference/weather remain retrospective; live-context failures do not block replay. No paid resource, deployment, account change or external message was created.
 
 ## Verified commands and observed outcomes
+
+### Step09 analytical tables (2026-10-12)
+
+- Read the exact prompt, actual schemas, source/visit/weather contracts and working agreement.
+  Created clean `feat/analytics-marts` from Step08; used existing native PostgreSQL and saved data.
+  Loaded PostgreSQL schema/index/transaction guidance; no provider request or dependency changes.
+- Added migration006, `marts.py`, packaged `queries/hourly.sql`, metric configuration and
+  `transform marts --port los_angeles --demo [--as-of <explicit UTC>]`. The grain is
+  port/source/dataset/analytical-version/UTC-hour. One latest timestamp group per vessel at hour
+  start,15-minute staleness, disjoint primary-zone counts and unknown conflicting timestamps.
+  Counts/medians/units/flags and five executable queries are in [ANALYTICS.md](ANALYTICS.md).
+- Source availability comes from successfully processed declared input periods, not assumed AIS
+  coverage. Missing empty intervals stay unknown; available empty counts can be zero. No hourly
+  reject event time is invented: dataset totals remain separate and hourly rejects are unknown
+  when any exist. Confirmation-hour arrivals/exits, completed-only dwell midpoint/bound medians,
+  waiting qualification/association knowledge, duration sample/partial counts, event freshness,
+  historical collector state and a single pinned weather revision remain explicit.
+- Visits and mart replacement publish in one repeatable-read transaction. Existing visit storage
+  now supports a caller-owned transaction; its standalone behavior remains covered. Late-data
+  tests remove obsolete visit IDs and hours, and injected publication failure preserves both
+  earlier outputs. Other source/dataset/version partitions remain separate. Spatial assignments
+  append before publication; original positions/raw/weather are unchanged.
+- Initial tests exposed a wrong synthetic dwell expectation (the correct interval is120–1,200s,
+  midpoint660s) and a prefix temp-table missing the waiting semantics default. Fixed both.
+  Final focused mart/visit/migration subset: **28 passed in18.78s**; cases include activity versus
+  snapshot, staleness, overlap/conflicts, weather/news join safety, missing intervals/reject timing,
+  completed/partial separation, late replacement, rollback, source/version isolation and prefixes.
+- `.\.venv\Scripts\python.exe -m portwatch db migrate`: applied only006. Full
+  `.\.venv\Scripts\python.exe -m portwatch transform marts --port los_angeles --demo`:
+  **24 hours,62,157 observations,56 inferred arrival/35 departure confirmations,14 completed dwell
+  samples,2 candidate-vessel hours**. The candidate is one pilot vessel, not two queued cargo ships.
+  Analytical version `ec3a3ebb7379e176f87f343e69474da992b3aa069bea9816e44f58f064f8a016`;
+  partition `44c6625e37b5c9dc4c61bfc54d4183c3bc1d9f7dfe86f6ef7e43596f15c49081`.
+- `.\.venv\Scripts\python.exe scripts/verify_marts.py`: two complete recomputations with identical
+  mart business hash `6f6ca8ecaa8e3824040aa481cd85d88cd0b52990ba2a0307daf14001ad223112`.
+  Five independent reconciliation groups have zero violations. Full source and visit hashes
+  remain the previously verified values. All five genuine raw batches verify unchanged.
+- `.\.venv\Scripts\python.exe -m portwatch transform marts --port los_angeles --demo --as-of
+  2024-01-01T12:30:00Z`:13 rows/12 completed hours,partial hour12 has1,317 observations and98
+  fresh hour-start reporting vessels. Verifier total prefix32,632 records. At20:40 candidate
+  regional; at20:43:02 port-associated. No later event time or persistent/audit write is used.
+  Stored full-input rows are withheld for noon replay; use the prefix helper instead.
+- `.\.bootstrap-venv\Scripts\uv.exe run --locked --extra dev python scripts/validate.py`:
+  **PASS**,139 unit tests31.97s/44 integration34.07s, zero selected skips/failures, lint/format65
+  Python files, wheel/sdist, actual isolated-wheel CLI import with hourly SQL resource, six packaged
+  migrations and fresh/repeat checks. Exact transcript: ignored `artifacts/step09/validation.log`.
+- Final executable documentation verification: all five named SQL examples succeeded against the
+  exact real series/version, returning24 activity,2 waiting,24 dwell,24 freshness and1 reject
+  summary rows. Latest complete verifier:37.40s, unchanged mart hash and zero violations.
+  Final lint/format passed66 Python files; doctor allPASS, five complete raw batches/zero issues,
+  repeat migration applied zero.
+- Final22-path staged scan found zero actual configured AIS-key matches; all five earlier SQL
+  migrations matched the Step08 checkpoint exactly. Private `.env`, source data, native runtime/
+  database and generated evidence remain ignored. This stage is a local checkpoint, not a push.
+
+Step09 changed paths: new mart module, hourly SQL resource, migration006, verifier and two test
+modules; CLI/settings/config/bookkeeping, transaction-aware visit storage and migration fixture;
+README plus analytics/contracts/results/decisions/handoff/runbook/source/GitHub docs. Real evidence
+is ignored in `artifacts/step09/verification.json`. Next is Step10; preserve $0, source/version
+filters, prefix semantics, experimental inference limits and the existing remote CI deferral.
 
 ### Step08 weather/news (2026-10-12)
 
