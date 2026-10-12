@@ -1,5 +1,26 @@
 # PortWatch runbook
 
+## Visit inference and read-only prefixes
+
+```powershell
+.\.venv\Scripts\python.exe -m portwatch db migrate
+.\.venv\Scripts\python.exe -m portwatch transform visits --port los_angeles --demo
+.\.venv\Scripts\python.exe -m portwatch transform visits --port los_angeles --demo --as-of 2024-01-01T12:00:00Z
+.\.venv\Scripts\python.exe scripts/verify_visits.py
+```
+
+Use the current native database and saved historical inputs. Default inference refreshes missing
+zone assignments and replaces complete selected-dataset derived histories atomically. If a run
+fails, the prior inference snapshot remains; fix the reported prerequisite and rerun. Missing
+zone versions/checksum mismatch require reviewed `geo load`. `--version` selects an older loaded
+geofence explicitly. Changed inference parameters create a separate rule ID; old contexts remain.
+
+`--as-of` requires explicit UTC and performs no writes. It cannot use future events to confirm a
+visit or waiting association. It reconstructs an event-time prefix, not actual historical provider
+delivery. Stored full-history episodes must remain labeled retrospective. [VISITS.md](VISITS.md)
+defines completed/partial timing, gaps and waiting-proxy limits, including the reported pilot-vessel
+candidate. No actual queue is established. Do not average partial spans as completed dwell.
+
 ## Local geofence and zone checks
 
 From the project root `C:\Users\samab\dataEngineering\portwatch`, use the running native

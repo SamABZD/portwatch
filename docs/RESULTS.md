@@ -1,5 +1,33 @@
 # Measured results
 
+## Step 07: visits and candidate waiting (2026-10-12)
+
+All 62,157 frozen historical positions were processed in 141 source-separated vessel histories.
+Experimental `visits-v1` produces **230 inferred episodes: 14 completed, 216 partial**, and **one
+qualified low-speed candidate**. 44 tracks are unknown at the dataset cutoff. Persistence is two
+distinct observation times spanning two minutes. Long gaps split incomplete fragments; unknown
+arrival/departure and partial observation proxies remain separate from completed duration ranges.
+
+The candidate spans 3,724 seconds across 57 reports, with speeds0–0.8 knots and max adjacent gap78s.
+It reports type50 (pilot vessel per the [USCG table](https://navcen.uscg.gov/ais-class-a-reports)),
+so it does not establish cargo congestion or actual queue time. Waiting qualifies19:59:58 UTC;
+association with the subsequent approximate harbor visit is supported20:43:01. At20:40 the
+read-only prefix keeps it regional; after20:43:01 it may associate. Full results are retrospective.
+
+Two recomputations have identical business SHA-256
+`76f96085b195058b60af35ad72b4b33de761dcbf61a3069baa1b67f73cb525da`. Eight independent SQL
+invariant groups have zero violations. Source hash remains
+`355cc069362fd84e7aa27530647bae9f8dbbcbdb0156e9585dfea9b91a8122d4`.
+The noon prefix has 31,316 positions, 124 tracks, six completed and158 partial visits, no candidate,
+and preserves stored rows. Visually reviewed four real tracks; exact evidence, disagreements and
+no-ground-truth limitations are in [VISITS.md](VISITS.md) and ignored `artifacts/step07/`.
+
+The shared full validator passed **109 unit tests (27.08s)** and **22 database tests (15.43s)**,
+with no selected skips, lint/format, source/wheel packaging and actual wheel import, all four SQL
+resources and fresh/repeated migration checks. Late-point fixtures verify obsolete IDs are removed;
+rollback restores the previous snapshot. No dependency changes, provider downloads, remote CI
+success, frontend, hosting or spending were added. Step08 is next.
+
 ## Step 06: versioned approximate geospatial zones (2026-10-12)
 
 Local implementation completed with the user's authorization to continue at $0 while the

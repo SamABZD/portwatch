@@ -2,6 +2,7 @@
 
 import asyncio
 import time
+from datetime import datetime
 from pathlib import Path
 from typing import Annotated
 
@@ -16,6 +17,8 @@ from portwatch.ingest import artifact_path, ingest_historical, plan
 from portwatch.live import CaptureError, LiveCollector, live_spec
 from portwatch.settings import Settings
 from portwatch.storage import RawStore
+from portwatch.visit_storage import transform_visits
+from portwatch.visits import InferenceError, utc
 from portwatch.zones import configured_geofence, load_geofence, transform_zones
 
 app = typer.Typer(help="PortWatch local data engineering commands.")
@@ -29,6 +32,51 @@ app.add_typer(storage_app, name="storage")
 app.add_typer(ingest_app, name="ingest")
 app.add_typer(transform_app, name="transform")
 app.add_typer(geo_app, name="geo")
+
+
+@transform_app.command("visits")
+def visits_transform(
+    port: Annotated[str, typer.Option(help="Configured port ID.")] = "los_angeles",
+    demo: Annotated[bool, typer.Option(help="Infer from the saved historical dataset.")] = False,
+    as_of: Annotated[
+        str | None, typer.Option(help="Read-only UTC event-time prefix; ISO timestamp.")
+    ] = None,
+    version: Annotated[str | None, typer.Option(help="Previously loaded geofence version.")] = None,
+) -> None:
+    """Infer visits and waiting candidates; retain gaps, partials and timing uncertainty."""
+    if not demo:
+        typer.echo("Select --demo for the saved historical dataset.", err=True)
+        raise typer.Exit(code=2)
+    cutoff = None
+    if as_of:
+        try:
+            cutoff = datetime.fromisoformat(as_of.replace("Z", "+00:00"))
+            utc(cutoff)
+        except ValueError:
+            typer.echo("--as-of requires an explicit UTC ISO timestamp.", err=True)
+            raise typer.Exit(code=2) from None
+    try:
+        settings = Settings()
+        with connect_db(settings) as connection:
+            selected, rules, counts = transform_visits(
+                settings, connection, port, as_of_utc=cutoff, version=version
+            )
+        typer.echo(
+            f"Geofence: {selected}; rules: {rules.rule_id}; "
+            f"mode: {'read-only event-time prefix' if cutoff else 'retrospective full-history'}"
+        )
+        typer.echo(
+            f"Positions: {counts.positions}; tracks: {counts.tracks}; visits: {counts.visits}; "
+            f"completed: {counts.completed_visits}; partial: {counts.partial_visits}; "
+            f"waiting candidates: {counts.waiting_episodes}; "
+            f"region only: {counts.regional_candidates}; "
+            f"visit associated: {counts.port_associated_candidates}"
+        )
+        typer.echo("Waiting is a low-speed observation proxy, not a confirmed port queue.")
+    except Exception as error:
+        detail = str(error) if isinstance(error, InferenceError) else type(error).__name__
+        typer.echo(f"Visit inference failed: {detail}", err=True)
+        raise typer.Exit(code=1) from None
 
 
 @geo_app.command("load")

@@ -1,5 +1,12 @@
 # Step 01 source audit
 
+Step07 review (2026-10-12): historical source and saved observations were preserved. The single
+low-speed candidate reports vessel type50 on all 57 eligible records. Verified the
+[USCG AIS type table](https://navcen.uscg.gov/ais-class-a-reports): code50 denotes pilot vessel.
+This is reported AIS metadata, not independently verified identity or queue/berth evidence.
+No new provider acquisition or additional day was required. [VISITS.md](VISITS.md) records
+manual real-track review, sparse-context limits and retrospective/event-time-prefix semantics.
+
 Checked 2026-10-11. Scope: $0, local-first Port of Los Angeles demo. Step 01 checks below were access probes. Step 03 downloaded the selected NOAA artifact and measured real regional observations, recorded separately below. No news articles were saved or observations invented. Provider responses and coverage can change.
 
 ## Frozen historical demo

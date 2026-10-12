@@ -1,5 +1,33 @@
 # Data contracts
 
+## Visit and waiting inference (Step07)
+
+`visit_rule_sets` stores algorithm/versioned parameters by canonical content identity.
+`visit_inference_partitions` has grain source/dataset/cleaning version/MMSI/port/geofence/spatial
+algorithm/rule ID. `vessel_activity_states` has one row per source position within that partition,
+with observed and preceding interval states. `vessel_visits` and `waiting_episodes` use deterministic
+partition/first-evidence IDs; same-time records count as one evidence time for persistence.
+
+Entry/exit need two distinct observations spanning at least two minutes by default. First/last
+sightings inside retain unknown boundaries. Long gaps split partial episodes; unsupported periods
+are never added to supported inside or waiting time. Completed visit durations are transition
+interval bounds; partial rows have null completed-duration fields and separate observation span/
+supported-interval proxies. Gap flags, completeness reasons, counts, jitter and duration semantics
+are stored. Original positions and all zone memberships remain unchanged.
+
+Waiting requires common candidate-zone membership, known speed<=1 knot, no terminal membership,
+30 minutes of eligible reports and no adjacent gap>15 minutes by default. Missing speed is unknown.
+Region candidates need a persistent same-track/same-segment port visit to acquire an association.
+Both association and confirmation knowledge times are recorded. Even associated/completed
+candidates are low-speed proxies, not confirmed anchorage, berth use or queues.
+
+Complete selected-dataset histories are replaced atomically, removing obsolete episode IDs after
+late points. Other source/dataset/version/rule partitions are preserved. Stored results are
+`retrospective_full_history`. `transform visits --demo --as-of <UTC>` reads an event-time prefix
+and writes nothing; future event times are excluded before inference. Do not reconstruct replay
+knowledge by filtering retrospective episode starts. Provider delivery chronology is unverified.
+[VISITS.md](VISITS.md) specifies the exact rules, schema, timing semantics and real-track review.
+
 ## Versioned geofences and memberships (Step06)
 
 GeoJSON polygons are approximate analytical vicinity zones, in 2D longitude/latitude EPSG:4326.

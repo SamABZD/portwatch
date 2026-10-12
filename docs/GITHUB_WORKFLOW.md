@@ -56,3 +56,8 @@ On 2026-10-12 the user declined paying for the account lock and authorized conti
 Step06 is a local checkpoint on `feat/geospatial-zones`, based on pending CI head `35b230c`.
 Run the shared local validation command for each stage and preserve CI as a separate pending gate.
 No unchecked merge, paid runner, plan/payment change, or deployment is authorized by this deferral.
+
+Step07 is also complete locally on `feat/visits-waiting`, based on Step06 checkpoint `a068ef6`.
+Both local stages remain unpushed; CI PR#2 and main remain unchanged. Shared local validation
+passes 109 unit/22 integration tests with four migrations. This evidence does not establish a
+remote GitHub execution pass.

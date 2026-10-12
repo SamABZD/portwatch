@@ -64,6 +64,8 @@ class PortConfig(BaseModel):
     waiting_speed_knots: float = Field(ge=0)
     waiting_min_minutes: int = Field(gt=0)
     max_observation_gap_minutes: int = Field(gt=0)
+    visit_persistence_minutes: float = Field(default=2, gt=0)
+    visit_min_consistent_observations: int = Field(default=2, ge=2, le=100)
 
     @field_validator("timezone")
     @classmethod

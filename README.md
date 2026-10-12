@@ -1,6 +1,6 @@
 # PortWatch
 
-PortWatch is a $0, local-first data engineering portfolio project for the Port of Los Angeles. Steps 00–06 establish the Python CLI, source audit and frozen demo, durable raw storage, PostgreSQL/PostGIS bookkeeping, historical ingestion, a verified live collector, reproducible position cleaning, and versioned approximate spatial zones. Historical replay works without a live AIS key. No frontend or deployed site exists yet. GitHub CI Step 05A remains blocked by an account billing lock; the user authorized continuing local stages at $0.
+PortWatch is a $0, local-first data engineering portfolio project for the Port of Los Angeles. Steps 00–07 establish the Python CLI, source audit and frozen demo, durable raw storage, PostgreSQL/PostGIS bookkeeping, historical ingestion, a verified live collector, reproducible position cleaning, versioned approximate spatial zones, and deterministic visit/candidate-waiting inference. Historical replay works without a live AIS key. No frontend or deployed site exists yet. GitHub CI Step 05A remains blocked by an account billing lock; the user authorized continuing local stages at $0.
 
 ## Local setup
 
@@ -88,6 +88,21 @@ a Los Angeles visit. See [zone provenance and rules](docs/GEO_ZONES.md); the ign
 `artifacts/step06/los-angeles-zones.png` is a diagnostic plot, not a dashboard.
 
 PostgreSQL is the primary database; Railway is the preferred future deployment target. Deployment remains outside the current stage and subject to the $0 budget.
+
+## Visits and waiting candidates
+
+```powershell
+.\.venv\Scripts\python.exe -m portwatch transform visits --port los_angeles --demo
+.\.venv\Scripts\python.exe -m portwatch transform visits --port los_angeles --demo --as-of 2024-01-01T12:00:00Z
+.\.venv\Scripts\python.exe scripts/verify_visits.py
+```
+
+The saved historical day yields 230 inferred episodes: 14 completed under experimental rules and
+216 partial, plus one low-speed waiting candidate. Repeated observations confirm entry/exit;
+reporting gaps split continuity, and missing arrival/departure remain unknown. Reprocessing replaces
+affected histories transactionally, including obsolete IDs after late reports. `--as-of` is read-only
+and excludes future event times. Full-history rows are retrospective. The sole candidate reports
+pilot-vessel type50 and does not establish a cargo queue; see [inference contracts and track review](docs/VISITS.md).
 
 Project decisions and the current state are in [docs/DECISIONS.md](docs/DECISIONS.md) and [docs/HANDOFF.md](docs/HANDOFF.md).
 Contributions follow [CONTRIBUTING.md](CONTRIBUTING.md) and the [GitHub workflow](docs/GITHUB_WORKFLOW.md). The verified publication details are in [docs/GITHUB_SETUP.md](docs/GITHUB_SETUP.md).

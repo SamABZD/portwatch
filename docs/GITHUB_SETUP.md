@@ -44,6 +44,11 @@ On 2026-10-12, reran PR run38171408548 as attempt2 on latest CI head `35b230c6d4
 
 ### Exact proposed main protection (unapplied)
 
+Step07 has subsequently completed locally on `feat/visits-waiting`, based on Step06 checkpoint
+`a068ef69d055eb1cf3dd7bbd88fa3bcbab882c05`. Both stages remain unpushed. Local validation now
+passes 109 unit/22 integration tests with four migrations. The CI deferral and $0 authorization
+remain in force; local checks do not establish hosted GitHub execution.
+
 Apply using `PUT /repos/SamABZD/portwatch/branches/main/protection`, after rechecking for any stricter rules and observing actual successful check names:
 
 ```json

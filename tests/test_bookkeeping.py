@@ -46,7 +46,7 @@ def test_double_registration_and_migration_preserve_data(connection, tmp_path, s
     assert migrate(connection) == []
     assert migrate(connection) == []
     assert connection.execute("SELECT count(*) FROM ingestion_batches").fetchone() == (1,)
-    assert connection.execute("SELECT count(*) FROM schema_migrations").fetchone() == (3,)
+    assert connection.execute("SELECT count(*) FROM schema_migrations").fetchone() == (4,)
 
 
 def test_reconcile_recovers_after_rename_before_registration(connection, tmp_path, spec):
@@ -108,10 +108,10 @@ def test_edited_migration_rejected_and_new_bad_migration_rolled_back(connection,
         migrate(connection, tmp_path)
     for migration in directory.glob("*.sql"):
         (tmp_path / migration.name).write_text(migration.read_text())
-    (tmp_path / "004_synthetic_failure.sql").write_text(
+    (tmp_path / "005_synthetic_failure.sql").write_text(
         "CREATE TABLE synthetic_rollback (id bigint); SELECT nonexistent_synthetic_function();"
     )
     with pytest.raises(UndefinedFunction):
         migrate(connection, tmp_path)
     assert connection.execute("SELECT to_regclass('synthetic_rollback')").fetchone() == (None,)
-    assert connection.execute("SELECT count(*) FROM schema_migrations").fetchone() == (3,)
+    assert connection.execute("SELECT count(*) FROM schema_migrations").fetchone() == (4,)
