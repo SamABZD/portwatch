@@ -2,6 +2,7 @@
 
 | ID | Stage | Decision | Reason / revisit point |
 | --- | --- | --- | --- |
+| D-051 | 12 planning | Use Next.js/React/TypeScript for the map/replay frontend, with a read-only Python query API. | User requested Next.js on2026-10-12, superseding Streamlit/PyDeck. Preserve completed Python/PostGIS/Prefect work and all original replay/data-quality checks. See [FRONTEND_PLAN.md](FRONTEND_PLAN.md); implementation remains pending after Step11. |
 | D-001 | 00 | Use a src-layout Python package and `python -m portwatch` Typer CLI. | Keeps pipeline entry points testable and separate from future presentation code. |
 | D-002 | 00 | Use Python 3.11 locally, with project support through 3.14. | Python 3.12 is not installed on this machine; 3.11 is installed and mature for the selected dependencies. Recheck when a 3.12 interpreter is available. |
 | D-003 | 00 | Use `postgis/postgis:16-3.5` in Compose with a localhost port and named volume. | Maintainer documentation lists PostgreSQL 16 with PostGIS 3.5 and the `/var/lib/postgresql/data` mount path. Image existence was verified from documentation, but this machine cannot run it until Docker is installed. [Maintainer reference](https://github.com/postgis/docker-postgis). |

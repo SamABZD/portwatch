@@ -4,6 +4,10 @@ PortWatch is a $0, local-first data engineering portfolio project for the Port o
 
 ## Local setup
 
+The planned Step12 frontend is **Next.js with React/TypeScript**, as requested by the user.
+It will read the existing Python/PostGIS system through a query API. The UI is not built yet;
+see [frontend direction and acceptance criteria](docs/FRONTEND_PLAN.md).
+
 Step10 adds complete resumable workflows. With the existing PostgreSQL cluster running, apply
 all seven migrations, then keep this local Prefect server terminal open:
 

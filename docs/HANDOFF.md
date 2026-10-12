@@ -2,6 +2,11 @@
 
 ## Stage state
 
+- **Frontend preference updated2026-10-12: Next.js/React/TypeScript replaces Streamlit for Step12.**
+  Follow [FRONTEND_PLAN.md](FRONTEND_PLAN.md), reusing the existing Python/PostGIS pipeline via
+  a read-only query API. Keep the original map/replay acceptance criteria. This is a recorded
+  user preference; frontend/API implementation has not started. Step11 remains next.
+
 - Completed locally: Steps00,00A,01–10, including zones, visits/waiting, context, marts and **orchestration/backfills**. Native PostgreSQL17.11/PostGIS3.6.2 remains healthy;194 tests pass. Historical24-hour metrics/source hashes remain unchanged. No frontend or deployed site exists.
 - Project root: `C:\Users\samab\dataEngineering\portwatch`. Current branch: `feat/orchestration-backfills`, from Step09 checkpoint `5caeeb8badd0e3010f15bb6f39457417a7b638ed`. Steps06–10 remain unpushed; use `git log -1` for this stage's local checkpoint.
 - **Step05A remote CI remains blocked by the GitHub account billing lock.** User declined payment and authorized local continuation at$0. [Repository](https://github.com/SamABZD/portwatch), [CI PR#2](https://github.com/SamABZD/portwatch/pull/2); PR stays unmerged and proposed branch rules unapplied. No payment, account change, push or hosted deployment.
