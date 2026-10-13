@@ -1,0 +1,75 @@
+name: Validate
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.13.0"
+          python-version: "3.11"
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+          cache-python: false
+          prune-cache: true
+      - name: Lint, format, unit tests, and built package
+        run: uv run --locked --extra dev python scripts/validate.py --group quality
+
+  integration:
+    name: integration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgis:
+        image: postgis/postgis:17-3.6-alpine
+        env:
+          POSTGRES_DB: portwatch_ci
+          POSTGRES_USER: portwatch_ci
+          POSTGRES_PASSWORD: ephemeral_ci_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U portwatch_ci -d portwatch_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PORTWATCH_DB_HOST: 127.0.0.1
+      PORTWATCH_DB_PORT: "5432"
+      PORTWATCH_DB_NAME: portwatch_ci
+      PORTWATCH_DB_USER: portwatch_ci
+      PORTWATCH_DB_PASSWORD: ephemeral_ci_only
+      PORTWATCH_DB_SSLMODE: disable
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.13.0"
+          python-version: "3.11"
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+          cache-python: false
+          prune-cache: true
+      - name: Migrations and synthetic transaction/replay tests
+        run: uv run --locked --extra dev python scripts/validate.py --group integration

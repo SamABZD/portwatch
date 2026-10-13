@@ -1,0 +1,112 @@
+{
+  "type": "FeatureCollection",
+  "schema_version": 1,
+  "port_id": "los_angeles",
+  "version": "la-approx-v1",
+  "authored_on": "2026-10-12",
+  "coordinate_order": "longitude,latitude",
+  "srid": 4326,
+  "approximate": true,
+  "uncertainty": "Manually authored analytical vicinity polygons, reviewed against the 2023 official terminal schematic and saved 2024 AIS tracks. Boundaries are not surveyed, official, navigational, berth occupancy, or proof of waiting. Terminal vicinity polygons include adjacent water and land; coverage is partial.",
+  "validity": {
+    "status": "approximate_reviewed",
+    "reviewed_on": "2026-10-12",
+    "effective_from": null,
+    "effective_to": null,
+    "historical_use": "2024-01-01 demo approximation; operational validity at that date is unverified",
+    "east_limit": "Conservative collection edge -118.225; excludes reviewed Long Beach reference points"
+  },
+  "references": [
+    {
+      "title": "Port of Los Angeles cargo terminal schematic (2023-0035)",
+      "url": "https://kentico.portoflosangeles.org/getmedia/07e1377d-b452-4ecb-a629-9a0c69410805/pola_terminals_map",
+      "reviewed_on": "2026-10-12"
+    },
+    {
+      "title": "Official Port of Los Angeles terminal map entry point",
+      "url": "https://portoflosangeles.org/business/terminals/terminal-map",
+      "reviewed_on": "2026-10-12"
+    }
+  ],
+  "review_points": [
+    {"label": "Pier 400 vicinity reference", "coordinates": [-118.253, 33.730], "expected_zone_ids": ["la_harbor", "pier400_vicinity"]},
+    {"label": "West Basin vicinity reference", "coordinates": [-118.277, 33.770], "expected_zone_ids": ["la_harbor", "west_basin_vicinity"]},
+    {"label": "Long Beach Pier F exclusion reference", "coordinates": [-118.209, 33.754], "expected_zone_ids": []},
+    {"label": "Shared offshore candidate reference", "coordinates": [-118.270, 33.690], "expected_zone_ids": ["san_pedro_bay_candidate"]}
+  ],
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "la_harbor", "name": "Los Angeles harbor approximation",
+        "zone_type": "harbor", "attribution_scope": "port",
+        "uncertainty": "General harbor vicinity includes channels, yards and land. Not a legal boundary or complete water mask. Eastern coverage is deliberately conservative."
+      },
+      "geometry": {"type": "Polygon", "coordinates": [[
+        [-118.284,33.709],[-118.253,33.709],[-118.226,33.722],[-118.226,33.765],
+        [-118.237,33.773],[-118.240,33.785],[-118.265,33.786],[-118.282,33.774],
+        [-118.289,33.758],[-118.297,33.742],[-118.295,33.720],[-118.284,33.709]
+      ]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "west_basin_vicinity", "name": "West Basin terminal vicinity",
+        "zone_type": "terminal", "attribution_scope": "port",
+        "uncertainty": "Coarse WBCT and adjacent water vicinity; not individual berth or operator attribution."
+      },
+      "geometry": {"type": "Polygon", "coordinates": [[
+        [-118.284,33.758],[-118.267,33.758],[-118.267,33.778],[-118.279,33.777],
+        [-118.284,33.766],[-118.284,33.758]
+      ]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "terminal_island_vicinity", "name": "Yusen and Everport terminal vicinity",
+        "zone_type": "terminal", "attribution_scope": "port",
+        "uncertainty": "Broad west Terminal Island vicinity covering terminal edges and channel water; no berth occupancy inference."
+      },
+      "geometry": {"type": "Polygon", "coordinates": [[
+        [-118.271,33.742],[-118.252,33.742],[-118.239,33.761],[-118.249,33.769],
+        [-118.263,33.762],[-118.271,33.750],[-118.271,33.742]
+      ]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "fenix_vicinity", "name": "Fenix terminal vicinity",
+        "zone_type": "terminal", "attribution_scope": "port",
+        "uncertainty": "Approximate Pier 300 vicinity including approach water. Adjacent terminal vicinity overlap is retained."
+      },
+      "geometry": {"type": "Polygon", "coordinates": [[
+        [-118.252,33.735],[-118.229,33.735],[-118.229,33.752],[-118.240,33.758],
+        [-118.252,33.750],[-118.252,33.735]
+      ]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "pier400_vicinity", "name": "Pier 400 terminal vicinity",
+        "zone_type": "terminal", "attribution_scope": "port",
+        "uncertainty": "Approximate Pier 400 vicinity includes adjacent water and yard. Membership does not establish a call, berth use or waiting."
+      },
+      "geometry": {"type": "Polygon", "coordinates": [[
+        [-118.266,33.718],[-118.245,33.718],[-118.236,33.737],[-118.248,33.743],
+        [-118.264,33.738],[-118.266,33.718]
+      ]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "san_pedro_bay_candidate", "name": "San Pedro Bay regional candidate area",
+        "zone_type": "waiting_candidate", "attribution_scope": "region",
+        "uncertainty": "Shared offshore vicinity, not an official anchorage and not attributed to Los Angeles. Speed, duration and visit evidence belong to Step 07; candidate membership alone is not waiting."
+      },
+      "geometry": {"type": "Polygon", "coordinates": [[
+        [-118.310,33.675],[-118.235,33.675],[-118.235,33.710],[-118.260,33.716],
+        [-118.292,33.709],[-118.310,33.695],[-118.310,33.675]
+      ]]}
+    }
+  ]
+}

@@ -4,7 +4,9 @@ from dataclasses import dataclass
 from uuid import UUID, uuid4
 
 import psycopg
+from psycopg.pq import TransactionStatus
 
+from portwatch.events import emit
 from portwatch.storage import Manifest, RawStore, checksum_file
 
 
@@ -29,10 +31,19 @@ def register_batch(connection: psycopg.Connection, store: RawStore, manifest: Ma
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (batch_id) DO NOTHING RETURNING batch_id""",
             (
-                manifest.batch_id, manifest.source_id, manifest.dataset_id, manifest.source_url,
-                manifest.mode, manifest.local_path, manifest.content_sha256, manifest.byte_count,
-                manifest.record_count, manifest.received_at, manifest.source_start_utc,
-                manifest.source_end_utc, manifest.processing_version,
+                manifest.batch_id,
+                manifest.source_id,
+                manifest.dataset_id,
+                manifest.source_url,
+                manifest.mode,
+                manifest.local_path,
+                manifest.content_sha256,
+                manifest.byte_count,
+                manifest.record_count,
+                manifest.received_at,
+                manifest.source_start_utc,
+                manifest.source_end_utc,
+                manifest.processing_version,
             ),
         ).fetchone()
         if not inserted:
@@ -42,8 +53,12 @@ def register_batch(connection: psycopg.Connection, store: RawStore, manifest: Ma
                 (manifest.batch_id,),
             ).fetchone()
             expected = (
-                manifest.source_id, manifest.dataset_id, manifest.source_url,
-                manifest.content_sha256, manifest.local_path, manifest.byte_count,
+                manifest.source_id,
+                manifest.dataset_id,
+                manifest.source_url,
+                manifest.content_sha256,
+                manifest.local_path,
+                manifest.byte_count,
             )
             if existing != expected:
                 raise ValueError("registered batch conflicts with manifest")
@@ -74,10 +89,28 @@ def finish_batch_processing(
 
 
 def start_run(connection: psycopg.Connection, stage: str) -> UUID:
-    if stage not in {"storage_reconcile", "historical_ingest", "live_collect", "clean"}:
+    if stage not in {
+        "storage_reconcile",
+        "historical_ingest",
+        "live_collect",
+        "clean",
+        "zones",
+        "visits",
+        "weather_ingest",
+        "news_ingest",
+        "marts",
+    }:
         raise ValueError("unknown pipeline stage")
     run_id = uuid4()
     connection.execute("INSERT INTO pipeline_runs (run_id, stage) VALUES (%s, %s)", (run_id, stage))
+    emit(
+        "pipeline_run_started",
+        run_id=str(run_id),
+        stage=stage,
+        audit_visibility="committed"
+        if connection.info.transaction_status == TransactionStatus.IDLE
+        else "pending_transaction",
+    )
     return run_id
 
 
@@ -93,11 +126,27 @@ def finish_run(
         """UPDATE pipeline_runs SET ended_at = clock_timestamp(), status = %s,
         input_count = %s, output_count = %s, error_summary = %s
         WHERE run_id = %s AND status = 'running' RETURNING run_id""",
-        ("failed" if error else "succeeded", input_count, output_count,
-         safe_error(error) if error else None, run_id),
+        (
+            "failed" if error else "succeeded",
+            input_count,
+            output_count,
+            safe_error(error) if error else None,
+            run_id,
+        ),
     ).fetchone()
     if not changed:
         raise ValueError("run is not running")
+    emit(
+        "pipeline_run_finished",
+        run_id=str(run_id),
+        status="failed" if error else "succeeded",
+        input_count=input_count,
+        output_count=output_count,
+        error_class=safe_error(error) if error else None,
+        audit_visibility="committed"
+        if connection.info.transaction_status == TransactionStatus.IDLE
+        else "pending_transaction",
+    )
 
 
 @dataclass
@@ -125,7 +174,10 @@ def reconcile(connection: psycopg.Connection, store: RawStore) -> ReconcileResul
             else:
                 result.existing += 1
         finish_run(
-            connection, run_id, input_count=count, output_count=result.registered,
+            connection,
+            run_id,
+            input_count=count,
+            output_count=result.registered,
             error=(
                 ValueError("storage integrity issues") if result.pending or result.invalid else None
             ),

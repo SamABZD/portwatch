@@ -76,7 +76,9 @@ def historical_input(settings: Settings, store: RawStore, spec, parameters) -> C
     for item in store.inspect():
         parent = item.manifest
         if parent and (parent.source_id, parent.dataset_id, parent.source_url) == (
-            spec.source_id, spec.dataset_id, spec.source_url
+            spec.source_id,
+            spec.dataset_id,
+            spec.source_url,
         ):
             if item.state != "complete":
                 raise ValueError("historical raw storage integrity issue")
@@ -434,6 +436,9 @@ def transform_positions(
             report, reused = load_batch(
                 connection, source, settings.project_path(settings.quarantine_dir)
             )
+            from portwatch.profiles import enrich_input
+
+            enrich_input(connection, source)
             reports.append((source.input_id, report, reused))
         finish_run(
             connection,

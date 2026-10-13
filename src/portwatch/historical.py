@@ -31,7 +31,9 @@ EXTRACTION_VERSION = "noaa-la-subset-v2"
 BATCH_ROWS = 65_536
 MAX_DISTINCT_VESSELS = 50_000
 RUNTIME_VERSIONS = {
-    "pyarrow": pa.__version__, "shapely": shapely.__version__, "numpy": np.__version__,
+    "pyarrow": pa.__version__,
+    "shapely": shapely.__version__,
+    "numpy": np.__version__,
 }
 
 
@@ -65,8 +67,10 @@ class ExtractParameters(BaseModel):
 
 def derivation_identity(parent: Manifest, parameters: ExtractParameters) -> str:
     body = {
-        "parent_batch_id": parent.batch_id, "parent_raw_sha256": parent.content_sha256,
-        "parameters": parameters.model_dump(mode="json"), "runtime_versions": RUNTIME_VERSIONS,
+        "parent_batch_id": parent.batch_id,
+        "parent_raw_sha256": parent.content_sha256,
+        "parameters": parameters.model_dump(mode="json"),
+        "runtime_versions": RUNTIME_VERSIONS,
     }
     encoded = json.dumps(body, sort_keys=True, separators=(",", ":")).encode()
     return hashlib.sha256(encoded).hexdigest()
@@ -132,27 +136,35 @@ def _schema(source: pq.ParquetFile, parent: Manifest, identity: str) -> pa.Schem
     # GeoParquet defaults to WGS84 when the CRS key is absent; explicit null means unknown.
     crs = geometry.get("crs")
     crs_id = crs.get("id", {}) if isinstance(crs, dict) else {}
-    supported_crs = "crs" not in geometry or (
-        crs_id.get("authority"), str(crs_id.get("code"))
-    ) == ("EPSG", "4326")
+    supported_crs = "crs" not in geometry or (crs_id.get("authority"), str(crs_id.get("code"))) == (
+        "EPSG",
+        "4326",
+    )
     if geometry.get("encoding") != "WKB" or not supported_crs:
         raise ValueError("unsupported geometry encoding or CRS")
     geometry.pop("bbox", None)  # National extent must not describe a regional subset.
     geometry.pop("covering", None)
     fields = [
-        pa.field("longitude", pa.float64()), pa.field("latitude", pa.float64()),
+        pa.field("longitude", pa.float64()),
+        pa.field("latitude", pa.float64()),
         pa.field("observed_at_utc", pa.timestamp("ms", tz="UTC")),
-        pa.field("source_row_offset", pa.uint64()), pa.field("source_batch_id", pa.string()),
-        pa.field("source_id", pa.string()), pa.field("dataset_id", pa.string()),
-        pa.field("derivation_id", pa.string()), pa.field("source_time_quality", pa.string()),
+        pa.field("source_row_offset", pa.uint64()),
+        pa.field("source_batch_id", pa.string()),
+        pa.field("source_id", pa.string()),
+        pa.field("dataset_id", pa.string()),
+        pa.field("derivation_id", pa.string()),
+        pa.field("source_time_quality", pa.string()),
     ]
     if any(field.name in source.schema_arrow.names for field in fields):
         raise ValueError("source columns conflict with lineage fields")
     schema = pa.schema(list(source.schema_arrow) + fields)
-    return schema.with_metadata({
-        b"geo": json.dumps(geo).encode(), b"parent_raw_sha256": parent.content_sha256.encode(),
-        b"derivation_id": identity.encode(),
-    })
+    return schema.with_metadata(
+        {
+            b"geo": json.dumps(geo).encode(),
+            b"parent_raw_sha256": parent.content_sha256.encode(),
+            b"derivation_id": identity.encode(),
+        }
+    )
 
 
 def _extent(timestamps):
@@ -210,9 +222,13 @@ def extract(
                 points = shapely.from_wkb(table["geometry"].to_pylist(), on_invalid="ignore")
                 longitude, latitude = shapely.get_x(points), shapely.get_y(points)
                 valid = (
-                    (shapely.get_type_id(points) == 0) & np.isfinite(longitude)
-                    & np.isfinite(latitude) & (longitude >= -180) & (longitude <= 180)
-                    & (latitude >= -90) & (latitude <= 90)
+                    (shapely.get_type_id(points) == 0)
+                    & np.isfinite(longitude)
+                    & np.isfinite(latitude)
+                    & (longitude >= -180)
+                    & (longitude <= 180)
+                    & (latitude >= -90)
+                    & (latitude <= 90)
                 )
                 bad_coordinates += int(np.count_nonzero(~valid))
                 # Named latitude/longitude fields are decoded before this collection filter.
@@ -225,16 +241,21 @@ def extract(
                 if low is not None:
                     source_earliest = low if source_earliest is None else min(source_earliest, low)
                     source_latest = high if source_latest is None else max(source_latest, high)
-                time_mask = pc.fill_null(pc.and_(
-                    pc.greater_equal(times, pa.scalar(parameters.start_utc, type=times.type)),
-                    pc.less(times, pa.scalar(parameters.end_utc, type=times.type)),
-                ), False).to_numpy(zero_copy_only=False)
+                time_mask = pc.fill_null(
+                    pc.and_(
+                        pc.greater_equal(times, pa.scalar(parameters.start_utc, type=times.type)),
+                        pc.less(times, pa.scalar(parameters.end_utc, type=times.type)),
+                    ),
+                    False,
+                ).to_numpy(zero_copy_only=False)
                 selected = region & time_mask
                 regional = table.filter(pa.array(selected))
                 count = regional.num_rows
                 regional_times = times.filter(pa.array(selected))
                 added = [
-                    pa.array(longitude[selected]), pa.array(latitude[selected]), regional_times,
+                    pa.array(longitude[selected]),
+                    pa.array(latitude[selected]),
+                    regional_times,
                     pa.array(np.arange(offset, rows, dtype=np.uint64)[selected]),
                     pa.array([parent.batch_id] * count, type=pa.string()),
                     pa.array([parent.source_id] * count, type=pa.string()),
@@ -255,11 +276,13 @@ def extract(
                     earliest = low if earliest is None else min(earliest, low)
                     latest = high if latest is None else max(latest, high)
                     for index in range(min(count, 5 - len(preview))):
-                        preview.append({
-                            "timestamp_utc": regional_times[index].as_py().isoformat(),
-                            "longitude": float(longitude[selected][index]),
-                            "latitude": float(latitude[selected][index]),
-                        })
+                        preview.append(
+                            {
+                                "timestamp_utc": regional_times[index].as_py().isoformat(),
+                                "longitude": float(longitude[selected][index]),
+                                "latitude": float(latitude[selected][index]),
+                            }
+                        )
         source.close()
         if rows != total_rows:
             raise ValueError("not all source rows were inspected")
@@ -268,18 +291,32 @@ def extract(
         checksum, size = checksum_file(temporary)
         peak, measurement = peak_process_memory()
         manifest = DerivedManifest(
-            derivation_id=identity, parent_batch_id=parent.batch_id,
-            parent_raw_sha256=parent.content_sha256, parent_raw_path=parent.local_path,
-            source_id=parent.source_id, dataset_id=parent.dataset_id, parameters=parameters,
+            derivation_id=identity,
+            parent_batch_id=parent.batch_id,
+            parent_raw_sha256=parent.content_sha256,
+            parent_raw_path=parent.local_path,
+            source_id=parent.source_id,
+            dataset_id=parent.dataset_id,
+            parameters=parameters,
             runtime_versions=RUNTIME_VERSIONS,
             artifact_path=artifact.relative_to(derived_root).as_posix(),
-            content_sha256=checksum, byte_count=size, source_rows_inspected=rows,
-            region_rows=region_count, unusable_coordinate_rows=bad_coordinates,
-            missing_timestamp_rows=missing_times, rows_selected=selected_count,
-            distinct_vessels=len(vessels), earliest_utc=earliest, latest_utc=latest,
-            source_earliest_utc=source_earliest, source_latest_utc=source_latest, preview=preview,
-            max_batch_rows_observed=max_batch, elapsed_seconds=time.perf_counter() - started,
-            peak_process_memory_bytes=peak, memory_measurement=measurement,
+            content_sha256=checksum,
+            byte_count=size,
+            source_rows_inspected=rows,
+            region_rows=region_count,
+            unusable_coordinate_rows=bad_coordinates,
+            missing_timestamp_rows=missing_times,
+            rows_selected=selected_count,
+            distinct_vessels=len(vessels),
+            earliest_utc=earliest,
+            latest_utc=latest,
+            source_earliest_utc=source_earliest,
+            source_latest_utc=source_latest,
+            preview=preview,
+            max_batch_rows_observed=max_batch,
+            elapsed_seconds=time.perf_counter() - started,
+            peak_process_memory_bytes=peak,
+            memory_measurement=measurement,
             created_at=datetime.now(UTC),
         )
         with _publication_lock(directory):

@@ -12,7 +12,7 @@ import yaml
 from portwatch.bookkeeping import finish_run, register_batch, start_run
 from portwatch.download import acquire
 from portwatch.historical import DerivedManifest, ExtractParameters, extract
-from portwatch.settings import Settings, load_port_config
+from portwatch.settings import Settings, for_port, load_port_config
 from portwatch.storage import BatchSpec, RawStore
 
 SOURCE_ID = "noaa_ocm_ais_2024_geoparquet"
@@ -41,9 +41,10 @@ def _date(value: str) -> date:
 def plan(
     settings: Settings, port_id: str, demo: bool, start: str | None, end: str | None
 ) -> list[tuple[BatchSpec, ExtractParameters]]:
+    settings = for_port(settings, port_id)
     port = load_port_config(settings.project_path(settings.port_config))
-    if port_id != port.port_id or port_id != "los_angeles":
-        raise ValueError("only configured los_angeles is supported in this stage")
+    if port_id != port.port_id:
+        raise ValueError("select a configured port")
     if port.bounding_box is None:
         raise ValueError("collection bounding box is required")
     configured = yaml.safe_load(settings.project_path(settings.demo_config).read_text("utf-8"))
@@ -75,18 +76,28 @@ def plan(
         url = SOURCE_ROOT + f"ais-{day.isoformat()}.parquet"
         if demo and configured["noaa_url"] != url:
             raise ValueError("demo URL must match its selected NOAA day")
-        dataset = configured["dataset_id"] if demo else (
-            f"{port_id}_{day:%Y_%m_%d}_noaa_ocm_geoparquet_v1"
+        dataset = (
+            configured["dataset_id"]
+            if demo
+            else (f"{port_id}_{day:%Y_%m_%d}_noaa_ocm_geoparquet_v1")
         )
         day_start = datetime.combine(day, datetime.min.time(), tzinfo=UTC)
         day_end = day_start + timedelta(days=1)
         spec = BatchSpec(
-            source_id=SOURCE_ID, dataset_id=dataset, source_url=url, mode="historical",
-            source_date=day, source_start_utc=day_start, source_end_utc=day_end,
+            source_id=SOURCE_ID,
+            dataset_id=dataset,
+            source_url=url,
+            mode="historical",
+            source_date=day,
+            source_start_utc=day_start,
+            source_end_utc=day_end,
             file_suffix=".parquet",
         )
         parameters = ExtractParameters(
-            port_id=port_id, bounding_box=port.bounding_box, start_utc=day_start, end_utc=day_end,
+            port_id=port_id,
+            bounding_box=port.bounding_box,
+            start_utc=day_start,
+            end_utc=day_end,
         )
         requests.append((spec, parameters))
     return requests
@@ -117,10 +128,14 @@ def ingest_historical(
             derived, reused = extract(raw_path, transfer.manifest, parameters, derived_root)
             inspected += derived.source_rows_inspected
             selected += derived.rows_selected
-            results.append(HistoricalResult(
-                manifest=derived, downloaded=transfer.downloaded, reused_extract=reused,
-                elapsed_seconds=time.perf_counter() - started,
-            ))
+            results.append(
+                HistoricalResult(
+                    manifest=derived,
+                    downloaded=transfer.downloaded,
+                    reused_extract=reused,
+                    elapsed_seconds=time.perf_counter() - started,
+                )
+            )
         finish_run(connection, run_id, input_count=inspected, output_count=selected)
     except Exception as error:
         finish_run(connection, run_id, input_count=inspected, output_count=selected, error=error)

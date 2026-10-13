@@ -3,6 +3,7 @@
 import asyncio
 import base64
 import json
+import os
 import threading
 import time
 from contextlib import suppress
@@ -58,8 +59,8 @@ def make_collector(tmp_path: Path, **kwargs) -> LiveCollector:
         tmp_path / "status.json",
         **{
             "flush_seconds": 0.02,
-            "ping_interval": 0.03,
-            "ping_timeout": 0.03,
+            "ping_interval": 0.1,
+            "ping_timeout": 1,
             "backoff_base": 0.01,
             "backoff_max": 0.04,
             **kwargs,
@@ -161,19 +162,55 @@ def test_reconnects_keep_distinct_sessions_and_reset_stable_backoff(tmp_path, mo
         await socket.send(CONFIRMATION)
         await socket.send(POSITION_FRAME)
         if connections == 2:
-            await asyncio.sleep(0.08)  # Exceeds test stable-connection threshold.
+            await asyncio.sleep(0.3)  # Exceeds test stable-connection threshold.
         if connections <= 2:
             await socket.close(code=1011)
         else:
             await socket.wait_closed()
 
-    collector, error = run_server(tmp_path, handler, duration=2, stable_seconds=0.04)
+    # This test targets reconnect/backoff, not sub-30ms heartbeat timing on a busy laptop.
+    collector, error = run_server(
+        tmp_path, handler, duration=2, stable_seconds=0.15, ping_interval=0.1, ping_timeout=0.5
+    )
     assert error is None and connections == 3
     assert collector.status.reconnect_count == 2
     assert collector.status.last_backoff_seconds == pytest.approx(0.01)
     records = saved_records(collector)
     assert len({record.connection_session for record in records}) == 3
     assert collector.status.observations == 3
+
+
+def test_heartbeat_cancellation_survives_simultaneous_completed_pong(tmp_path):
+    async def scenario():
+        collector = make_collector(tmp_path, ping_interval=0.001, ping_timeout=1)
+        task = None
+
+        class Socket:
+            pings = 0
+
+            async def ping(self):
+                self.pings += 1
+                pong = asyncio.get_running_loop().create_future()
+                if self.pings == 1:
+                    asyncio.get_running_loop().call_soon(task.cancel)
+
+                    def complete():
+                        if not pong.done():
+                            pong.set_result(None)
+
+                    asyncio.get_running_loop().call_soon(complete)
+                return pong
+
+            async def close(self):
+                pass
+
+        socket = Socket()
+        task = asyncio.create_task(collector._heartbeat(socket))
+        with pytest.raises(asyncio.CancelledError):
+            await asyncio.wait_for(task, timeout=0.2)
+        assert socket.pings == 1
+
+    asyncio.run(scenario())
 
 
 @pytest.mark.parametrize(
@@ -371,6 +408,8 @@ def test_complete_corrupt_active_record_is_not_silently_skipped(tmp_path):
 
 
 def test_rotation_by_size_time_hour_and_frequent_durable_flush(tmp_path, monkeypatch):
+    clock = [100.0]
+    monkeypatch.setattr("portwatch.live_spool.time.monotonic", lambda: clock[0])
     spec = synthetic_spec()
     spool = LiveSpool(
         tmp_path / "active",
@@ -388,10 +427,10 @@ def test_rotation_by_size_time_hour_and_frequent_durable_flush(tmp_path, monkeyp
     assert spool.append(
         envelope(spec, sequence=3, received_at=datetime(2026, 10, 11, 13, tzinfo=UTC))
     )  # Hour.
-    time.sleep(0.015)
+    clock[0] += 0.015
     before_flush = len(flushes)
     assert spool.tick() == [] and len(flushes) > before_flush
-    time.sleep(0.02)
+    clock[0] += 0.02
     assert spool.tick()  # Short interval rotation.
     assert len(spool.store.inspect()) == 3
 
@@ -484,19 +523,78 @@ def test_periodic_status_updates_during_connected_idle_capture(tmp_path):
                 status_interval=0.02,
             )
             task = asyncio.create_task(collector.run(stop_event=stop))
-            for _ in range(100):
-                await asyncio.sleep(0.01)
-                if collector.status_path.exists():
-                    report = json.loads(collector.status_path.read_text())
-                    if report["observations"] == 1 and report["last_socket_heartbeat"]:
-                        break
-            else:
-                pytest.fail("live metrics did not advance while connected")
-            assert report["connected"] and report["state"] == "subscribed"
-            stop.set()
-            await task
+            try:
+                async with asyncio.timeout(3):
+                    while True:
+                        await asyncio.sleep(0.01)
+                        if collector.status_path.exists():
+                            report = json.loads(collector.status_path.read_text())
+                            if report["observations"] == 1 and report["last_socket_heartbeat"]:
+                                break
+                assert report["connected"] and report["state"] == "subscribed"
+            finally:
+                stop.set()
+                await asyncio.wait_for(task, timeout=3)
 
     asyncio.run(scenario())
+
+
+@pytest.mark.parametrize("winerror", [5, 32, 33])
+def test_status_publication_retries_transient_windows_reader_collision(
+    tmp_path, monkeypatch, winerror
+):
+    collector = make_collector(tmp_path)
+    replace = os.replace
+    attempts = []
+
+    def briefly_locked(source, target):
+        attempts.append(target)
+        if len(attempts) == 1:
+            error = PermissionError("synthetic Windows status reader collision")
+            error.winerror = winerror
+            raise error
+        replace(source, target)
+
+    monkeypatch.setattr("portwatch.live.os.replace", briefly_locked)
+    asyncio.run(collector.publish_status())
+    assert attempts == [collector.status_path] * 2
+    assert json.loads(collector.status_path.read_text())["state"] == "starting"
+
+
+def test_permanent_status_access_denial_is_bounded_and_keeps_previous_snapshot(
+    tmp_path, monkeypatch
+):
+    collector = make_collector(tmp_path)
+    asyncio.run(collector.publish_status())
+    original = collector.status_path.read_bytes()
+    attempts, waits = [], []
+
+    def denied(source, target):
+        attempts.append(target)
+        error = PermissionError("synthetic persistent denial")
+        error.winerror = 5
+        raise error
+
+    monkeypatch.setattr("portwatch.live.os.replace", denied)
+    monkeypatch.setattr("portwatch.live.time.sleep", waits.append)
+    with pytest.raises(PermissionError):
+        asyncio.run(collector.publish_status())
+    assert len(attempts) == 5 and waits == [0.01, 0.02, 0.04, 0.08]
+    assert collector.status_path.read_bytes() == original
+
+
+def test_other_status_permission_failure_is_not_retried(tmp_path, monkeypatch):
+    collector = make_collector(tmp_path)
+    attempts = []
+
+    def denied(*_):
+        attempts.append(True)
+        raise PermissionError("synthetic non-Windows error")
+
+    monkeypatch.setattr("portwatch.live.os.replace", denied)
+    with pytest.raises(PermissionError):
+        asyncio.run(collector.publish_status())
+    assert len(attempts) == 1
 
 
 def test_cancelled_recovery_joins_worker_before_releasing_collector_lock(tmp_path, monkeypatch):

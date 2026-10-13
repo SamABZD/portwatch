@@ -1,7 +1,9 @@
 """PortWatch command line interface."""
 
 import asyncio
+import json
 import time
+from datetime import datetime
 from pathlib import Path
 from typing import Annotated
 
@@ -9,23 +11,450 @@ import typer
 
 from portwatch.bookkeeping import finish_run, reconcile, register_batch, start_run
 from portwatch.cleaning import transform_positions
+from portwatch.context import ContextError, plan_context
+from portwatch.context_storage import ingest_context
 from portwatch.db import connect_db, migrate
 from portwatch.doctor import diagnose, required_checks_pass
 from portwatch.download import DownloadError
 from portwatch.ingest import artifact_path, ingest_historical, plan
 from portwatch.live import CaptureError, LiveCollector, live_spec
+from portwatch.marts import MartError, transform_marts
 from portwatch.settings import Settings
 from portwatch.storage import RawStore
+from portwatch.visit_storage import transform_visits
+from portwatch.visits import InferenceError, utc
+from portwatch.zones import configured_geofence, load_geofence, transform_zones
 
 app = typer.Typer(help="PortWatch local data engineering commands.")
 db_app = typer.Typer(help="PostgreSQL schema commands.")
 storage_app = typer.Typer(help="Verify raw files and recover database registration.")
 ingest_app = typer.Typer(help="Acquire historical AIS or collect live AIS independently.")
 transform_app = typer.Typer(help="Normalize saved source batches with deterministic lineage.")
+geo_app = typer.Typer(help="Load immutable approximate analytical geofences.")
+pipeline_app = typer.Typer(help="Finite historical, live and context workflows; local recovery.")
+orchestrate_app = typer.Typer(help="Local Prefect server and scheduled finite jobs.")
 app.add_typer(db_app, name="db")
 app.add_typer(storage_app, name="storage")
 app.add_typer(ingest_app, name="ingest")
 app.add_typer(transform_app, name="transform")
+app.add_typer(geo_app, name="geo")
+app.add_typer(pipeline_app, name="pipeline")
+app.add_typer(orchestrate_app, name="orchestrate")
+demo_app = typer.Typer(help="Read-only Next.js query API and portable historical preparation.")
+app.add_typer(demo_app, name="demo")
+
+
+@demo_app.command("serve")
+def demo_serve(
+    listen_port: Annotated[int, typer.Option(min=1024, max=65535)] = 8000,
+    prepared: Annotated[
+        Path | None, typer.Option(help="Verified prepared JSON; no database needed.")
+    ] = None,
+):
+    """Serve bounded queries on localhost; never start collection or migrations."""
+    import uvicorn
+
+    from portwatch.demo.api import create_app
+
+    try:
+        settings = Settings()
+        application = create_app(
+            settings, prepared=settings.project_path(prepared) if prepared else None
+        )
+    except Exception as error:
+        typer.echo(f"Replay unavailable: {type(error).__name__}", err=True)
+        raise typer.Exit(code=1) from None
+    uvicorn.run(application, host="127.0.0.1", port=listen_port, access_log=False)
+
+
+@demo_app.command("export")
+def demo_export(output: Annotated[Path, typer.Option(help="New prepared historical JSON path.")]):
+    """Export only cleaned port data, zones and matching context; preserve a checksum."""
+    from portwatch.demo.replay import ReplayError, export_prepared
+
+    try:
+        typer.echo(json.dumps(export_prepared(Settings(), output), indent=2))
+    except Exception as error:
+        reason = str(error) if isinstance(error, ReplayError) else type(error).__name__
+        typer.echo(f"Preparation failed: {reason}", err=True)
+        raise typer.Exit(code=1) from None
+
+
+def operational_logs(
+    log_json: Annotated[
+        bool, typer.Option(help="Structured operational events on stderr.")
+    ] = False,
+):
+    if log_json:
+        from portwatch.events import enable_event_logs
+
+        return enable_event_logs()
+
+
+@app.command("health")
+def health_command(
+    port: str = "los_angeles", json_output: Annotated[bool, typer.Option("--json")] = False
+):
+    """Read-only historical readiness, live freshness, backlog and source health."""
+    from portwatch.health import collect_health, human_health
+
+    try:
+        report = collect_health(Settings(), port)
+        typer.echo(json.dumps(report, indent=2) if json_output else human_health(report))
+    except Exception as error:
+        typer.echo(f"Health unavailable: {type(error).__name__}", err=True)
+        raise typer.Exit(code=2) from None
+    if report["overall"] != "ok":
+        raise typer.Exit(code=1)
+
+
+@db_app.command("backup")
+def db_backup(
+    output: Annotated[Path, typer.Option(help="New .dump archive path; never overwrite.")],
+    verify: bool = True,
+):
+    """Dump a consistent snapshot; verify by restoring only into a newly owned test database."""
+    from portwatch.backup import BackupError, create_backup
+
+    try:
+        typer.echo(json.dumps(create_backup(Settings(), output, verify=verify), indent=2))
+    except Exception as error:
+        code = str(error) if isinstance(error, BackupError) else type(error).__name__
+        typer.echo(f"Backup failed: {code}", err=True)
+        raise typer.Exit(code=1) from None
+
+
+@db_app.command("verify-backup")
+def db_verify_backup(
+    file: Annotated[Path, typer.Option(help="Archive with matching checksum manifest.")],
+):
+    """Verify a saved archive without restoring over the analytical database."""
+    from portwatch.backup import BackupError, verify_backup
+
+    try:
+        typer.echo(json.dumps(verify_backup(Settings(), file), indent=2))
+    except Exception as error:
+        code = str(error) if isinstance(error, BackupError) else type(error).__name__
+        typer.echo(f"Backup verification failed: {code}", err=True)
+        raise typer.Exit(code=1) from None
+
+
+def pipeline_command(
+    kind, port, demo=False, start=None, end=None, stop_after_raw=False, rebuild=False, local=False
+):
+    from portwatch.pipeline import PipelineError, run_context, run_historical, run_live, sanitized
+
+    try:
+        if kind in {"run", "backfill"}:
+            # Validate dates and configured port before making a Prefect API request.
+            plan(Settings(), port, demo, start, end)
+        if local:
+            if kind in {"run", "backfill"}:
+                result = run_historical(
+                    port,
+                    demo=demo,
+                    start=start,
+                    end=end,
+                    stop_after_raw=stop_after_raw,
+                    force=rebuild,
+                )
+            elif kind == "live":
+                result = run_live(port)
+            else:
+                result = run_context(kind, port)
+        else:
+            from portwatch.orchestration import (
+                backfill_flow,
+                historical_flow,
+                live_flow,
+                news_flow,
+                weather_flow,
+            )
+
+            if kind == "run":
+                result = historical_flow(port, stop_after_raw, rebuild)
+            elif kind == "backfill":
+                result = backfill_flow(port, start, end, rebuild)
+            else:
+                result = {"live": live_flow, "weather": weather_flow, "news": news_flow}[kind](port)
+        typer.echo(json.dumps(result, indent=2, default=str))
+        if result.get("status") in {"failed", "busy"}:
+            raise PipelineError("pipeline_" + result["status"])
+    except Exception as error:
+        typer.echo(f"Pipeline stopped: {sanitized(error).code}", err=True)
+        raise typer.Exit(code=1) from None
+
+
+@pipeline_app.command("run")
+def pipeline_run(
+    port: str = "los_angeles",
+    demo: bool = False,
+    rebuild: bool = False,
+    local: bool = False,
+    stop_after_raw: bool = False,
+):
+    """Run the frozen demo; --local bypasses Prefect for recovery; --rebuild republishes."""
+    if not demo:
+        typer.echo("Select --demo for the frozen historical workflow.", err=True)
+        raise typer.Exit(code=2)
+    pipeline_command(
+        "run", port, demo=True, stop_after_raw=stop_after_raw, rebuild=rebuild, local=local
+    )
+
+
+@pipeline_app.command("backfill")
+def pipeline_backfill(
+    start: Annotated[str, typer.Option(help="Inclusive UTC date, YYYY-MM-DD.")],
+    end: Annotated[str, typer.Option(help="Exclusive UTC date, YYYY-MM-DD.")],
+    port: str = "los_angeles",
+    rebuild: bool = False,
+    local: bool = False,
+):
+    """Process 1–7 NOAA 2024 UTC days, inclusive start and exclusive end."""
+    pipeline_command("backfill", port, start=start, end=end, rebuild=rebuild, local=local)
+
+
+@pipeline_app.command("live")
+def pipeline_live(port: str = "los_angeles", local: bool = False):
+    """Process completed saved live batches and report event freshness."""
+    pipeline_command("live", port, local=local)
+
+
+@pipeline_app.command("weather")
+def pipeline_weather(port: str = "los_angeles", local: bool = False):
+    """Finite current forecast fetch, independent of AIS and news."""
+    pipeline_command("weather", port, local=local)
+
+
+@pipeline_app.command("news")
+def pipeline_news(port: str = "los_angeles", local: bool = False):
+    """Finite recent article fetch, independent of AIS and weather."""
+    pipeline_command("news", port, local=local)
+
+
+@orchestrate_app.command("server")
+def orchestrate_server():
+    """Run the local Prefect API/UI and SQLite metadata; stop with Ctrl+C."""
+    from portwatch.orchestration import start_local_server
+
+    start_local_server()
+
+
+@orchestrate_app.command("serve")
+def orchestrate_serve(port: str = "los_angeles"):
+    """Keep minute live processing and independent hourly context deployments running."""
+    from portwatch.orchestration import serve_local
+
+    serve_local(port)
+
+
+@orchestrate_app.command("pause")
+def orchestrate_pause():
+    """Pause our schedules before stopping the serving process."""
+    from portwatch.orchestration import pause_local
+
+    pause_local()
+
+
+@transform_app.command("marts")
+def marts_transform(
+    port: Annotated[str, typer.Option(help="Configured port ID.")] = "los_angeles",
+    demo: Annotated[
+        bool, typer.Option(help="Build the historical hourly analytical partition.")
+    ] = False,
+    as_of: Annotated[
+        str | None, typer.Option(help="Read-only event-time prefix; explicit UTC ISO.")
+    ] = None,
+) -> None:
+    """Publish source-separated metrics or reconstruct a prefix without persistent writes."""
+    if not demo:
+        typer.echo("Select --demo for the saved historical dataset.", err=True)
+        raise typer.Exit(code=2)
+    try:
+        cutoff = datetime.fromisoformat(as_of.replace("Z", "+00:00")) if as_of else None
+        if cutoff:
+            utc(cutoff)
+        with connect_db(Settings()) as connection:
+            config, result = transform_marts(Settings(), connection, port, as_of_utc=cutoff)
+        if cutoff:
+            typer.echo(
+                f"Event-time prefix: {cutoff}; hours: {len(result)}; "
+                f"completed hours: {sum(row['complete_hour'] for row in result)}"
+            )
+            if result:
+                last = result[-1]
+                typer.echo(
+                    f"Last hour: {last['hour_utc']}; complete: {last['complete_hour']}; "
+                    f"observations: {last['observation_count']}; "
+                    f"snapshot: {last['snapshot_vessel_count']}"
+                )
+        else:
+            typer.echo(
+                f"Partition: {result.partition_id}; analytical version: {result.analytical_version}"
+            )
+            typer.echo(
+                f"Hours: {result.hours}; observations: {result.observations}; "
+                f"confirmed arrivals: {result.arrivals}; departures: {result.departures}; "
+                f"completed dwell samples: {result.completed_dwell_samples}; "
+                f"candidate-vessel hours: {result.waiting_vessel_hours}"
+            )
+        typer.echo(
+            f"Weather revision: {config.weather_batch_id or 'unavailable'}; "
+            "metrics describe observed reports and experimental inference, not total coverage."
+        )
+    except Exception as error:
+        detail = (
+            str(error) if isinstance(error, (MartError, InferenceError)) else type(error).__name__
+        )
+        typer.echo(f"Mart transform failed: {detail}", err=True)
+        raise typer.Exit(code=1) from None
+
+
+def context_ingest(kind: str, port: str, demo: bool, refresh: bool) -> None:
+    try:
+        settings = Settings()
+        request = plan_context(settings, port, kind, demo=demo)
+        with connect_db(settings) as connection:
+            result = ingest_context(settings, connection, request, refresh=refresh)
+        typer.echo(
+            f"Product: {request.product}; UTC interval: {request.start_utc} to {request.end_utc}"
+        )
+        typer.echo(
+            f"Response: {'reused' if result.reused else 'stored'}; rows: {result.rows}; "
+            f"retrieved UTC: {result.retrieved_at}; batch: {result.batch_id}"
+        )
+        typer.echo("Quality: " + str(result.quality))
+        if kind == "news":
+            typer.echo(
+                "Potential disruption mentions; coverage is not exhaustive. "
+                "First seen is not publication time. Excluded from the historical demo."
+            )
+        else:
+            typer.echo(
+                "Model output; retrieval time is not model issue time. Wind m/s; precipitation mm."
+            )
+    except Exception as error:
+        detail = error.code if isinstance(error, ContextError) else type(error).__name__
+        typer.echo(f"{kind.title()} ingestion failed: {detail}", err=True)
+        if isinstance(error, ContextError) and error.next_allowed_at:
+            typer.echo(f"Next allowed UTC: {error.next_allowed_at}", err=True)
+        raise typer.Exit(code=1) from None
+
+
+@ingest_app.command("weather")
+def weather_ingest(
+    port: Annotated[str, typer.Option(help="Configured port ID.")] = "los_angeles",
+    demo: Annotated[bool, typer.Option(help="Frozen historical reanalysis period.")] = False,
+    refresh: Annotated[
+        bool, typer.Option(help="Select a fresh saved revision; respects cooldown.")
+    ] = False,
+) -> None:
+    """Acquire historical ERA5 or the current UTC day plus next-day forecast."""
+    context_ingest("weather", port, demo, refresh)
+
+
+@ingest_app.command("news")
+def news_ingest(
+    port: Annotated[str, typer.Option(help="Configured port ID.")] = "los_angeles",
+    refresh: Annotated[
+        bool, typer.Option(help="Refresh bounded recent window; respects cooldown.")
+    ] = False,
+) -> None:
+    """Acquire recent GDELT article metadata, preserving empty and failed states."""
+    context_ingest("news", port, False, refresh)
+
+
+@transform_app.command("visits")
+def visits_transform(
+    port: Annotated[str, typer.Option(help="Configured port ID.")] = "los_angeles",
+    demo: Annotated[bool, typer.Option(help="Infer from the saved historical dataset.")] = False,
+    as_of: Annotated[
+        str | None, typer.Option(help="Read-only UTC event-time prefix; ISO timestamp.")
+    ] = None,
+    version: Annotated[str | None, typer.Option(help="Previously loaded geofence version.")] = None,
+) -> None:
+    """Infer visits and waiting candidates; retain gaps, partials and timing uncertainty."""
+    if not demo:
+        typer.echo("Select --demo for the saved historical dataset.", err=True)
+        raise typer.Exit(code=2)
+    cutoff = None
+    if as_of:
+        try:
+            cutoff = datetime.fromisoformat(as_of.replace("Z", "+00:00"))
+            utc(cutoff)
+        except ValueError:
+            typer.echo("--as-of requires an explicit UTC ISO timestamp.", err=True)
+            raise typer.Exit(code=2) from None
+    try:
+        settings = Settings()
+        with connect_db(settings) as connection:
+            selected, rules, counts = transform_visits(
+                settings, connection, port, as_of_utc=cutoff, version=version
+            )
+        typer.echo(
+            f"Geofence: {selected}; rules: {rules.rule_id}; "
+            f"mode: {'read-only event-time prefix' if cutoff else 'retrospective full-history'}"
+        )
+        typer.echo(
+            f"Positions: {counts.positions}; tracks: {counts.tracks}; visits: {counts.visits}; "
+            f"completed: {counts.completed_visits}; partial: {counts.partial_visits}; "
+            f"waiting candidates: {counts.waiting_episodes}; "
+            f"region only: {counts.regional_candidates}; "
+            f"visit associated: {counts.port_associated_candidates}"
+        )
+        typer.echo("Waiting is a low-speed observation proxy, not a confirmed port queue.")
+    except Exception as error:
+        detail = str(error) if isinstance(error, InferenceError) else type(error).__name__
+        typer.echo(f"Visit inference failed: {detail}", err=True)
+        raise typer.Exit(code=1) from None
+
+
+@geo_app.command("load")
+def geo_load(
+    port: Annotated[str, typer.Option(help="Configured port ID.")] = "los_angeles",
+    file: Annotated[Path | None, typer.Option(help="Versioned GeoJSON override.")] = None,
+) -> None:
+    """Validate polygons without repair and load or reuse an immutable version."""
+    try:
+        settings = Settings()
+        geofence = configured_geofence(settings, port, file)
+        with connect_db(settings) as connection:
+            created = load_geofence(connection, geofence)
+        typer.echo(
+            f"Geofence {geofence.document.version}: {'loaded' if created else 'reused'}; "
+            f"zones: {len(geofence.document.features)}; SHA-256: {geofence.content_sha256}"
+        )
+        typer.echo("Approximate analytical zones; candidate waiting areas are regional.")
+    except Exception as error:
+        detail = str(error) if isinstance(error, ValueError) else type(error).__name__
+        typer.echo(f"Geofence load failed: {detail}", err=True)
+        raise typer.Exit(code=1) from None
+
+
+@transform_app.command("zones")
+def zones_transform(
+    port: Annotated[str, typer.Option(help="Configured port ID.")] = "los_angeles",
+    demo: Annotated[bool, typer.Option(help="Classify the saved historical demo.")] = False,
+    version: Annotated[str | None, typer.Option(help="Previously loaded geofence version.")] = None,
+) -> None:
+    """Preserve every membership and an explicit outside state for each saved position."""
+    if not demo:
+        typer.echo("Select --demo; this stage classifies the saved historical dataset.", err=True)
+        raise typer.Exit(code=2)
+    try:
+        settings = Settings()
+        with connect_db(settings) as connection:
+            selected, counts = transform_zones(settings, connection, port, version)
+        typer.echo(
+            f"Geofence: {selected}; positions: {counts.input_positions}; "
+            f"newly assigned: {counts.newly_assigned}; inside: {counts.inside}; "
+            f"outside: {counts.outside}; memberships: {counts.memberships}; "
+            f"overlapping positions: {counts.overlaps}"
+        )
+    except Exception as error:
+        detail = str(error) if isinstance(error, ValueError) else type(error).__name__
+        typer.echo(f"Zone transform failed: {detail}", err=True)
+        raise typer.Exit(code=1) from None
 
 
 @transform_app.command("positions")
@@ -63,8 +492,14 @@ def positions_transform(
 
 
 @app.callback()
-def main() -> None:
+def main(
+    ctx: typer.Context,
+    log_json: Annotated[bool, typer.Option(help="Structured events on stderr.")] = False,
+) -> None:
     """PortWatch CLI."""
+    cleanup = operational_logs(log_json)
+    if cleanup:
+        ctx.call_on_close(cleanup)
 
 
 @app.command()

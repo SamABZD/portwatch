@@ -11,16 +11,13 @@ py -3.11 -m venv .bootstrap-venv
 .\.bootstrap-venv\Scripts\python.exe -m pip install uv
 ```
 
-Then run the checks relevant to your change:
+Run the shared local/CI gate:
 
 ```powershell
-.\.bootstrap-venv\Scripts\uv.exe sync --locked --extra dev
-.\.bootstrap-venv\Scripts\uv.exe run ruff check .
-.\.bootstrap-venv\Scripts\uv.exe run pytest tests/test_settings_cli.py
-.\.bootstrap-venv\Scripts\uv.exe run python -m portwatch doctor
+.\.bootstrap-venv\Scripts\uv.exe run --locked --extra dev python scripts/validate.py
 ```
 
-The doctor needs local PostGIS for its database checks. If Docker is unavailable, record its failed database check accurately; do not claim a full pass. Later stages may add focused tests and commands.
+Use `--group quality` if PostgreSQL is unavailable; this does not establish an integration pass. Integration requires PostgreSQL 17/PostGIS 3.6 and uses isolated synthetic schemas. Windows can use the existing native runtime without Docker. See [GitHub workflow](docs/GITHUB_WORKFLOW.md) for command groups and test policy. Run `python -m portwatch doctor` separately to check operational settings and optional live credentials; CI deliberately does not require an AIS key.
 
 ## Branches, commits, and pull requests
 
@@ -30,4 +27,4 @@ Review `git status --short`, `git diff --check`, and the staged file list before
 
 If a local artifact is staged accidentally, run `git restore --staged -- <path>`, add a suitable ignore rule, and verify `git status` again. If it was committed but not pushed, remove it from tracking with `git rm --cached -- <path>` and make a correction commit. If a secret reaches a published commit, revoke or rotate it immediately, remove it from current tracking, and coordinate any history cleanup; do not casually force-push or assume deletion in a later commit erases exposure.
 
-See [the GitHub workflow](docs/GITHUB_WORKFLOW.md) for the full routine. GitHub CI is scheduled for Step 05A; local checks are required until then.
+See [the GitHub workflow](docs/GITHUB_WORKFLOW.md) for the full routine. Require successful `quality` and `integration` checks before merging subsequent PRs.

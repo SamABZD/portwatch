@@ -69,8 +69,8 @@ class BatchSpec(BaseModel):
     def valid_times_and_layout(self) -> "BatchSpec":
         if self.mode == "historical" and self.source_date is None:
             raise ValueError("historical batches require a source date")
-        if self.mode == "live" and self.file_suffix != ".jsonl":
-            raise ValueError("live batches must be JSONL")
+        if self.mode == "live" and self.file_suffix not in {".jsonl", ".json", ".xml"}:
+            raise ValueError("live batches must be JSONL or an original JSON/XML response")
         if (self.source_start_utc is None) != (self.source_end_utc is None):
             raise ValueError("source time range must contain both endpoints or neither")
         if self.source_start_utc is not None and self.source_end_utc < self.source_start_utc:
@@ -88,8 +88,8 @@ def relative_path(spec: BatchSpec, batch_id: str) -> Path:
         period = spec.source_date.strftime("%Y/%m/%d")
     else:
         period = spec.received_at.strftime("%Y/%m/%d/%H")
-    return Path(spec.source_id) / spec.mode / period / spec.dataset_id / (
-        batch_id + spec.file_suffix
+    return (
+        Path(spec.source_id) / spec.mode / period / spec.dataset_id / (batch_id + spec.file_suffix)
     )
 
 
@@ -246,10 +246,48 @@ class RawStore:
         finally:
             temporary.unlink(missing_ok=True)
 
+    def reuse_historical(self, parent: Manifest, spec: BatchSpec) -> Manifest:
+        """New regional receipt/identity, same immutable national bytes via a hard link."""
+        if (
+            spec.mode != "historical"
+            or parent.mode != "historical"
+            or (spec.source_id, spec.source_url, spec.source_date)
+            != (parent.source_id, parent.source_url, parent.source_date)
+        ):
+            raise ValueError("only identical historical source artifacts may be shared")
+        source = self._path(parent.local_path)
+        if checksum_file(source) != (parent.content_sha256, parent.byte_count):
+            raise ValueError("shared source integrity failure")
+        identity = batch_identity(spec, parent.content_sha256)
+        manifest = Manifest(
+            **spec.model_dump(),
+            batch_id=identity,
+            content_sha256=parent.content_sha256,
+            byte_count=parent.byte_count,
+            local_path=relative_path(spec, identity).as_posix(),
+        )
+        with _publication_lock(self.root):
+            destination = self._path(manifest.local_path)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            sidecar = Path(str(destination) + ".manifest.json")
+            if sidecar.exists():
+                manifest = Manifest.model_validate_json(sidecar.read_text("utf-8"))
+            else:
+                _publish_json(sidecar, manifest.model_dump_json(indent=2))
+            if not destination.exists():
+                os.link(source, destination)
+                _sync_directory(destination.parent)
+            if checksum_file(destination) != (parent.content_sha256, parent.byte_count):
+                raise ValueError("shared source target integrity failure")
+        return manifest
+
     def inspect(self) -> list[Inspection]:
         inspections = []
         referenced = set()
-        for sidecar in sorted(self.root.rglob("*.manifest.json")):
+        inspected = set()
+
+        def inspect_manifest(sidecar):
+            inspected.add(sidecar)
             try:
                 manifest = Manifest.model_validate_json(sidecar.read_text("utf-8"))
                 path = self._path(manifest.local_path)
@@ -266,6 +304,9 @@ class RawStore:
                     inspections.append(Inspection(sidecar, "complete", manifest, "verified"))
             except (OSError, ValueError, TypeError):
                 inspections.append(Inspection(sidecar, "invalid", None, "manifest_invalid"))
+
+        for sidecar in sorted(self.root.rglob("*.manifest.json")):
+            inspect_manifest(sidecar)
         for path in sorted(self.root.rglob("*")):
             if (
                 path.is_file()
@@ -273,7 +314,13 @@ class RawStore:
                 and not path.name.startswith(".")
                 and not path.name.endswith((".part", ".manifest.json"))
             ):
-                inspections.append(Inspection(path, "unmanifested", None, "missing_manifest"))
+                # A collector can publish after the first directory scan. Its manifest
+                # precedes the payload; verify that new sidecar before declaring an orphan.
+                sidecar = Path(str(path) + ".manifest.json")
+                if sidecar not in inspected and sidecar.is_file():
+                    inspect_manifest(sidecar)
+                if path not in referenced:
+                    inspections.append(Inspection(path, "unmanifested", None, "missing_manifest"))
         return inspections
 
 
@@ -295,8 +342,12 @@ def quarantine_record(
         sidecar = Path(str(destination) + ".manifest.json")
         if not sidecar.exists():
             metadata = dict(
-                schema_version=1, batch_id=batch_id, record_offset=record_offset,
-                reason=reason, content_sha256=checksum, byte_count=len(payload),
+                schema_version=1,
+                batch_id=batch_id,
+                record_offset=record_offset,
+                reason=reason,
+                content_sha256=checksum,
+                byte_count=len(payload),
             )
             _publish_json(sidecar, json.dumps(metadata, indent=2))
         if not destination.exists():

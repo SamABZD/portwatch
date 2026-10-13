@@ -38,10 +38,16 @@ def selection_path(store: RawStore, spec: BatchSpec) -> Path:
 def remember_selection(store: RawStore, spec: BatchSpec, batch: Manifest, etag: str | None) -> None:
     """Mutable current-source pointer; immutable first receipts retain their provenance."""
     path = selection_path(store, spec)
-    body = json.dumps({
-        "schema_version": 1, "batch_id": batch.batch_id, "remote_etag": etag,
-        "byte_count": batch.byte_count, "last_verified_at": datetime.now(UTC).isoformat(),
-    }, indent=2)
+    body = json.dumps(
+        {
+            "schema_version": 1,
+            "batch_id": batch.batch_id,
+            "remote_etag": etag,
+            "byte_count": batch.byte_count,
+            "last_verified_at": datetime.now(UTC).isoformat(),
+        },
+        indent=2,
+    )
     with _publication_lock(store.root):
         with tempfile.NamedTemporaryFile(dir=store.root, suffix=".part", delete=False) as stream:
             temporary = Path(stream.name)
@@ -84,9 +90,12 @@ def acquire(
     candidates = []
     for item in store.inspect():
         batch = item.manifest
-        if batch and (
-            batch.source_id, batch.dataset_id, batch.source_url, batch.source_date
-        ) == (spec.source_id, spec.dataset_id, spec.source_url, spec.source_date):
+        if batch and (batch.source_id, batch.dataset_id, batch.source_url, batch.source_date) == (
+            spec.source_id,
+            spec.dataset_id,
+            spec.source_url,
+            spec.source_date,
+        ):
             if item.state == "invalid":
                 raise DownloadError("cached_raw_integrity_failure")
             if item.state == "complete":
@@ -105,6 +114,20 @@ def acquire(
         cached = max(candidates, key=lambda item: item.received_at) if candidates else None
     if cached and not refresh:
         return DownloadResult(cached, False)
+    if not cached and not refresh and spec.mode == "historical":
+        shared = [
+            item.manifest
+            for item in store.inspect()
+            if item.state == "complete"
+            and item.manifest.mode == "historical"
+            and (item.manifest.source_id, item.manifest.source_url, item.manifest.source_date)
+            == (spec.source_id, spec.source_url, spec.source_date)
+        ]
+        if shared:
+            parent = max(shared, key=lambda item: item.received_at)
+            result = store.reuse_historical(parent, spec)
+            remember_selection(store, spec, result, None)
+            return DownloadResult(result, False)
     last_code = "transfer_failed"
     for attempt in range(attempts):
         try:
@@ -116,8 +139,10 @@ def acquire(
                 modified = response.headers.get("Last-Modified")
             if expected is not None and expected > max_bytes:
                 raise DownloadError("download_exceeds_size_limit")
-            cached_etag = selection.get("remote_etag") if selection else (
-                cached.remote_etag if cached else None
+            cached_etag = (
+                selection.get("remote_etag")
+                if selection
+                else (cached.remote_etag if cached else None)
             )
             if cached and etag and cached_etag == etag and cached.byte_count == expected:
                 remember_selection(store, spec, cached, etag)
@@ -139,11 +164,14 @@ def acquire(
                     raise DownloadError("download_exceeds_size_limit")
                 if response.headers.get("Content-Encoding", "identity") != "identity":
                     raise DownloadError("unexpected_content_encoding")
-                acquisition = BatchSpec(**{
-                    **spec.model_dump(), "remote_etag": actual_etag or etag,
-                    "remote_last_modified": response.headers.get("Last-Modified") or modified,
-                    "expected_byte_count": expected,
-                })
+                acquisition = BatchSpec(
+                    **{
+                        **spec.model_dump(),
+                        "remote_etag": actual_etag or etag,
+                        "remote_last_modified": response.headers.get("Last-Modified") or modified,
+                        "expected_byte_count": expected,
+                    }
+                )
                 started = time.monotonic()
 
                 def chunks(response=response, expected=expected, started=started):

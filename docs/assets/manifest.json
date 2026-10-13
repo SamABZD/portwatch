@@ -1,0 +1,26 @@
+[
+  {
+    "file": "historical-los-angeles.png",
+    "original": "artifacts/step13/prepared-browser/los_angeles-desktop.png",
+    "bytes": 126785,
+    "sha256": "ca1d40859ac5ff848415e9a4dfa8eb7657b176c689df62b8c2cc5b936b570b02"
+  },
+  {
+    "file": "historical-oakland.png",
+    "original": "artifacts/step13/prepared-browser/oakland-desktop.png",
+    "bytes": 127760,
+    "sha256": "d68b0fc7f220e9e4cdd5034a8debb52e6fb8213030c20ac677bb49a8c439c39f"
+  },
+  {
+    "file": "historical-mobile.png",
+    "original": "artifacts/step13/prepared-browser/los_angeles-mobile.png",
+    "bytes": 105222,
+    "sha256": "ccdaf35a9f30dca2a597870daf018b0b1e880e455569dcf4754365805d4f6399"
+  },
+  {
+    "file": "pipeline.png",
+    "original": "artifacts/step13/diagram/desktop.png",
+    "bytes": 67161,
+    "sha256": "01dfdc9532ebe6dfd15958512eeb09ecb814b31a523afd5602b7fb52271696b7"
+  }
+]

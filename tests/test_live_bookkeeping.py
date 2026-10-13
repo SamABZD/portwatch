@@ -49,7 +49,9 @@ def test_cli_live_registers_real_db_run_without_source_or_key_leak(
             )
             return await asyncio.to_thread(
                 # Allow Windows scheduling/fsync before the finite capture deadline.
-                CliRunner().invoke, app, ["ingest", "live", "--duration", "2"]
+                CliRunner().invoke,
+                app,
+                ["ingest", "live", "--duration", "2"],
             )
 
     result = asyncio.run(scenario())

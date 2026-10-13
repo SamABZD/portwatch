@@ -17,12 +17,12 @@ def test_settings_are_typed_and_paths_resolve_from_project_root(
     assert settings.project_path(settings.raw_dir) == PROJECT_ROOT / "data/raw"
 
 
-def test_los_angeles_config_has_collection_bounds_without_geofence() -> None:
+def test_los_angeles_config_has_collection_bounds_and_geofence() -> None:
     config = load_port_config(PROJECT_ROOT / "configs/ports/los_angeles.yaml")
     assert isinstance(config, PortConfig)
     assert config.port_id == "los_angeles"
     assert config.bounding_box == (-118.34, 33.66, -118.225, 33.80)
-    assert config.geofence_path is None
+    assert config.geofence_path == "geo/los_angeles.geojson"
 
 
 def test_blank_db_password_is_invalid(monkeypatch: pytest.MonkeyPatch) -> None:

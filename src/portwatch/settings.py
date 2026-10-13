@@ -36,6 +36,11 @@ class Settings(BaseSettings):
     live_rotate_seconds: float = Field(default=30, ge=1, le=300)
     live_rotate_bytes: int = Field(default=1048576, ge=262144, le=16777216)
     live_flush_seconds: float = Field(default=1, gt=0, le=5)
+    health_status_stale_seconds: int = Field(default=60, ge=10, le=3600)
+    health_observation_stale_seconds: int = Field(default=300, ge=10, le=86400)
+    health_backlog_warn_seconds: int = Field(default=120, ge=1, le=86400)
+    health_context_stale_seconds: int = Field(default=7200, ge=60, le=604800)
+    storage_min_free_bytes: int = Field(default=1073741824, ge=0)
 
     @field_validator("db_host", "db_name", "db_user")
     @classmethod
@@ -64,6 +69,30 @@ class PortConfig(BaseModel):
     waiting_speed_knots: float = Field(ge=0)
     waiting_min_minutes: int = Field(gt=0)
     max_observation_gap_minutes: int = Field(gt=0)
+    visit_persistence_minutes: float = Field(default=2, gt=0)
+    visit_min_consistent_observations: int = Field(default=2, ge=2, le=100)
+    snapshot_staleness_minutes: int = Field(default=15, ge=1, le=60)
+    weather_latitude: float = Field(default=33.71466, ge=-90, le=90)
+    weather_longitude: float = Field(default=-118.24239, ge=-180, le=180)
+    news_query: str = Field(
+        default='("Port of Los Angeles" OR "Los Angeles Harbor") '
+        "(disruption OR closure OR strike OR congestion OR storm)",
+        min_length=1,
+        max_length=1000,
+    )
+    news_lookback_hours: int = Field(default=24, ge=1, le=168)
+    news_max_records: int = Field(default=100, ge=1, le=250)
+    news_rss_url: str | None = None
+    news_keywords: list[str] = Field(
+        default_factory=lambda: ["disruption", "closure", "strike", "congestion", "storm"]
+    )
+
+    @field_validator("news_keywords")
+    @classmethod
+    def valid_news_keywords(cls, value: list[str]) -> list[str]:
+        if not value or len(value) > 30 or any(not word.strip() for word in value):
+            raise ValueError("select 1 to 30 nonblank relevance keywords")
+        return sorted(set(word.strip().casefold() for word in value))
 
     @field_validator("timezone")
     @classmethod
@@ -100,3 +129,29 @@ def load_port_config(path: Path) -> PortConfig:
         if not geofence.is_file():
             raise ValueError("configured geofence_path does not point to a file")
     return config
+
+
+def for_port(settings: Settings, port_id: str) -> Settings:
+    """Resolve an installed port, preserving explicitly configured paths for that port."""
+    current = load_port_config(settings.project_path(settings.port_config))
+    if current.port_id == port_id:
+        return settings
+    if not port_id or any(c not in "abcdefghijklmnopqrstuvwxyz0123456789_" for c in port_id):
+        raise ValueError("unknown port")
+    path = Path("configs/ports") / f"{port_id}.yaml"
+    demo = (
+        Path("configs/demo.yaml")
+        if port_id == "los_angeles"
+        else Path("configs/demos") / f"{port_id}.yaml"
+    )
+    if not settings.project_path(path).is_file() or not settings.project_path(demo).is_file():
+        raise ValueError("unknown port")
+    if load_port_config(settings.project_path(path)).port_id != port_id:
+        raise ValueError("port configuration identity mismatch")
+    return settings.model_copy(update={"port_config": path, "demo_config": demo})
+
+
+def configured_ports(settings: Settings) -> list[str]:
+    """Only local reviewed configuration files can be selected by HTTP clients."""
+    paths = sorted(settings.project_path(Path("configs/ports")).glob("*.yaml"))
+    return [load_port_config(path).port_id for path in paths]

@@ -1,0 +1,10 @@
+dataset_id: oakland_2024_01_01_noaa_ocm_geoparquet_v1
+source_id: noaa_ocm_ais_2024_geoparquet
+port_id: oakland
+start_utc: "2024-01-01T00:00:00Z"
+end_utc: "2024-01-02T00:00:00Z"
+noaa_url: https://ocmgeodatastor1.blob.core.windows.net/marinecadastre/ais2024/ais-2024-01-01.parquet
+weather_period:
+  start_utc: "2024-01-01T00:00:00Z"
+  end_utc: "2024-01-02T00:00:00Z"
+replay_interval_minutes: 5

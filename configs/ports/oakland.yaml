@@ -1,0 +1,19 @@
+port_id: oakland
+display_name: Port of Oakland
+timezone: America/Los_Angeles
+# Oakland approaches in San Francisco Bay; not an official jurisdiction boundary.
+bounding_box: [-122.39, 37.73, -122.255, 37.84]
+geofence_path: geo/oakland.geojson
+waiting_speed_knots: 1.0
+waiting_min_minutes: 30
+max_observation_gap_minutes: 15
+visit_persistence_minutes: 2
+visit_min_consistent_observations: 2
+snapshot_staleness_minutes: 15
+weather_latitude: 37.795
+weather_longitude: -122.33
+news_query: '"Port of Oakland" (disruption OR closure OR strike OR congestion OR storm)'
+news_lookback_hours: 24
+news_max_records: 100
+news_rss_url: https://www.portofoakland.com/feed/
+news_keywords: [disruption, closure, strike, congestion, storm]

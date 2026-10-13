@@ -17,12 +17,14 @@ from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
+import psutil
 from pydantic import SecretStr
 from websockets.asyncio.client import connect
 from websockets.exceptions import ConnectionClosed, InvalidStatus, WebSocketException
 
+from portwatch.events import emit
 from portwatch.live_spool import MAX_FRAME_BYTES, LiveEnvelope, LiveSpool, collector_lock
-from portwatch.settings import Settings, load_port_config
+from portwatch.settings import Settings, for_port, load_port_config
 from portwatch.storage import BatchSpec, Manifest, RawStore
 
 STREAM_URL = "wss://stream.aisstream.io/v0/stream"
@@ -45,8 +47,9 @@ class CaptureError(RuntimeError):
 
 
 def live_spec(settings: Settings, port_id: str) -> tuple[BatchSpec, tuple]:
+    settings = for_port(settings, port_id)
     port = load_port_config(settings.project_path(settings.port_config))
-    if port_id != "los_angeles" or port_id != port.port_id or port.bounding_box is None:
+    if port_id != port.port_id or port.bounding_box is None:
         raise CaptureError("invalid_port_configuration")
     return BatchSpec(
         source_id="aisstream_v0",
@@ -165,6 +168,7 @@ class LiveCollector:
         self.status_callback = status_callback
         self.queue = asyncio.Queue(maxsize=queue_records)
         self.status = LiveStatus()
+        self.process_created_at_utc = datetime.fromtimestamp(psutil.Process().create_time(), UTC)
         self.status_lock = asyncio.Lock()
         self.terminal_error: CaptureError | None = None
         self.vessels: set[int] = set()
@@ -181,6 +185,10 @@ class LiveCollector:
     def snapshot(self) -> dict:
         return {
             **asdict(self.status),
+            "status_schema_version": 2,
+            "process_id": os.getpid(),
+            "process_created_at_utc": self.process_created_at_utc.isoformat(),
+            "status_updated_at_utc": _utc(),
             "source_id": self.spec.source_id,
             "dataset_id": self.spec.dataset_id,
             "distinct_vessels": len(self.vessels),
@@ -211,11 +219,28 @@ class LiveCollector:
                 stream.flush()
                 os.fsync(stream.fileno())
             try:
-                os.replace(temporary, self.status_path)
+                for attempt in range(5):
+                    try:
+                        os.replace(temporary, self.status_path)
+                        break
+                    except PermissionError as error:
+                        # Windows readers may briefly deny replacement of the status file.
+                        # Retry only its sharing/access codes, in this joined I/O worker.
+                        if getattr(error, "winerror", None) not in {5, 32, 33} or attempt == 4:
+                            raise
+                        time.sleep(0.01 * 2**attempt)
             finally:
                 temporary.unlink(missing_ok=True)
 
         await _thread_join(write)
+        emit(
+            "collector_status",
+            state=self.status.state,
+            connected=self.status.connected,
+            observations=self.status.observations,
+            reconnect_count=self.status.reconnect_count,
+            raw_persistence_failures=self.status.raw_persistence_failures,
+        )
         if self.status_callback:
             self.status_callback(snapshot)
 
@@ -327,7 +352,10 @@ class LiveCollector:
             while True:
                 await asyncio.sleep(self.ping_interval)
                 pong = await socket.ping()
-                await asyncio.wait_for(pong, timeout=self.ping_timeout)
+                # Await the Pong directly so a simultaneous completed Pong cannot swallow
+                # external cancellation in Python3.11 wait_for's cancellation race.
+                async with asyncio.timeout(self.ping_timeout):
+                    await pong
                 self.status.last_socket_heartbeat = _utc()
         except (TimeoutError, ConnectionClosed):
             await socket.close()

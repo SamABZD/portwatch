@@ -1,0 +1,11 @@
+{
+  "verified": true,
+  "checks": [
+    "nine_selectable_components_and_keyboard",
+    "four_viewports_no_overflow_or_clipped_node_text",
+    "secondary_text_contrast",
+    "diagram_works_without_health_API"
+  ],
+  "minimum_secondary_text_contrast": 5.792814629607921,
+  "page_errors": []
+}

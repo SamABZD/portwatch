@@ -1,5 +1,161 @@
 # Data contracts
 
+## Live multiport evidence and audit corrections
+
+Migration008 adds timed reported vessel profiles and accepted-input enrichment checkpoints;
+001–007 remain unchanged. Profile grain is source-record/processing-version, with source/dataset,
+MMSI, availability UTC and bounded reported fields. Availability is NOAA observation time or
+live local receipt time. Replay merges only fields available by its cutoff; no ETA year or
+confirmed destination is inferred. Foreign keys retain accepted clean-record/input lineage.
+
+Installed port configurations now include Los Angeles and Oakland. Historical/live source IDs,
+regional datasets, cache keys, geofence versions and API scopes stay separate. Neighboring-day
+backfill context also requires the selected port's dataset prefix, with SQL wildcard escaping.
+
+An empty database can rebuild historical weather from matching checksum-verified raw artifacts.
+It preserves original retrieval time and records no fabricated HTTP attempt. Explicit refresh
+still uses the connector's provider/cooldown rules. Current forecast/news are not reconstructed
+as fresh historical context. Prepared-only frontend sessions select historical mode and the
+snapshot's port automatically. See [RELEASE_CHECK.md](RELEASE_CHECK.md) for measured audit evidence.
+
+## Step10 workflow state
+
+Migration007 extends the existing pipeline audit with workflow/parent identity, attempts, safe
+details and elapsed duration. `pipeline_checkpoints` references committed audit runs and input
+fingerprints; checkpoints publish after business commits. Missing source404 is a failed
+`pipeline_source_gaps` record, separate from valid empty input. `visit_partition_context` records
+canonical dataset IDs used for a target day's complete-context inference. Original positions keep
+their identities; context-aware metric versions and target-day event attribution prevent midnight
+arrivals. Forecast is an explicitly separate mart product. See [ORCHESTRATION.md](ORCHESTRATION.md).
+
+## Step09 analytical mart (`marts-v1`)
+
+Migration006 adds `mart_rule_sets`, `mart_partitions` and `port_activity_hourly`. Earlier
+migrations and source rows are unchanged. The explicit hourly key is port + source + dataset +
+analytical version + UTC hour. Partition FKs enforce descriptor consistency; parameters retain
+cleaning/geofence/assignment/visit-rule versions, snapshot age and one weather revision. Different
+sources, live/historical input modes and analytical versions do not share an output series.
+
+Hours are half-open UTC intervals. Snapshots use the latest report group per vessel at hour start,
+at most15 minutes old by default. Primary zones are disjoint for counts, retaining all earlier
+spatial memberships separately. Conflicting latest-time zones become one `unknown` vessel.
+Hourly distinct activity and instantaneous observed occupancy are separate fields.
+
+Known-boundary arrival/exit confirmations are counted in their confirmation hour. Completed dwell
+uses only completed episodes, attributed to exit confirmation hour, with midpoint/lower/upper
+medians and sample counts. Incomplete episodes stay separate. Waiting counts are qualified
+candidate vessels intersecting an hour; association requires knowledge by period end. Observed
+duration proxies are sampled once in the last-observed hour, with partial sample counts. Counts
+are experimental observation/inference quantities, not total ships, official port calls or queues.
+
+Available input periods come from processed raw/cleaning ledger intervals. Empty unavailable
+hours yield unknown, while available empty intervals permit measured zeros. Reject timestamps
+cannot be invented: dataset rejects are stored on the partition; hourly rejects are null when any
+exist. Current collector state is not projected onto2024. Event-time freshness is relative to the
+hour end or prefix cutoff. Named flags retain gaps, ambiguity, incomplete inputs and proxy limits.
+
+Weather joins one pinned saved reanalysis batch at its UTC valid hour. Missing hours/variables stay
+null. Precipitation describes the preceding hour ending at the row's hour start. News remains in
+the context tables and is excluded from this historical series. No many-to-many join multiplies
+position counts. Field definitions, units, inclusion rules and examples are in [ANALYTICS.md](ANALYTICS.md).
+
+Each mart build recomputes full selected vessel histories and replaces their visits and mart
+partition in one repeatable-read transaction. Missing spatial assignments are appended first.
+Late-data reruns remove obsolete visits/hours; a publication error retains the previous valid
+visit/mart snapshot. Rule/weather changes produce another analytical version. Computation time
+and run audits are excluded from business-hash comparison.
+
+Stored output is retrospective and contains completed hours only. Its query helper withholds a
+partition until its full input inference cutoff is reached. During replay, the prefix helper
+reconstructs episodes from event times <= cutoff, returns source/version/weather identifiers,
+and labels the current hour partial. It writes temporary objects only and preserves persistent
+rows/audits. Historical weather remains retrospective reanalysis, not2024 issue/receipt chronology.
+
+## Step08 weather/news (`context-v1`)
+
+See [CONTEXT.md](CONTEXT.md) for acquisition, field semantics, revisions and attribution.
+Migration005 appends five tables without changing migrations001–004 or AIS data.
+
+| Table / grain | Contract |
+| --- | --- |
+| `context_requests` / request SHA256 | Kind, port, source, product, endpoint, complete public API parameters, UTC bounds, parser/keyword configuration, selected raw batch and actual selection retrieval time. The key includes the full configuration; changing a request produces another partition. |
+| `context_responses` / raw batch | FK to verified immutable raw and request; normalized row count, missing/truncation/relevance quality and available provider metadata including response grid coordinates and units. |
+| `context_attempts` / UUID | Request/run FKs; start/end/retrieval times, raw batch if available, HTTP status, safe error code, durable next-attempt time; explicit running, valid_empty, valid_nonempty or failed. Actual duplicate fetches keep their own receipts. |
+| `weather_values` / batch + valid UTC hour | Nullable wind speed/gusts m/s and precipitation mm, with quality flags. Units and grid provenance live on the parent response. Exact hourly coverage is validated. Precipitation ends the preceding-hour interval; gusts depend on product availability. |
+| `news_mentions` / batch + conservative URL | Original URL/title/domain/language; publication UTC only if supplied as `published_at`; independent first-seen UTC from `seendate`; configurable title substring tags and flags. No article bodies. |
+
+Products are distinct: `historical_reanalysis` (archive ERA5), `current_forecast` (forecast
+best_match selector) and `recent_news` (GDELT). Source issue/run times remain unknown unless
+explicitly provided; retrieval and `generationtime_ms` are not issue time. Requested coordinates
+and actual provider grid coordinates remain distinct. Historical gusts are null/not requested,
+not zero. Source failures and missing variables never become measured zero or successful empty.
+
+Raw `.json` API bodies are saved unchanged through `RawStore`; existing live AIS `.jsonl` storage
+is unchanged. The first identical-byte raw receipt is immutable. Explicit refresh can select a
+different saved revision; normalized values never overwrite older revisions. A new successful
+fetch of identical bytes updates selection retrieval time while preserving raw first receipt.
+Failed normalization retains raw evidence, publishes no partial rows, and leaves prior valid
+selection intact. HTTP failures have no normalized response. A capped news response is truncated;
+no request establishes exhaustive coverage. URL tracking removal preserves meaningful IDs.
+
+The historical replay helper selects the exact demo request/product (or its explicit pinned batch),
+restricts valid time to the demo and cutoff, and returns news status `excluded_recent_source` with
+no articles. It labels reanalysis retrospective; it does not assert2024 receipt/issue chronology.
+Missing historical weather is `unavailable`. A replay prefix restricts valid time, not retrieval
+time. New analytical outputs must record the selected batch ID and filter **one exact request and
+revision** before joining. Selecting all current requests can duplicate overlapping forecast
+days; weather revisions and news must never multiply AIS counts.
+
+## Visit and waiting inference (Step07)
+
+`visit_rule_sets` stores algorithm/versioned parameters by canonical content identity.
+`visit_inference_partitions` has grain source/dataset/cleaning version/MMSI/port/geofence/spatial
+algorithm/rule ID. `vessel_activity_states` has one row per source position within that partition,
+with observed and preceding interval states. `vessel_visits` and `waiting_episodes` use deterministic
+partition/first-evidence IDs; same-time records count as one evidence time for persistence.
+
+Entry/exit need two distinct observations spanning at least two minutes by default. First/last
+sightings inside retain unknown boundaries. Long gaps split partial episodes; unsupported periods
+are never added to supported inside or waiting time. Completed visit durations are transition
+interval bounds; partial rows have null completed-duration fields and separate observation span/
+supported-interval proxies. Gap flags, completeness reasons, counts, jitter and duration semantics
+are stored. Original positions and all zone memberships remain unchanged.
+
+Waiting requires common candidate-zone membership, known speed<=1 knot, no terminal membership,
+30 minutes of eligible reports and no adjacent gap>15 minutes by default. Missing speed is unknown.
+Region candidates need a persistent same-track/same-segment port visit to acquire an association.
+Both association and confirmation knowledge times are recorded. Even associated/completed
+candidates are low-speed proxies, not confirmed anchorage, berth use or queues.
+
+Complete selected-dataset histories are replaced atomically, removing obsolete episode IDs after
+late points. Other source/dataset/version/rule partitions are preserved. Stored results are
+`retrospective_full_history`. `transform visits --demo --as-of <UTC>` reads an event-time prefix
+and writes nothing; future event times are excluded before inference. Do not reconstruct replay
+knowledge by filtering retrospective episode starts. Provider delivery chronology is unverified.
+[VISITS.md](VISITS.md) specifies the exact rules, schema, timing semantics and real-track review.
+
+## Versioned geofences and memberships (Step06)
+
+GeoJSON polygons are approximate analytical vicinity zones, in 2D longitude/latitude EPSG:4326.
+`geofence_versions` owns the canonical document SHA-256, reference, review date, uncertainty and
+validity metadata. `port_zones` owns valid nonempty versioned MultiPolygons. Updates/deletes are
+refused; changing geometry or metadata requires a new version. Earlier versions remain queryable.
+Operational effective dates are unknown, and the frozen-day application is an approximation.
+
+`position_zone_assignments` has grain `(position_id, port_id, geofence_version, assignment_version)`.
+Position ID identifies the unchanged source observation/cleaning version. `position_zone_memberships`
+adds zone ID to that key and preserves every matching polygon. `covers-v1` uses boundary-inclusive
+ST_Covers. Outside observations have no primary zone and zero memberships. Primary priority is
+terminal (10), harbor (20), regional waiting candidate (30); equal priorities sort zone ID.
+Overlap is preserved independently from primary display choice. Candidate membership is neither
+waiting nor an LA visit. Source/dataset/cleaning version/UTC filters scope the demo; live stays separate.
+
+Assignments insert missing keys transactionally; failure exposes no partial summary/membership
+rows. The CLI default requires a configured/loaded checksum match; `--version` explicitly selects
+a previously loaded version. Geographic areas and distances use PostGIS geography units, never
+degrees as meters. [GEO_ZONES.md](GEO_ZONES.md) records approximation evidence, reference checks,
+schema, observed results and limitations. The collection filter is not an analytical port boundary.
+
 ## Raw batch and manifest v1 (Step 02)
 
 Raw payload bytes are immutable provider output. Storage does not parse or rewrite them. Synthetic data is used only in tests and is identified by `synthetic_*` source and dataset IDs. Each completed payload has a sidecar `<payload>.manifest.json` with `schema_version: 1`. Sidecars describe acquisition; they are not a copy of current database processing status.

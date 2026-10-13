@@ -5,8 +5,19 @@ timezone: America/Los_Angeles
 # north latitude] in WGS84. Includes LA harbor and nearby approaches; this is
 # not an official port boundary or an analytical geofence.
 bounding_box: [-118.34, 33.66, -118.225, 33.80]
-geofence_path: null
-# Version 1 provisional waiting heuristics; validate against observed tracks in Step 04.
+geofence_path: geo/los_angeles.geojson
+# Version 1 provisional waiting heuristics; validate visit behavior in Step 07.
 waiting_speed_knots: 1.0
 waiting_min_minutes: 30
 max_observation_gap_minutes: 15
+# Experimental hysteresis: at least two distinct event times spanning two minutes.
+visit_persistence_minutes: 2
+visit_min_consistent_observations: 2
+# Maximum age for each vessel's latest report at an hourly snapshot.
+snapshot_staleness_minutes: 15
+weather_latitude: 33.71466
+weather_longitude: -118.24239
+news_query: '("Port of Los Angeles" OR "Los Angeles Harbor") (disruption OR closure OR strike OR congestion OR storm)'
+news_lookback_hours: 24
+news_max_records: 100
+news_keywords: [disruption, closure, strike, congestion, storm]

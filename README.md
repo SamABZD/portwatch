@@ -1,78 +1,163 @@
 # PortWatch
 
-PortWatch is a $0, local-first data engineering portfolio project for the Port of Los Angeles. Steps 00–05 establish the Python CLI, source audit and frozen demo, durable raw storage, PostgreSQL/PostGIS bookkeeping, historical ingestion, a verified live collector, and reproducible position cleaning. Historical replay works without a live AIS key. No frontend or deployed site exists yet.
+[GitHub Actions: disabled by owner](https://github.com/SamABZD/portwatch/actions/workflows/ci.yml)
 
-## Local setup
+Vessel reports arrive with duplicates, gaps and incomplete context. PortWatch turns them into traceable observations, experimental port visits and hourly analytics for **Los Angeles and Oakland**. It preserves original inputs, makes transformations replayable, and shows what the evidence supports on a live map and historical replay.
 
-Use Python 3.11 (the version installed on this machine). `uv` was installed into an ignored project-local bootstrap environment. From this directory on the current machine:
+**Works locally at $0:** Python/PostGIS processing, Prefect schedules, a read-only FastAPI service and a Next.js website. Historical replay needs no live API key; exported snapshots also work without a database. The owner disabled GitHub Actions; release validation runs locally. The repository remains private. Cloud deployment uses Vercel for the frontend and the owner's paid Railway Hobby workspace for the backend and database; see the [deployment record](deploy/README.md) for verified status and operating requirements.
 
-```powershell
-.\.bootstrap-venv\Scripts\uv.exe sync --locked --extra dev
-docker compose up -d db
-.\.bootstrap-venv\Scripts\uv.exe run python -m portwatch db migrate
-.\.bootstrap-venv\Scripts\uv.exe run python -m portwatch doctor
-.\.bootstrap-venv\Scripts\uv.exe run python -m portwatch storage inspect
-.\.bootstrap-venv\Scripts\uv.exe run python -m portwatch storage reconcile
-.\.bootstrap-venv\Scripts\uv.exe run ruff check .
-$env:PORTWATCH_TEST_DB='1'
-.\.bootstrap-venv\Scripts\uv.exe run pytest -q
+**[Open the hosted PortWatch app](https://portwatch-iota.vercel.app)** — live observations and
+historical replay for both ports. Source freshness and incomplete coverage stay explicit.
+
+## Product tour
+
+![Los Angeles historical map, replay controls, observed activity and weather](docs/assets/historical-los-angeles.png)
+
+This genuine NOAA snapshot at **2024-01-01 12:30 UTC** includes 99 fresh reporting vessels. It is a prepared historical session with live collection unavailable. Basemap requests were deliberately blocked during verification; local geometry remains usable.
+
+1. Select **Historical replay**, choose a port and move the cutoff. Later observations, completed hours and visit confirmations stay outside earlier frames.
+2. Select a vessel or search by name/MMSI. Inspect actual report time, available profile, approximate zone and incomplete visit evidence.
+3. Compare reporting activity, completed-visit dwell samples and weather context. Unknown intervals remain unknown; low-speed candidates do not establish a cargo queue.
+4. Open **Data pipeline** for the selectable architecture drawing, source states, actual counts and port-scoped workflow runs.
+5. Enable **Live** after starting the separate runtime. Two collectors preserve received AIS reports; the website polls saved results every 30 seconds.
+
+<details>
+<summary>Oakland historical replay — 75 fresh reporting vessels at the recorded cutoff</summary>
+
+![Oakland historical replay and metrics](docs/assets/historical-oakland.png)
+
+</details>
+
+![Pipeline components and data flow](docs/assets/pipeline.png)
+
+[Screenshot provenance](docs/assets/README.md) · [Five-minute demonstration](docs/DEMO.md)
+
+## Architecture
+
+```mermaid
+flowchart LR
+    NOAA[NOAA historical AIS] --> RAW[Immutable files and SHA-256 manifests]
+    AIS[AISStream live collectors] --> RAW
+    CONTEXT[Open-Meteo weather and attributed news metadata] --> RAW
+    RAW --> PY[Python validation and normalization]
+    PY --> PG[(PostgreSQL 17 and PostGIS 3.6)]
+    PG --> ANALYTICS[Versioned zones, visits and hourly marts]
+    ANALYTICS --> API[FastAPI read-only queries]
+    API --> WEB[Next.js map, replay and pipeline]
+    PREFECT[Local Prefect schedules] -.-> PY
+    PG --> EXPORT[Historical snapshot and checksum]
+    EXPORT --> API
 ```
 
-On another machine without `uv`, create the same local bootstrap environment with `py -3.11 -m venv .bootstrap-venv` and `.\.bootstrap-venv\Scripts\python.exe -m pip install uv`. If `uv` is already on PATH, the equivalent commands are `uv sync --locked --extra dev` and `uv run ...`. Copy `.env.example` to `.env` only when local overrides are needed; the checked-in defaults work for the localhost demo.
+Historical and live datasets remain separate. Original records retain lineage even when observations deduplicate. Business rows publish transactionally before workflow checkpoints; failed publication preserves the previous analytical partition. Replay reconstructs evidence at its event-time cutoff. See [data contracts](docs/DATA_CONTRACTS.md), [orchestration](docs/ORCHESTRATION.md) and [metric definitions](docs/ANALYTICS.md).
 
-The Compose option needs Docker Desktop. Docker publishes PostgreSQL only on `127.0.0.1:5432` by default; the database uses a named local volume. The sample password is strictly for this localhost demo and should be changed if the service is exposed elsewhere. Update `PORTWATCH_DB_PASSWORD` in `.env` before first Compose startup if you change it. Compose initialization variables do not reset a populated volume.
+| Layer | Technology |
+| --- | --- |
+| Ingestion and transformation | Python 3.11, PyArrow, bounded HTTP/WebSocket connectors |
+| Spatial and analytical storage | PostgreSQL 17, PostGIS 3.6, eight SQL migrations |
+| Orchestration | Prefect 3, resumable workflows, independent live collectors |
+| Query service | FastAPI, Uvicorn, bounded read-only queries and revision-aware cache |
+| Website | Next.js 16, React 19, TypeScript, MapLibre and local geometry fallback |
+| Validation | uv lockfile, Ruff, pytest, PostgreSQL integration tests, Playwright |
 
-On this Windows machine, the isolated PostgreSQL 17.11 cluster uses a private runtime with PostGIS 3.6.2 in ignored `pg-runtime/`, prepared from installed PostgreSQL and the official PostGIS bundle. Existing services were untouched. Data stays in `pgdata/portwatch`; local `.env` selects `127.0.0.1:55432`. It is already initialized; restart it after reboot from this project directory with:
+## Run the historical demo
 
-```powershell
-$portwatchPg = Start-Process -FilePath "$PWD\pg-runtime\bin\pg_ctl.exe" -ArgumentList @('-D','pgdata\portwatch','-l','pgdata\portwatch-server.log','-o','"-h 127.0.0.1 -p 55432"','-w','start') -WindowStyle Hidden -PassThru
-$portwatchPg.WaitForExit(15000) | Out-Null
+Requirements: Git, Python 3.11, [uv](https://docs.astral.sh/uv/getting-started/installation/), Node.js 20.9+ and PostgreSQL 17/PostGIS 3.6. Docker Compose is the portable database option; [existing native Windows cluster operation](docs/RUNBOOK.md#native-windows-database) is also documented. GitHub access is required while the repository is private.
+
+From a new clone, using the default localhost configuration:
+
+```sh
+git clone https://github.com/SamABZD/portwatch.git
+cd portwatch
+uv sync --locked --extra dev
+docker compose up -d --wait db
+uv run --locked python -m portwatch db migrate
+uv run --locked python -m portwatch doctor
+uv run --locked python -m portwatch pipeline run --port los_angeles --demo --local
 ```
 
-Skip `docker compose up` when using this native cluster. Check status with `& .\pg-runtime\bin\pg_ctl.exe -D pgdata\portwatch status`; stop cleanly with `& .\pg-runtime\bin\pg_ctl.exe -D pgdata\portwatch -m fast -w stop`. These commands target only PortWatch's cluster. Use `$portwatchPg.WaitForExit(15000)` as above; `Start-Process -Wait` also waits for server descendants and can remain blocked. On this machine the runtime is already prepared. To reproduce preparation with installed PG17, run `.\.venv\Scripts\python.exe scripts/prepare_postgis.py` before starting the private runtime; it verifies the pinned official bundle hash and never restarts a server. Keep the private runtime with this cluster because PostGIS libraries resolve through it.
+The first historical run downloads the genuine **227 MB NOAA file for January 1, 2024** and matching ERA5 weather; it needs internet and local disk space. Matching reruns verify and reuse saved artifacts. No AISStream key or running Prefect server is needed with `--local`. Add Oakland with the pipeline command using `--port oakland`. Optional overrides are in [.env.example](.env.example); copy it to an ignored `.env` only for local changes. Its password is a public localhost example. An existing `.env` must match the database you start.
 
-The reviewed collection bounding box and one-day UTC demo are in `configs/ports/los_angeles.yaml` and `configs/demo.yaml`. The analytical geofence remains pending. `doctor` reports database connectivity and PostGIS separately and exits nonzero if a required check fails. Raw storage and recovery rules are in [docs/DATA_CONTRACTS.md](docs/DATA_CONTRACTS.md). Default tests run without a database; setting `PORTWATCH_TEST_DB=1` enables real PostgreSQL tests in newly created isolated test schemas.
+Keep the API running in the project root:
 
-## Historical demo
-
-With the local database running and migrations applied:
-
-```powershell
-.\.bootstrap-venv\Scripts\uv.exe run python -m portwatch ingest historical --port los_angeles --demo
-.\.bootstrap-venv\Scripts\uv.exe run python scripts/verify_historical.py --rebuild
+```sh
+uv run --locked python -m portwatch demo serve --listen-port 8000
 ```
 
-The command downloads the frozen NOAA day once, preserves its unchanged raw artifact and manifest, then extracts the collection box in bounded batches into derived Parquet with parent lineage. A matching rerun verifies and reuses both artifacts. Add `--refresh` to check remote ETag/length explicitly; changed bytes retain a separate raw revision. Generated provider data and plots are ignored by Git.
+In a second terminal, enter `web` inside the cloned `portwatch` directory:
 
-Explicit backfills support 1–7 UTC days within 2024, with an exclusive end date:
-
-```powershell
-.\.bootstrap-venv\Scripts\uv.exe run python -m portwatch ingest historical --port los_angeles --start 2024-01-01 --end 2024-01-02
+```sh
+cd web
+npm ci
+npm run build
+npm run start
 ```
 
-The verified demo contains 62,159 observations and 141 distinct vessel identifiers. Counts, measured memory, timestamp limitations and the geographic preview are in [docs/RESULTS.md](docs/RESULTS.md). The verifier checks every regional row, regenerates a bounded scatter plot, and optionally rebuilds from the preserved raw file to compare checksums. No live key or Docker download is needed for this stage on the configured native database.
+Open [localhost:3000](http://127.0.0.1:3000) and select **Historical replay**. The [pipeline page](http://127.0.0.1:3000/pipeline) explains the components. Stop API/frontend with Ctrl+C; `docker compose stop db` preserves its volume. Docker startup was unavailable on the audit machine: Step 13 exercised fresh native PostgreSQL/PostGIS reproduction from saved genuine inputs. It did not re-download upstream data or prove current provider availability.
 
-## Live capture
+For a database-free session, export after processing, stop the ordinary API, then serve the export:
 
-Create a key at [AISStream account](https://aisstream.io/account) and set `PORTWATCH_AIS_API_KEY=<your key>` in the existing ignored local `.env`, then:
-
-```powershell
-.\.bootstrap-venv\Scripts\uv.exe run python -m portwatch ingest live --port los_angeles --duration 60
+```sh
+uv run --locked python -m portwatch demo export --output data/demo/los-angeles.json
+uv run --locked python -m portwatch demo serve --prepared data/demo/los-angeles.json
 ```
 
-Omit `--duration` for continuous capture; Ctrl+C drains and finalizes the batch. The collector preserves original messages in versioned envelopes, flushes active files frequently, rotates raw batches, reconnects with bounded backoff and reports queue/persistence failures. A real 60.84-second LA capture saved 26 positions, 11 static messages and one confirmation without parse errors or reconnects. A key is now saved in ignored `.env`. Setup, status definitions, loss windows and interrupted-file recovery are in [docs/RUNBOOK.md](docs/RUNBOOK.md).
+The snapshot/checksum stay ignored. Live collection and current health are unavailable in prepared mode. See [replay options](docs/REPLAY.md).
 
-## Clean saved positions
+## Measured results
 
-```powershell
-.\.venv\Scripts\python.exe -m portwatch transform positions --port los_angeles --demo
-.\.venv\Scripts\python.exe -m portwatch transform positions --port los_angeles --pending-live
-.\.venv\Scripts\python.exe scripts/verify_positions.py
+Frozen period: **2024-01-01 00:00 UTC to 2024-01-02 00:00 UTC**, exclusive end. These are regional observations, not complete port coverage.
+
+| Measure | Los Angeles | Oakland |
+| --- | ---: | ---: |
+| Extracted reports | 62,159 | 52,785 |
+| Canonical positions | 62,157 | 52,783 |
+| Distinct observed vessels | 141 | 172 |
+| Duplicates with preserved lineage | 2 | 2 |
+| Historical quarantines | 0 | 0 |
+| Fresh pipeline, saved local inputs | 65.45 s | 59.38 s |
+| Forced repeat | 24.47 s | 25.01 s |
+
+Both-port reruns reproduced identical business and metric digests. LA uncached/cached replay frame samples were 0.457/0.045 seconds. Complete fresh-database/API/export/recovery verification took 295.53 seconds on Windows/Python 3.11, eight logical CPUs and approximately 24 GiB RAM. These are local samples, not production guarantees.
+
+The [audit](docs/RELEASE_CHECK.md), [results](docs/RESULTS.md) and [reviewed evidence](docs/evidence/README.md) distinguish genuine-data reproduction from synthetic failure drills.
+
+## Verification and recovery
+
+```sh
+uv run --locked --extra dev python scripts/validate.py
+cd web
+npm run typecheck
+npm run build
 ```
 
-These commands use saved inputs without provider downloads. Historical inputs reconcile to 62,157 clean positions and two duplicates; live inputs to 26 positions and 12 explicit skips, including 11 separately preserved static messages. Reruns reuse identical counts and business rows. Contracts, timestamp choices, source-record lineage and quarantine reasons are in [docs/DATA_CONTRACTS.md](docs/DATA_CONTRACTS.md). The verifier checks two replays and writes ignored `artifacts/step05/verification.json`.
+Step 13 passed **242 tests: 185 unit and 57 integration**. The health/deployment follow-up passed **258 tests: 194 unit and 64 integration**, lint/format, package/installed-wheel checks and eight fresh migrations with zero on repeat. The Next.js production build passed locally and on Vercel. Browser checks covered replay, both ports, prepared sessions, keyboard/mobile behavior and the drawing. Integration tests need PostgreSQL 17/PostGIS 3.6 and create owned temporary schemas. Deterministic tests reject provider connections.
 
-PostgreSQL is the primary database; Railway is the preferred future deployment target. Deployment remains outside the current stage and subject to the $0 budget.
+The [Validate workflow source](.github/workflows/ci.yml) defines shared Python `quality` and `integration` gates, but repository Actions are disabled by the owner. Local passes do not establish a GitHub-hosted pass. Next.js production builds also passed on Vercel. [GitHub setup](docs/GITHUB_SETUP.md) records the owner's override and actual publication evidence.
 
-Project decisions and the current state are in [docs/DECISIONS.md](docs/DECISIONS.md) and [docs/HANDOFF.md](docs/HANDOFF.md).
-Contributions follow [CONTRIBUTING.md](CONTRIBUTING.md) and the [GitHub workflow](docs/GITHUB_WORKFLOW.md). The verified publication details are in [docs/GITHUB_SETUP.md](docs/GITHUB_SETUP.md).
+From the project root:
+
+```sh
+uv run --locked python -m portwatch health --port los_angeles
+uv run --locked python -m portwatch db backup --output artifacts/manual-backup.dump
+```
+
+Backup verification restores into a new owned database and requires PostgreSQL client tools on PATH or the prepared native runtime. Failure drills demonstrated rollback, duplicate replay, quarantine, late-report replacement, corruption detection and reconnect gaps. [Recovery contracts](docs/HEALTH_RECOVERY.md) and the [runbook](docs/RUNBOOK.md) include diagnosis, restore and restart commands.
+
+## Live operation and limitations
+
+Set `PORTWATCH_AIS_API_KEY` privately in the ignored root `.env`, then run `uv run --locked python -m portwatch.runtime` from the project root. Stop with `uv run --locked python -m portwatch.runtime --stop`. See [multiport operation](docs/LIVE_MULTIPORT.md) for process ownership, gaps, cooldowns and storage growth.
+
+- Local collection needs an awake, connected computer. The deployed Railway runtime runs independently; off-device backup and continuing storage management remain operator requirements.
+- NOAA is provider-preprocessed; live coverage is incomplete. Live analysis uses receipt-time fallback with provider timestamp text preserved separately.
+- Zones are approximate. Inferred visits, waiting and dwell are experimental, not official calls, confirmed queues or causality.
+- Weather is coarse model context. GDELT can return HTTP429; Oakland's official RSS fallback covers releases only. Verified empty responses do not establish absence of disruption. Recent news is excluded from replay.
+- Cloud services consume the owner's existing paid Railway plan. No billing plan, payment method or unrelated project was changed; no permanently free24/7 hosting is promised.
+
+## Sources and attribution
+
+Historical AIS: **NOAA Office for Coastal Management / MarineCadastre.gov, 2024 AIS vessel traffic**, [CC0 data and suggested citation](https://github.com/ocm-marinecadastre/ais-vessel-traffic/blob/main/data/ais-broadcast-points-2024-readme.md). Weather: [Open-Meteo](https://open-meteo.com/) and [Copernicus Climate Change Service / ERA5](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=overview), transformed UTC selections with [CC BY 4.0 attribution](https://open-meteo.com/en/licence) and applicable noncommercial API terms. Live: [AISStream](https://aisstream.io/). News metadata: [GDELT](https://www.gdeltproject.org/), [Port of Oakland official RSS](https://www.portofoakland.com/feed/) and original publishers. Optional basemap: OpenStreetMap contributors.
+
+Included artifacts are reviewed historical screenshots and aggregate reports. Raw files, live payloads, databases, snapshots and credentials stay excluded. The [source audit](docs/SOURCE_AUDIT.md) records redistribution and timestamp limits. PortWatch polygons are independently authored approximations; official port maps are contextual references.
+
+[Release notes](docs/RELEASE_NOTES.md) · [Demo guide](docs/DEMO.md) · [Contributing](CONTRIBUTING.md) · [Handoff](docs/HANDOFF.md)

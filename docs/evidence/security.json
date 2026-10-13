@@ -1,0 +1,24 @@
+{
+  "tracked_paths": 143,
+  "migrations_unchanged": [
+    "001_raw_bookkeeping.sql",
+    "002_clean_positions.sql",
+    "003_port_zones.sql",
+    "004_visits_waiting.sql",
+    "005_weather_news.sql",
+    "006_analytical_marts.sql",
+    "007_orchestration.sql",
+    "008_vessel_profiles.sql"
+  ],
+  "lockfiles_unchanged": true,
+  "bulk_private_paths_excluded": true,
+  "npm_known_vulnerabilities": 0,
+  "python_audited_packages": 112,
+  "python_known_vulnerabilities": 0,
+  "staged_new_files_included": true,
+  "private_credentials_absent_in_index_and_history": true,
+  "staged_token_pattern_scan": true,
+  "local_database_uses_documented_public_sample": true,
+  "sample_password_intentionally_tracked": true,
+  "deployment_requires_private_database_credentials": true
+}

@@ -22,36 +22,67 @@ def source(tmp_path):
     def point(longitude, latitude):
         return struct.pack("<BIdd", 1, 1, longitude, latitude)
 
-    table = pa.table({
-        "mmsi": pa.array([111, 222, 333, 444, 555, 666, 777, 888], type=pa.int32()),
-        "base_date_time": pa.array([
-            datetime(2024, 1, 1, 1), datetime(2024, 1, 1, 2), datetime(2024, 1, 1, 3),
-            datetime(2024, 1, 1, 4), datetime(2024, 1, 1, 5), datetime(2024, 1, 1, 6),
-            datetime(2024, 1, 2), None,
-        ], type=pa.timestamp("ms")),
-        "sog": pa.array([1.0] * 8, type=pa.float32()),
-        "cog": pa.array([0.0] * 8, type=pa.float32()),
-        "heading": pa.array([0] * 8, type=pa.int32()),
-        "geometry": pa.array([
-            point(-118.25, 33.73), point(-118.30, 33.70), point(-118.20, 33.75), None,
-            point(300, 33.7), b"bad", point(-118.25, 33.73), point(-118.25, 33.73),
-        ], type=pa.binary()),
-    }).replace_schema_metadata({b"geo": json.dumps({
-        "version": "1.0.0", "primary_column": "geometry",
-        "columns": {"geometry": {"encoding": "WKB", "geometry_types": ["Point"]}},
-    }).encode()})
+    table = pa.table(
+        {
+            "mmsi": pa.array([111, 222, 333, 444, 555, 666, 777, 888], type=pa.int32()),
+            "base_date_time": pa.array(
+                [
+                    datetime(2024, 1, 1, 1),
+                    datetime(2024, 1, 1, 2),
+                    datetime(2024, 1, 1, 3),
+                    datetime(2024, 1, 1, 4),
+                    datetime(2024, 1, 1, 5),
+                    datetime(2024, 1, 1, 6),
+                    datetime(2024, 1, 2),
+                    None,
+                ],
+                type=pa.timestamp("ms"),
+            ),
+            "sog": pa.array([1.0] * 8, type=pa.float32()),
+            "cog": pa.array([0.0] * 8, type=pa.float32()),
+            "heading": pa.array([0] * 8, type=pa.int32()),
+            "geometry": pa.array(
+                [
+                    point(-118.25, 33.73),
+                    point(-118.30, 33.70),
+                    point(-118.20, 33.75),
+                    None,
+                    point(300, 33.7),
+                    b"bad",
+                    point(-118.25, 33.73),
+                    point(-118.25, 33.73),
+                ],
+                type=pa.binary(),
+            ),
+        }
+    ).replace_schema_metadata(
+        {
+            b"geo": json.dumps(
+                {
+                    "version": "1.0.0",
+                    "primary_column": "geometry",
+                    "columns": {"geometry": {"encoding": "WKB", "geometry_types": ["Point"]}},
+                }
+            ).encode()
+        }
+    )
     path = tmp_path / "synthetic.parquet"
     pq.write_table(table, path, row_group_size=3)
     spec = BatchSpec(
-        source_id="synthetic_fixture", dataset_id="synthetic_step03",
-        source_url="https://example.invalid/synthetic.parquet", mode="historical",
-        source_date=date(2024, 1, 1), file_suffix=".parquet",
+        source_id="synthetic_fixture",
+        dataset_id="synthetic_step03",
+        source_url="https://example.invalid/synthetic.parquet",
+        mode="historical",
+        source_date=date(2024, 1, 1),
+        file_suffix=".parquet",
     )
     store = RawStore(tmp_path / "raw")
     parent = store.write([path.read_bytes()], spec)
     parameters = ExtractParameters(
-        port_id="los_angeles", bounding_box=(-118.34, 33.66, -118.225, 33.80),
-        start_utc=datetime(2024, 1, 1, tzinfo=UTC), end_utc=datetime(2024, 1, 2, tzinfo=UTC),
+        port_id="los_angeles",
+        bounding_box=(-118.34, 33.66, -118.225, 33.80),
+        start_utc=datetime(2024, 1, 1, tzinfo=UTC),
+        end_utc=datetime(2024, 1, 2, tzinfo=UTC),
         batch_rows=2,
     )
     return store, parent, parameters
@@ -85,9 +116,12 @@ def test_rerun_reuses_and_changed_parameters_create_new_identity(tmp_path, sourc
     first, _ = extract(store._path(parent.local_path), parent, parameters, root)
     repeated, reused = extract(store._path(parent.local_path), parent, parameters, root)
     assert reused and repeated == first
-    changed = ExtractParameters(**{
-        **parameters.model_dump(), "bounding_box": (-118.27, 33.66, -118.225, 33.80),
-    })
+    changed = ExtractParameters(
+        **{
+            **parameters.model_dump(),
+            "bounding_box": (-118.27, 33.66, -118.225, 33.80),
+        }
+    )
     other, reused = extract(store._path(parent.local_path), parent, changed, root)
     assert not reused and other.derivation_id != first.derivation_id
     assert other.rows_selected == 1
@@ -113,13 +147,19 @@ def test_unknown_crs_rejected_instead_of_assuming_degrees(tmp_path, source):
     invalid = tmp_path / "synthetic_unknown_crs.parquet"
     pq.write_table(table, invalid)
     with pq.ParquetFile(invalid) as reader, pytest.raises(ValueError, match="CRS"):
-        _schema(reader, parent, "0"*64)
+        _schema(reader, parent, "0" * 64)
 
 
 @pytest.fixture
 def server():
-    state = {"body": b"synthetic download bytes", "etag": '"synthetic-v1"', "get_count": 0,
-             "status": 200, "truncate": False, "precondition_fail_once": False}
+    state = {
+        "body": b"synthetic download bytes",
+        "etag": '"synthetic-v1"',
+        "get_count": 0,
+        "status": 200,
+        "truncate": False,
+        "precondition_fail_once": False,
+    }
 
     class Handler(BaseHTTPRequestHandler):
         def do_HEAD(self):
@@ -158,8 +198,12 @@ def server():
 
 def download_spec(url):
     return BatchSpec(
-        source_id="synthetic_http", dataset_id="synthetic_step03_http", source_url=url,
-        mode="historical", source_date=date(2024, 1, 1), file_suffix=".parquet",
+        source_id="synthetic_http",
+        dataset_id="synthetic_step03_http",
+        source_url=url,
+        mode="historical",
+        source_date=date(2024, 1, 1),
+        file_suffix=".parquet",
     )
 
 
@@ -231,11 +275,17 @@ def test_http_failure_and_size_ceiling_do_not_publish(tmp_path, server):
     assert store.inspect() == []
 
 
-@pytest.mark.parametrize(("demo", "start", "end"), [
-    (True, "2024-01-01", None), (False, None, None),
-    (False, "2023-12-31", "2024-01-01"), (False, "2024-01-01", "2024-01-09"),
-    (False, "2024-01-02", "2024-01-01"), (False, "bad", "2024-01-02"),
-])
+@pytest.mark.parametrize(
+    ("demo", "start", "end"),
+    [
+        (True, "2024-01-01", None),
+        (False, None, None),
+        (False, "2023-12-31", "2024-01-01"),
+        (False, "2024-01-01", "2024-01-09"),
+        (False, "2024-01-02", "2024-01-01"),
+        (False, "bad", "2024-01-02"),
+    ],
+)
 def test_unsupported_backfill_rejected_before_network(demo, start, end):
     with pytest.raises(ValueError):
         plan(Settings(), "los_angeles", demo, start, end)

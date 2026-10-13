@@ -1,8 +1,92 @@
 # Step 01 source audit
 
+## Live multiport extension review (2026-10-12)
+
+Los Angeles and Oakland now have separate genuine AISStream subscriptions, raw identities,
+canonical data, profile evidence, geofence versions and displayed query scopes. This is observed
+regional reception, not exhaustive vessel coverage. Live metadata uses local receipt availability;
+reported destinations/ETA are unverified, ETA year is unspecified, and missing fields stay unknown.
+The bounded live view includes the current UTC hour and six prior hours. Collection gaps remain
+unknown rather than interpolated tracks. Two connections stay within the provider's documented
+three-connection account/IP limit; no availability SLA or durable provider replay is assumed.
+
+Oakland's2024-01-01 demonstration uses the same verified national NOAA artifact as Los Angeles,
+with a distinct port-specific derivation and dataset identity. Actual hardlink inode equality and
+SHA-256 `3124557f70bb216e3a4d5817cf019368a6ca47d86aec8d3d2aa8c8e6d1e92560` were verified.
+The extraction has52,785 reports/52,783 canonical positions and two duplicates. Existing Los Angeles
+observations are preserved. `oakland-approx-v1` is a manually authored analytical vicinity/approach
+approximation, with the official Port of Oakland2024 properties map as a contextual reference.
+It includes land/water and is not surveyed, an official boundary, a berth definition or call proof.
+See the uncertainty and review points in `geo/oakland.geojson`.
+
+Oakland historical weather saved24 genuine hourly reanalysis points. Current forecast requests
+succeeded for both ports (HTTP200,48 hourly points each). Los Angeles GDELT news returned429;
+Oakland news was not yet requested at the20:04:57UTC snapshot. Shared cooldowns are enforced
+and hourly schedules are staggered by port. These outcomes do not claim news coverage or an
+empty-success response. Earlier audits below record the states observed at their original stages.
+
+Evidence: `artifacts/multiport/final-state.json`, `artifacts/multiport/browser-verification.json`,
+immutable raw receipts and the existing source ledgers. No provider content was fabricated.
+
+Step09 review (2026-10-12): no provider requests or source changes. The analytical mart uses the
+saved NOAA series and one selected historical ERA5 revision; recent news/forecast are excluded.
+Known-boundary confirmations and completed midpoint durations remain experimental inference,
+not verified port calls/dwell. Counts include all vessel types and all reporting points in the
+collection region. The sole candidate remains reported pilot-vessel type50, contributing two
+candidate-vessel hours and one duration sample; it is not a demonstrated cargo queue. Coarse
+weather, approximate zones, gaps and unknown boundaries remain explicit. Processed source
+intervals and event-time recency do not establish total AIS coverage or today's collector health.
+All original source/visit business hashes and raw checksums remain unchanged.
+
+## Step08 recheck and real requests (2026-10-12)
+
+Primary [archive](https://open-meteo.com/en/docs/historical-weather-api),
+[forecast](https://open-meteo.com/en/docs), [terms](https://open-meteo.com/en/terms),
+[licence](https://open-meteo.com/en/licence) and
+[GDELT DOC](https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/) documentation were rechecked.
+Free non-commercial weather terms still list fewer than600/minute,5,000/hour and10,000/day calls.
+Local policies are much lower; no key/payment was used. Attribution and interpretation are
+documented for future presentation in [CONTEXT.md](CONTEXT.md).
+
+- Archive GET200 at12:25:00.890960UTC: latitude33.71466, longitude−118.24239; date2024-01-01,
+  hourly wind_speed_10m/precipitation, models=era5, UTC/unixtime, ms/mm, sea preference.
+  Saved24 points00:00–23:00UTC; actual cell33.5 / −118.25. ERA5 has no archive gusts in the audited
+  matrix, so gusts were not requested. Wind model values0.85–3.92m/s. Returned precipitation
+  values sum0.2mm over their preceding-hour intervals, not a claimed calendar-day rainfall total.
+- Forecast GET200 at12:26:18.591898UTC: same requested location/units, dates2026-10-12 through
+  2026-10-13, best_match and wind/gusts/precipitation. Saved48 points; actual cell33.72767 / −118.24222.
+  Neither response provided model issue/run time; generationtime_ms remains computation duration.
+- GDELT bounded ArticleList request: query `("Port of Los Angeles" OR "Los Angeles Harbor")
+  (disruption OR closure OR strike OR congestion OR storm)`, maxrecords100, explicit interval
+  2026-10-11T12:15:00Z to2026-10-12T12:15:00Z. **HTTP429**, recorded `source_rate_limited`; no
+  immediate retry, no real articles and no empty-success claim. Earliest local retry12:40:00.277470UTC.
+  Its docs allow explicit recent intervals and a maximum250-record cap. First-seen metadata is
+  separate from unknown publication time. News is excluded from the2024 replay.
+
+Exact public parameter maps, response metadata, original bytes, raw checksums and attempts are
+retained locally. Real news nonempty/empty responses remain externally unverified in Step08;
+synthetic tests cover both shapes and throttling. Existing Step01 `{}` evidence remains historical
+probe evidence, not a fresh2026 feed success. Weather is model context, not on-site observations
+or causal evidence for queueing.
+
+Step07 review (2026-10-12): historical source and saved observations were preserved. The single
+low-speed candidate reports vessel type50 on all 57 eligible records. Verified the
+[USCG AIS type table](https://navcen.uscg.gov/ais-class-a-reports): code50 denotes pilot vessel.
+This is reported AIS metadata, not independently verified identity or queue/berth evidence.
+No new provider acquisition or additional day was required. [VISITS.md](VISITS.md) records
+manual real-track review, sparse-context limits and retrospective/event-time-prefix semantics.
+
 Checked 2026-10-11. Scope: $0, local-first Port of Los Angeles demo. Step 01 checks below were access probes. Step 03 downloaded the selected NOAA artifact and measured real regional observations, recorded separately below. No news articles were saved or observations invented. Provider responses and coverage can change.
 
 ## Frozen historical demo
+
+Step06 update (2026-10-12): reviewed the official
+[2023 Port of Los Angeles terminal schematic](https://kentico.portoflosangeles.org/getmedia/07e1377d-b452-4ecb-a629-9a0c69410805/pola_terminals_map)
+visually and compared six manually authored vicinity polygons with saved 2024 AIS tracks.
+`geo/los_angeles.geojson` records version, uncertainty, references and reviewed exclusion points.
+The schematic does not supply surveyed coordinates or establish historical operational validity.
+The shared offshore candidate is regional; no anchorage, waiting or visit evidence is claimed.
+See [GEO_ZONES.md](GEO_ZONES.md) for the exact approximation and source limitations.
 
 [`configs/demo.yaml`](../configs/demo.yaml) is the single source of truth for later commands: NOAA OCM 2024-01-01, from `2024-01-01T00:00:00Z` inclusive to `2024-01-02T00:00:00Z` exclusive, with the same UTC weather period and a 5-minute replay interval. The interval controls presentation; it does not create five-minute AIS observations. `America/Los_Angeles` is display time only. All stored event times remain UTC. The one UTC day spans portions of two Los Angeles calendar dates.
 
@@ -62,6 +146,20 @@ The [Port of Los Angeles terminal map](https://kentico.portoflosangeles.org/getm
 Initial waiting heuristics remain 1.0 knot, 30 continuous minutes, maximum 15-minute observation gap. They are analytical assumptions, not port rules or observed thresholds. Given the documented provider sampling and observed second-level timestamps, validate gap behavior on actual LA tracks before reporting waiting estimates.
 
 ## Failure-state rules and Step 03 fallback
+
+### Current-context recovery (2026-10-13 UTC)
+
+Open-Meteo forecasts returned200 and48 rows for each port. LA GDELT returned200 with a
+valid empty response at10:33:10.508915UTC; Oakland GDELT remained429/rate limited.
+The reviewed [official Port of Oakland RSS](https://www.portofoakland.com/feed/) returned200
+at11:09:02.221622UTC. Its10 feed items were outside the requested24h window, yielding a
+valid empty result. This is a narrow official-release feed, not broad news/disruption coverage.
+
+Original XML is preserved privately and checksummed. Normalized outputs retain title/link,
+publisher/domain and known publication time, without feed bodies or invented first-seen time.
+Undated items are excluded and counted; an entirely undated feed fails explicitly. DTD/entity
+declarations are rejected. Primary source failures remain in the audit; fallback freshness
+and source identity are exposed separately. Publishers retain rights to their content.
 
 - **Failure:** non-2xx, parse error, timeout, or authentication error. Keep source error and last success separately; do not turn failure into empty data.
 - **Valid empty:** successful response with no matched records, including the observed GDELT `{}`. Record request bounds and response time.

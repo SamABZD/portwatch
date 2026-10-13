@@ -1,0 +1,94 @@
+{
+  "folder": "artifacts\\step13\\b10119e6ea8c4327ace9b807fca53ebe",
+  "verified": true,
+  "passes": [
+    {
+      "elapsed_seconds": {
+        "los_angeles": 65.45243669999763,
+        "oakland": 59.38293419999536
+      },
+      "snapshot": {
+        "business_sha256": "383592ed9041fa367971a750e3b127774575abe19e33ac38bd8cf1f92bee8f66",
+        "ports": {
+          "los_angeles": {
+            "positions": 62157,
+            "vessels": 141,
+            "first_utc": "2024-01-01T00:00:00+00:00",
+            "last_utc": "2024-01-01T23:59:58+00:00",
+            "national_input_rows": 7293408,
+            "extracted": 62159,
+            "duplicates": 2,
+            "quarantined": 0,
+            "mart_sha256": "6f6ca8ecaa8e3824040aa481cd85d88cd0b52990ba2a0307daf14001ad223112"
+          },
+          "oakland": {
+            "positions": 52783,
+            "vessels": 172,
+            "first_utc": "2024-01-01T00:00:00+00:00",
+            "last_utc": "2024-01-01T23:59:59+00:00",
+            "national_input_rows": 7293408,
+            "extracted": 52785,
+            "duplicates": 2,
+            "quarantined": 0,
+            "mart_sha256": "6f8475f8980b5257e8eec455f331ad1dbf1eaec64ce8d91196083fc31bf46963"
+          }
+        },
+        "profile_sha256": "f93092ee3bf3955307a7916b3a0b52397e0fb9eb374cd6fc4d734a24e88d8035"
+      }
+    },
+    {
+      "elapsed_seconds": {
+        "los_angeles": 24.465658600005554,
+        "oakland": 25.013244600006146
+      },
+      "snapshot": {
+        "business_sha256": "383592ed9041fa367971a750e3b127774575abe19e33ac38bd8cf1f92bee8f66",
+        "ports": {
+          "los_angeles": {
+            "positions": 62157,
+            "vessels": 141,
+            "first_utc": "2024-01-01T00:00:00+00:00",
+            "last_utc": "2024-01-01T23:59:58+00:00",
+            "national_input_rows": 7293408,
+            "extracted": 62159,
+            "duplicates": 2,
+            "quarantined": 0,
+            "mart_sha256": "6f6ca8ecaa8e3824040aa481cd85d88cd0b52990ba2a0307daf14001ad223112"
+          },
+          "oakland": {
+            "positions": 52783,
+            "vessels": 172,
+            "first_utc": "2024-01-01T00:00:00+00:00",
+            "last_utc": "2024-01-01T23:59:59+00:00",
+            "national_input_rows": 7293408,
+            "extracted": 52785,
+            "duplicates": 2,
+            "quarantined": 0,
+            "mart_sha256": "6f8475f8980b5257e8eec455f331ad1dbf1eaec64ce8d91196083fc31bf46963"
+          }
+        },
+        "profile_sha256": "f93092ee3bf3955307a7916b3a0b52397e0fb9eb374cd6fc4d734a24e88d8035"
+      }
+    }
+  ],
+  "database_version": [
+    "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit",
+    "3.6.2"
+  ],
+  "cold_query_seconds": 0.45726040001318324,
+  "cached_query_seconds": 0.045168699987698346,
+  "prepared_query_seconds": 0.4989851999998791,
+  "without_live_credentials": true,
+  "prepared_without_database": true,
+  "provider_requests": 0,
+  "verified_at_utc": "2026-10-12T20:52:23.302493+00:00",
+  "elapsed_seconds": 295.5317525999999,
+  "hardware": {
+    "os": "Windows-10-10.0.19045-SP0",
+    "python": "3.11.9",
+    "logical_cpus": 8,
+    "ram_bytes": 25642815488
+  },
+  "owned_database_removed": true,
+  "native_cluster_stopped": true
+}
