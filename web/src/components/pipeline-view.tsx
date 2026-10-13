@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import PipelineDiagram from "@/components/pipeline-diagram";
 import HistoryResults from "@/components/history-results";
+import { startVisiblePolling } from "@/lib/visible-polling";
 
 type Series = {
   status: string;
@@ -34,21 +35,15 @@ export default function PipelineView() {
   const [report, setReport] = useState<Report | null>(null);
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
-  useEffect(() => {
-    const controller = new AbortController();
-    const refresh = async () => {
-      try {
-        const response = await fetch("/api/pipeline", { cache: "no-store", signal: controller.signal });
+  useEffect(() => startVisiblePolling({
+      load: async (signal) => {
+        const response = await fetch("/api/pipeline", { cache: "no-store", signal });
         if (!response.ok) throw new Error("disconnected");
-        setReport(await response.json()); setError(false);
-      } catch (failure) {
-        if (failure instanceof Error && failure.name !== "AbortError") setError(true);
-      }
-    };
-    refresh();
-    const timer = setInterval(refresh, 30000);
-    return () => { controller.abort(); clearInterval(timer); };
-  }, [retry]);
+        return await response.json() as Report;
+      },
+      onData: (data) => { setReport(data); setError(false); },
+      onError: () => setError(true),
+  }), [retry]);
 
   return <main className="workspace pipeline-workspace">
     <header className="app-header">

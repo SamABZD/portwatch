@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import HarborMap from "./harbor-map";
 import type { Dataset, Frame, Health, Mode, Vessel } from "@/lib/types";
+import { startVisiblePolling } from "@/lib/visible-polling";
 
 function labelForZone(zone: string) { return zone === "UTC" ? "UTC" : "Pacific"; }
 function coordinate(value: number | null) { return value == null ? "Unknown" : value.toFixed(5); }
@@ -68,8 +69,6 @@ export default function Dashboard() {
   const [port, setPort] = useState("los_angeles");
   const [ports, setPorts] = useState<{ port_id: string; name: string }[]>([]);
   const [preparedMode, setPreparedMode] = useState(false);
-  const portRef = useRef(port);
-  portRef.current = port;
   const [minute, setMinute] = useState(750);
   const [zone, setZone] = useState("UTC");
   const [playing, setPlaying] = useState(false);
@@ -86,6 +85,7 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(true);
   const [catalogError, setCatalogError] = useState<string | null>(null);
+  const [catalogRetry, setCatalogRetry] = useState(0);
   const [tick, setTick] = useState(0);
   const [healthError, setHealthError] = useState(false);
   const busyRef = useRef(busy);
@@ -108,33 +108,35 @@ export default function Dashboard() {
   const vessel = shown?.vessels.find((v) => v.mmsi === selected) || null;
 
   const loadCatalog = useCallback(() => {
-    setCatalogError(null);
-    query<{ datasets: Dataset[]; ports: { port_id: string; name: string }[]; prepared_mode: boolean }>(`catalog?port=${port}`)
-      .then((data) => {
-        if (port !== portRef.current) return;
+    setCatalogRetry((value) => value + 1);
+  }, []);
+  useEffect(() => {
+    const stop = startVisiblePolling({
+      intervalMs: null,
+      onStart: () => setCatalogError(null),
+      load: (signal) => query<{ datasets: Dataset[]; ports: { port_id: string; name: string }[]; prepared_mode: boolean }>(`catalog?port=${port}`, signal),
+      onData: (data) => {
         setDatasets(data.datasets); setPorts(data.ports); setPreparedMode(data.prepared_mode);
         if (data.prepared_mode) {
           setMode("historical");
           if (data.ports[0] && !data.ports.some(item => item.port_id === port)) setPort(data.ports[0].port_id);
         }
-      })
-      .catch((e) => {
-        setCatalogError(e.message);
+        // A successful catalog is one-shot; revision changes and retries reload it.
+        stop();
+      },
+      onError: (failure) => {
+        setCatalogError(failure instanceof Error ? failure.message : "prepared_data_unavailable");
         setBusy(false);
-      });
-  }, [port]);
+      },
+    });
+    return stop;
+  }, [port, catalogRetry]);
   useEffect(() => {
-    loadCatalog();
-  }, [loadCatalog]);
-  useEffect(() => {
-    const controller = new AbortController();
     if (!dataset) {
       setFrame(null);
       setBusy(false);
-      return () => controller.abort();
+      return;
     }
-    setBusy(true);
-    setError(null);
     const params = new URLSearchParams({
       mode,
       port,
@@ -142,43 +144,34 @@ export default function Dashboard() {
       trail: "30",
     });
     if (mode === "historical") params.set("at", cutoff);
-    query<Frame>(`frame?${params}`, controller.signal)
-      .then((result) => {
+    return startVisiblePolling({
+      intervalMs: mode === "live" ? 30000 : null,
+      onStart: () => { setBusy(true); setError(null); },
+      load: (signal) => query<Frame>(`frame?${params}`, signal),
+      onData: (result) => {
         setFrame(result);
         setBusy(false);
         if (result.dataset.revision !== dataset.revision) loadCatalog();
-      })
-      .catch((e) => {
-        if (e.name !== "AbortError") {
-          setError(e.message);
-          setBusy(false);
-          setPlaying(false);
-        }
-      });
-    return () => controller.abort();
-  }, [mode, port, cutoff, dataset?.revision, staleness, tick]);
-  useEffect(() => {
-    const controller = new AbortController();
-    const refresh = () =>
-      query<Health>(`health?port=${port}`, controller.signal)
-        .then((result) => {
+      },
+      onError: (failure) => {
+        setError(failure instanceof Error ? failure.message : "prepared_data_unavailable");
+        setBusy(false);
+        setPlaying(false);
+      },
+    });
+  }, [mode, port, cutoff, dataset?.revision, staleness, tick, loadCatalog]);
+  useEffect(() => startVisiblePolling({
+        load: (signal) => query<Health>(`health?port=${port}`, signal),
+        onData: (result) => {
           setHealth(result);
           setHealthError(false);
-        })
-        .catch((e) => {
-          if (e.name !== "AbortError") setHealthError(true);
-        });
-    refresh();
-    const timer = setInterval(refresh, 30000);
-    return () => {
-      controller.abort();
-      clearInterval(timer);
-    };
-  }, [port]);
+        },
+        onError: () => setHealthError(true),
+  }), [port]);
   useEffect(() => {
     if (!playing || mode !== "historical") return;
     const timer = setInterval(() => {
-      if (!busyRef.current)
+      if (document.visibilityState === "visible" && !busyRef.current)
         setMinute((previous) => Math.min(1440, previous + 5 * speed));
     }, 1200);
     return () => clearInterval(timer);
@@ -186,11 +179,6 @@ export default function Dashboard() {
   useEffect(() => {
     if (minute >= 1440) setPlaying(false);
   }, [minute]);
-  useEffect(() => {
-    if (mode !== "live") return;
-    const timer = setInterval(() => setTick((value) => value + 1), 30000);
-    return () => clearInterval(timer);
-  }, [mode]);
   function switchMode(next: Mode) {
     setPlaying(false);
     setSelected(null);

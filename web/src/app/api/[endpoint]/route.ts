@@ -16,7 +16,7 @@ export async function GET(
     target.search = request.nextUrl.search;
     const response = await fetch(target, {
       cache: "no-store",
-      signal: AbortSignal.timeout(20000),
+      signal: AbortSignal.any([request.signal, AbortSignal.timeout(20000)]),
     });
     if (endpoint === "history-lineage" && response.ok)
       return new NextResponse(await response.text(), {
