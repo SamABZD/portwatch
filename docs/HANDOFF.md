@@ -2,18 +2,22 @@
 
 ## Current stage state
 
-- Project: this repository; current publication branch `release/portfolio-v0.1.0`.
+- Project: this repository; default branch `main`. Publication PR#3 merged at
+  `8fcaa933971f5ce98816d97761a5979e7e2c2560`; first release
+  [v0.1.0](https://github.com/SamABZD/portwatch/releases/tag/v0.1.0) points to that exact
+  tested commit. Published2026-10-13T11:40:34UTC; repository remains private.
 - Steps00,00A,01-13 and Step15 port generalization completed locally. Additional pre-release
   work includes continuous two-port collection, timed vessel profiles and an interactive pipeline drawing.
 - User skips Step14 academy submission and Step17 scale study. Step14A portfolio publication
-  is being prepared, followed by public24/7 hosting. Step16 history/dbt remains optional
+  and cloud hosting are complete. Step16 history/dbt remains optional
   and unimplemented. Owner subsequently requested health fixes, disabled Actions, and authorized
   proceeding with local validation and cloud deployment; this supersedes hosted-check gates below.
-- Frontend3000/API8000, PostgreSQL55432 and existing Prefect API4200 support the local app.
-  An owned runtime collects Los Angeles/Oakland; six Prefect deployments are active.
-  Check `artifacts/live/runtime.json` and current processes before starting another runtime.
-- Read [LIVE_MULTIPORT.md](LIVE_MULTIPORT.md) for commands, scopes, stop/restart and remaining
-  always-on public hosting requirements. Use `git log -1` for the local checkpoint.
+- The [hosted frontend](https://portwatch-iota.vercel.app) uses Railway API/PostGIS and one
+  cloud runtime with independent Los Angeles/Oakland collectors and six Prefect schedules.
+  Local raw/history/database are preserved; local collection stopped before cloud live began.
+  Leave local collectors stopped while the cloud runtime is active.
+- Read [deployment operations](../deploy/README.md) for endpoints, persistence, update/handover,
+  storage and backup requirements. Use `git log -1` for the latest documentation checkpoint.
 - CI05A was account-billing-blocked; repository Actions are now explicitly disabled by the owner.
   Preserve private repository visibility. User authorized hosting on Sam's existing paid Railway
   Hobby workspace with a Vercel frontend. Account/payment/plan changes remain outside this work.
@@ -21,6 +25,24 @@
   superseded by the live runtime. No source observations were invented for this extension.
 
 ## Verified commands and observed outcomes
+
+### Completed publication (2026-10-13 UTC)
+
+- PR#3 merged at11:38:08UTC; CI PR#2 was automatically marked merged as its ancestor code
+  is included. Main's tree exactly matched reviewed PR head `7d233d4`.
+- Re-ran the complete locked validator on actual main `8fcaa933971f5ce98816d97761a5979e7e2c2560`:
+  PASS,194 unit +64 integration tests, lint/format, installed package/CLI and eight migrations
+  with zero on repeat. No executable change was made between verification and tagging.
+- Annotated tag `v0.1.0` was unused, created/pushed normally, and its remote peeled commit
+  equals that tested main SHA. Release creation with the tracked notes succeeded; it is
+  published, not a draft. No tag was moved or overwritten.
+- At11:41:56–11:41:59UTC the Vercel proxy returned both ports' healthy connected collectors,
+  recent real observations, successful minute jobs, fresh forecasts and valid empty news.
+  Cloud clean counts were274 LA/218 Oakland live positions, with one pending batch each;
+  NOAA historical counts remain62,157/52,783. These are time-specific observations.
+- 193 relative documentation links, four asset hashes, current content and reachable-history
+  credential scans passed before publication. Actions remain disabled_manually/permissions
+  false, with zero queued/running jobs. Vercel deployment checks passed separately.
 
 ### Health fixes and deployment follow-up (2026-10-13 UTC)
 

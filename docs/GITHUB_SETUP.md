@@ -1,5 +1,25 @@
 # GitHub setup record
 
+## Published v0.1.0 (2026-10-13 UTC)
+
+[Publication PR#3](https://github.com/SamABZD/portwatch/pull/3) merged at11:38:08UTC into
+`8fcaa933971f5ce98816d97761a5979e7e2c2560`; its tree exactly matches reviewed head
+`7d233d4689fc7654c5abe0253e9e99420cddff03`. CI PR#2 was automatically marked merged.
+The full locked local validator passed again on that actual main commit:194 unit and64
+integration tests, lint/format, installed wheel/CLI, eight migrations and zero repeat.
+
+The unused annotated `v0.1.0` tag was pushed without overwriting anything. Remote peeled
+tag SHA equals the tested main commit. [PortWatch v0.1.0](https://github.com/SamABZD/portwatch/releases/tag/v0.1.0)
+was published at11:40:34UTC using the tracked release notes; API confirms `isDraft:false`
+and the exact target commit. No source changes occurred between final validation and tag.
+
+Repository visibility remains private; the About homepage now points to the working
+[hosted app](https://portwatch-iota.vercel.app). Actions permissions remain `enabled:false`,
+Validate remains `disabled_manually`, and queued/running counts are zero. Successful Vercel
+deployment checks are separate from GitHub Actions; no hosted Python CI pass is claimed.
+This section supersedes earlier preparation statuses below. Subsequent documentation-only
+bookkeeping does not change or move the release tag.
+
 ## Owner override and current validation (2026-10-13)
 
 The owner explicitly requested GitHub Actions off and continuing the project. Repository
