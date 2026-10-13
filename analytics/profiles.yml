@@ -1,0 +1,17 @@
+# Credentials come only from the calling process; DBT_ENV_SECRET_* is log-redacted by dbt.
+portwatch:
+  target: local
+  outputs:
+    local:
+      type: postgres
+      host: "{{ env_var('PORTWATCH_DB_HOST', '127.0.0.1') }}"
+      port: "{{ env_var('PORTWATCH_DB_PORT', '5432') | int }}"
+      dbname: "{{ env_var('PORTWATCH_DB_NAME', 'portwatch') }}"
+      user: "{{ env_var('PORTWATCH_DB_USER', 'portwatch') }}"
+      password: "{{ env_var('DBT_ENV_SECRET_PORTWATCH_PASSWORD') }}"
+      sslmode: "{{ env_var('PORTWATCH_DB_SSLMODE', 'prefer') }}"
+      schema: "{{ env_var('PORTWATCH_DBT_SCHEMA', 'portwatch_dbt') }}"
+      threads: 1
+      connect_timeout: 5
+      retries: 0
+      search_path: public

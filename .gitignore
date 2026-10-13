@@ -57,3 +57,7 @@ web/public/vendor/maplibre/
 # Keep small synthetic test fixtures under tests/fixtures/ trackable.
 .railway/
 .vercel/
+analytics/.venv/
+analytics/target/
+analytics/logs/
+analytics/dbt_packages/

@@ -30,6 +30,15 @@ from portwatch.visits import identity
 from portwatch.zones import AssignmentScope, assign_zones, configured_geofence, load_geofence
 
 PIPELINE_VERSION = "pipeline-v1"
+OPTIONAL_WEATHER_FAILURES = {
+    "source_http_failure",
+    "source_timeout",
+    "source_connection_failure",
+    "source_deadline",
+    "source_rate_limited",
+    "local_poll_cooldown",
+    "context_connector_already_running",
+}
 
 
 class PipelineError(RuntimeError):
@@ -261,15 +270,16 @@ def execute_step(port, day, step, key, parent, *, force=False):
             return checkpointed(
                 connection, key, step, identity([spec.source_url]), parent, raw, force=True
             )
-        saved = connection.execute(
-            "SELECT result FROM pipeline_checkpoints WHERE workflow_key=%s AND step='raw'", (key,)
-        ).fetchone()[0]
-        batch = next(
-            item.manifest
-            for item in store.inspect()
-            if item.state == "complete" and item.manifest.batch_id == saved["batch_id"]
-        )
         if step == "extract":
+            saved = connection.execute(
+                "SELECT result FROM pipeline_checkpoints WHERE workflow_key=%s AND step='raw'",
+                (key,),
+            ).fetchone()[0]
+            batch = next(
+                item.manifest
+                for item in store.inspect()
+                if item.state == "complete" and item.manifest.batch_id == saved["batch_id"]
+            )
 
             def extraction():
                 derived, _ = extract(
@@ -380,7 +390,14 @@ def execute_step(port, day, step, key, parent, *, force=False):
 
 
 def run_day(
-    port, day, *, prepare_only=False, stop_after_raw=False, force=False, step_runner=execute_step
+    port,
+    day,
+    *,
+    prepare_only=False,
+    stop_after_raw=False,
+    force=False,
+    step_runner=execute_step,
+    allow_missing_weather=False,
 ):
     settings = for_port(Settings(), port)
     spec, _ = day_request(settings, port, day)
@@ -396,7 +413,26 @@ def run_day(
                         if prepare_only
                         else ("raw", "extract", "clean", "weather", "publish", "validate")
                     ):
-                        reports[step] = step_runner(port, day, step, key, str(run_id), force=force)
+                        try:
+                            reports[step] = step_runner(
+                                port, day, step, key, str(run_id), force=force
+                            )
+                        except Exception as error:
+                            safe = sanitized(error)
+                            if not (
+                                allow_missing_weather
+                                and step == "weather"
+                                and safe.code in OPTIONAL_WEATHER_FAILURES
+                            ):
+                                raise
+                            # Failed connector/audit/checkpoint remain unchanged. The mart
+                            # uses only an actually saved matching weather revision, or NULL.
+                            reports[step] = dict(
+                                status="unavailable",
+                                reason=safe.code,
+                                input_count=0,
+                                output_count=0,
+                            )
                         if stop_after_raw and step == "raw":
                             raise ControlledStop()
                     connection.execute(
@@ -473,6 +509,7 @@ def run_historical(
     stop_after_raw=False,
     force=False,
     step_runner=execute_step,
+    allow_missing_weather=False,
 ):
     requests = plan(Settings(), port, demo, start, end)
     reports, failed = [], []
@@ -488,6 +525,7 @@ def run_historical(
                 stop_after_raw=stop_after_raw,
                 force=force,
                 step_runner=step_runner,
+                allow_missing_weather=allow_missing_weather,
             )
             reports.append(result)
         except ControlledStop:
@@ -500,7 +538,11 @@ def run_historical(
                 continue
             try:
                 reports[reports.index(prepared)] = run_day(
-                    port, prepared["day"], force=force, step_runner=step_runner
+                    port,
+                    prepared["day"],
+                    force=force,
+                    step_runner=step_runner,
+                    allow_missing_weather=allow_missing_weather,
                 )
             except PipelineError as error:
                 failed.append(dict(day=prepared["day"], status="failed", reason=error.code))

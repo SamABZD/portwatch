@@ -140,7 +140,15 @@ def db_verify_backup(
 
 
 def pipeline_command(
-    kind, port, demo=False, start=None, end=None, stop_after_raw=False, rebuild=False, local=False
+    kind,
+    port,
+    demo=False,
+    start=None,
+    end=None,
+    stop_after_raw=False,
+    rebuild=False,
+    local=False,
+    allow_missing_weather=False,
 ):
     from portwatch.pipeline import PipelineError, run_context, run_historical, run_live, sanitized
 
@@ -157,6 +165,7 @@ def pipeline_command(
                     end=end,
                     stop_after_raw=stop_after_raw,
                     force=rebuild,
+                    allow_missing_weather=allow_missing_weather,
                 )
             elif kind == "live":
                 result = run_live(port)
@@ -174,7 +183,7 @@ def pipeline_command(
             if kind == "run":
                 result = historical_flow(port, stop_after_raw, rebuild)
             elif kind == "backfill":
-                result = backfill_flow(port, start, end, rebuild)
+                result = backfill_flow(port, start, end, rebuild, allow_missing_weather)
             else:
                 result = {"live": live_flow, "weather": weather_flow, "news": news_flow}[kind](port)
         typer.echo(json.dumps(result, indent=2, default=str))
@@ -209,15 +218,50 @@ def pipeline_backfill(
     port: str = "los_angeles",
     rebuild: bool = False,
     local: bool = False,
+    allow_missing_weather: bool = False,
 ):
     """Process 1–7 NOAA 2024 UTC days, inclusive start and exclusive end."""
-    pipeline_command("backfill", port, start=start, end=end, rebuild=rebuild, local=local)
+    pipeline_command(
+        "backfill",
+        port,
+        start=start,
+        end=end,
+        rebuild=rebuild,
+        local=local,
+        allow_missing_weather=allow_missing_weather,
+    )
 
 
 @pipeline_app.command("live")
 def pipeline_live(port: str = "los_angeles", local: bool = False):
     """Process completed saved live batches and report event freshness."""
     pipeline_command("live", port, local=local)
+
+
+@pipeline_app.command("models")
+def pipeline_models(
+    start: Annotated[str, typer.Option(help="Inclusive historical UTC date.")],
+    end: Annotated[str, typer.Option(help="Exclusive historical UTC date; at most 7 days.")],
+    port: str = "los_angeles",
+    local: bool = False,
+    check_live: bool = False,
+):
+    """Build/test dbt SQL and lineage; opt-in live receipt freshness is separate from history."""
+    from portwatch.models import run_models
+    from portwatch.pipeline import sanitized
+
+    try:
+        plan(Settings(), port, False, start, end)
+        if local:
+            result = run_models(Settings(), port, start, end, check_live=check_live)
+        else:
+            from portwatch.orchestration import models_flow
+
+            result = models_flow(port, start, end, check_live)
+        typer.echo(json.dumps(result, indent=2))
+    except Exception as error:
+        typer.echo(f"Models stopped: {sanitized(error).code}", err=True)
+        raise typer.Exit(code=1) from None
 
 
 @pipeline_app.command("weather")

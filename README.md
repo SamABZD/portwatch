@@ -9,6 +9,12 @@ Vessel reports arrive with duplicates, gaps and incomplete context. PortWatch tu
 **[Open the hosted PortWatch app](https://portwatch-iota.vercel.app)** — live observations and
 historical replay for both ports. Source freshness and incomplete coverage stay explicit.
 
+The [historical expansion and dbt guide](docs/HISTORY_DBT.md) documents the optional local
+seven-day Los Angeles dataset, explicit SQL lineage, typed hourly models and preliminary
+baselines. The hosted application retains its one-day replay and continuous live collection.
+Step16 verified443,296 observations/168 hours,36 dbt data tests and276 Python tests;
+[measured results](docs/evidence/history-dbt.json) retain source and baseline limitations.
+
 ## Product tour
 
 ![Los Angeles historical map, replay controls, observed activity and weather](docs/assets/historical-los-angeles.png)

@@ -1,5 +1,27 @@
 # Measured results
 
+## Step16: bounded history and dbt (2026-10-13 Asia/Beirut)
+
+- Jan1–7,2024 LA:443,296 canonical observations across168 complete UTC hours; all seven
+  NOAA files verified and no missing AIS days. A separate owned local database preserves the
+  hosted one-day demo and cloud collectors. Final DB size2.83GiB; original bytes1.48GiB.
+- Initial strict run preserved actual weather502/timeout failures. Resumption reused all seven
+  clean checkpoints and preserved the exact business hash; weather later became available for
+  all168 hours. Interrupted resumption wall time is not a processing-throughput measurement.
+- Eleven dbt models,36 data tests and45 typed hourly columns pass. Every hourly field matches
+  the original implementation; repeated model output has zero differences. Python ingestion,
+  visit inference and Prefect remain in place. New models use owned schemas and an isolated lock.
+- Contextual projections deduplicate to1,572 inferred episodes,211 completed,404 crossing UTC
+  dates. Partial durations remain unknown; these are experimental episodes, not official calls.
+- Trailing samples contain0–167 prior hours. The168-prior-hour/seven-date gate suppresses all
+  anomaly labels; a seven-day dataset cannot establish seasonality or total AIS coverage.
+- Full validation:208 unit +68 integration =276 tests, lint/format, package/CLI, eight fresh
+  migrations/repeat zero. Real Prefect execution, a deliberately altered/restored derivative
+  parity test, separate stopped-live freshness rejection and rendered standalone lineage pass.
+- [Measured evidence](evidence/history-dbt.json), [validation](evidence/history-dbt-validation.txt),
+  [model lineage](evidence/dbt-lineage.json), [operations](HISTORY_DBT.md). No additional paid
+  resources or cloud expansion. Actions remain disabled; Step16 complete locally, Step17 skipped.
+
 ## Step13 final audit and pipeline drawing (2026-10-13 Asia/Beirut)
 
 - Added a selectable nine-component architecture drawing to `/pipeline`, connecting genuine

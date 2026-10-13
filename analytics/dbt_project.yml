@@ -1,0 +1,26 @@
+name: portwatch_analytics
+version: '0.1.0'
+config-version: 2
+require-dbt-version: ['>=1.12.5', '<1.13.0']
+profile: portwatch
+model-paths: [models]
+macro-paths: [macros]
+test-paths: [tests]
+clean-targets: [target, dbt_packages]
+models:
+  portwatch_analytics:
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: table
+    marts:
+      +materialized: table
+vars:
+  port_id: los_angeles
+  start_utc: '2024-01-01T00:00:00+00:00'
+  end_utc: '2024-01-02T00:00:00+00:00'
+  baseline_min_hours: 168
+  baseline_min_days: 7
+  check_live: false
+flags:
+  send_anonymous_usage_stats: false

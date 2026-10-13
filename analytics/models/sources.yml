@@ -1,0 +1,59 @@
+version: 2
+sources:
+- name: portwatch
+  schema: public
+  description: Python ingestion, spatial inference and reference publication; unchanged
+    business definitions.
+  tables:
+  - name: mart_partitions
+    config:
+      freshness: null
+  - name: mart_rule_sets
+    config:
+      freshness: null
+  - name: vessel_positions
+    config:
+      freshness: null
+  - name: position_zone_assignments
+    config:
+      freshness: null
+  - name: port_zones
+    config:
+      freshness: null
+  - name: visit_inference_partitions
+    config:
+      freshness: null
+  - name: vessel_visits
+    config:
+      freshness: null
+  - name: waiting_episodes
+    config:
+      freshness: null
+  - name: ingestion_batches
+    config:
+      freshness: null
+  - name: clean_batches
+    config:
+      freshness: null
+  - name: weather_values
+    config:
+      freshness: null
+  - name: port_activity_hourly
+    config:
+      freshness: null
+- name: live_feed
+  schema: public
+  tables:
+  - name: positions
+    identifier: vessel_positions
+    config:
+      enabled: '{{ var(''check_live'', false) }}'
+      loaded_at_field: received_at
+      freshness:
+        filter: source_id='aisstream_v0' AND dataset_id='{{ var("port_id") }}_live_aisstream_v1'
+        warn_after:
+          count: 5
+          period: minute
+        error_after:
+          count: 15
+          period: minute

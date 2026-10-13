@@ -9,8 +9,8 @@
 - Steps00,00A,01-13 and Step15 port generalization completed locally. Additional pre-release
   work includes continuous two-port collection, timed vessel profiles and an interactive pipeline drawing.
 - User skips Step14 academy submission and Step17 scale study. Step14A portfolio publication
-  and cloud hosting are complete. Step16 history/dbt remains optional
-  and unimplemented. Owner subsequently requested health fixes, disabled Actions, and authorized
+  and cloud hosting are complete. Step16 history/dbt is now complete locally
+  on `feat/history-dbt`; Step17 remains skipped. Owner subsequently requested health fixes, disabled Actions, and authorized
   proceeding with local validation and cloud deployment; this supersedes hosted-check gates below.
 - The [hosted frontend](https://portwatch-iota.vercel.app) uses Railway API/PostGIS and one
   cloud runtime with independent Los Angeles/Oakland collectors and six Prefect schedules.
@@ -25,6 +25,47 @@
   superseded by the live runtime. No source observations were invented for this extension.
 
 ## Verified commands and observed outcomes
+
+### Step16 history/dbt (2026-10-13 Asia/Beirut)
+
+- Owner requested the next unfinished step. Implemented only Step16; no cloud resources,
+  billing changes, local collectors, hosted dataset expansion or GitHub Actions were enabled.
+- Genuine NOAA Jan1–7,2024:443,296 canonical LA observations,168 complete hours, no missing
+  AIS days. Seven files total1,589,333,765 bytes. Measured one-day DB/index growth244.24MiB;
+  final owned history database3,039,663,795 bytes. Context-adjusted disk plan7.24GiB.
+- Initial strict run took2,322.96s and retained Jan2 HTTP502/Jan3 timeout failures; other dates
+  published. Resumption succeeded with all seven clean checkpoints reused and the exact same
+  positions/clean-record/static business hash. Its11,505.38s wall time includes an interrupted
+  gap and is not a compute benchmark. Weather subsequently succeeded for all168 hours; earlier
+  failed attempts remain in the audit. No zeros, weather receipts or source rows were invented.
+- Optional `--allow-missing-weather` preserves failed connector/checkpoint state and null/
+  flagged context when needed; strict mode remains default. Non-provider errors still fail.
+  Removed redundant archive scans only from stages that consume context/database contracts.
+- Isolated locked dbt Core1.12.5/Postgres1.11.0:11 models,36 data tests and45 typed hourly
+  columns pass. All168 rows match every reference field; a second model build is identical.
+  Original Python visits/SQL metric definitions and one-day demo remain the reference.
+- Deduplicated contextual projections show1,572 inferred episodes,211 completed and404
+  crossing UTC dates. Partial episodes retain null completed-duration bounds. The report
+  distinguishes vessel-track slice edges from episodes within15min of the interval edges;
+  these are experimental inferences, not official port calls.
+- Baselines contain0–167 prior hours; all168 anomaly labels are null under the168-hour/
+  seven-date gate. Source/rule separation, prior-only samples and coverage limits are explicit.
+- `uv run --locked --extra dev python scripts/validate.py`: PASS208 unit +68 integration
+  =276, lint/117 formats, wheel/CLI, eight fresh migrations/repeat zero. A real temporary
+  Prefect model flow completed and stopped its server. A changed owned dbt output value
+  failed parity; restoring it passed. The stopped local live feed correctly failed its own
+  freshness check, with historical archives excluded. Static docs/graph rendered in Chrome.
+- Read-only hosted recheck at16:48UTC (19:48 Beirut): both portsOK, connected/recent collectors,
+  successful minute jobs, fresh forecasts and attributed official-release fallbacks. Actions
+  permissions remain false and the repository private. Live deployment is unchanged.
+- Evidence: [history](evidence/history-dbt.json), [validation](evidence/history-dbt-validation.txt),
+  [lineage](evidence/dbt-lineage.json). Operations and exact commands:
+  [HISTORY_DBT](HISTORY_DBT.md). Ignored `artifacts/step16/local.json` records the owned local
+  database, selected output schema and model artifact directory; original `.env` remains intact.
+  Raw/derived files and history DB are intentionally retained. Do not start local collectors.
+- Optional Prefect test-folder deletion was automatically blocked without a detailed reason;
+  the test server is stopped and its temporary folder remains. No retry bypassed the block.
+  Step16 ends here. Steps14/17 remain skipped; no further roadmap stage is automatically started.
 
 ### Post-release Los Angeles context resilience (2026-10-13 UTC)
 
