@@ -9,8 +9,9 @@
 - Steps00,00A,01-13 and Step15 port generalization completed locally. Additional pre-release
   work includes continuous two-port collection, timed vessel profiles and an interactive pipeline drawing.
 - User skips Step14 academy submission and Step17 scale study. Step14A portfolio publication
-  and cloud hosting are complete. Step16 history/dbt is now complete locally
-  on `feat/history-dbt`; Step17 remains skipped. Owner subsequently requested health fixes, disabled Actions, and authorized
+  and cloud hosting are complete. Step16 history/dbt is complete locally and deployed to
+  the existing Railway PostGIS service; PR#6 merged at `53053d3236d7f2ff1089583d57760d9358e43045`.
+  Step17 remains skipped. Owner subsequently requested health fixes, disabled Actions, and authorized
   proceeding with local validation and cloud deployment; this supersedes hosted-check gates below.
 - The [hosted frontend](https://portwatch-iota.vercel.app) uses Railway API/PostGIS and one
   cloud runtime with independent Los Angeles/Oakland collectors and six Prefect schedules.
@@ -25,6 +26,54 @@
   superseded by the live runtime. No source observations were invented for this extension.
 
 ## Verified commands and observed outcomes
+
+### Budgeted cloud history and operation (2026-10-13 Asia/Beirut)
+
+- Owner approved merging/deploying history/dbt and strengthening continuous operation,
+  with no additional spending and no30-day expansion. Separately stopped all three
+  `appealing-upliftment` deployments and disabled its two GitHub auto-deploy settings;
+  project/services/source connections/database volume remain. Retained storage still bills.
+- Kept existing PortWatch services,5000MB volumes, backend1CPU/2GB and database0.5CPU/1GB
+  limits. Both restart policies are `ALWAYS`. No plan upgrade or new paid service.
+  Backend deployment `02446750-ef6e-4fb5-ae55-f173c5996e64` uses code
+  `fa2abb78e9c3f69d434b2feed5da7f7acc77af7f`; subsequent changes are documentation.
+- Restored a checksum-verified compact snapshot into the separate `portwatch_history_7d`
+  database on the existing private PostGIS service. All443,296 positions, clean-record
+  lineage, profiles and reference marts remain; only recomputable activity-state rows
+  were omitted. Original NOAA bytes and derivations remain preserved locally.
+- Actual isolated cloud dbt execution for `[2024-01-01,2024-01-08)` UTC passed11 models,
+  36 tests and45 typed columns. All168 complete hours match every local reference field
+  and business hash `24efbb918da302d845611f38b8f1f83c1caaaec8b32895e09b4d97ab0a1f2b25`.
+  Baselines have0–167 preceding hours; anomaly labels stay null. The pipeline page reads
+  these bounded results and static lineage; the original map replay stays bounded.
+- A real owned-runner SIGKILL triggered whole-container recovery. Runtime restarted at
+  `2026-10-13T18:37:45.965295UTC`, recovered two old active flow states, and both ports
+  completed two new live runs with no old active states. History hashes and persistent
+  `data/models` artifacts survived. Both API port health reports were healthy afterward.
+- Daily compressed logical backups keep two copies per database on the second existing
+  volume. Native APIs rejected Hobby as Pro-only; no upgrade was made. The finished
+  111,640,078-byte history copy was downloaded, checksum-verified and restored in an owned
+  temporary local database:8 migrations,443,296 positions,168 hours and the same hash.
+  The owned test database was removed. A separate live dump restore recovered8 migrations,
+  129,737 positions and275 hourly rows at its snapshot time. These checks are point-in-time.
+- Hourly maintenance retains seven days of terminal Prefect metadata (200 runs/pass) and
+  bounded diagnostic logs; metadata failures cannot prevent independent backup attempts.
+  Missing/stale/truncated backups and failed/overdue maintenance degrade health. Explicit
+  storage audits and writers hash bytes directly; API polling caches unchanged checksums
+  for at most five minutes. Live cleaning excludes NOAA files and bulk-reuses only complete
+  clean/profile results with matching receipt fields.
+- `uv run --locked --extra dev python scripts/validate.py`:213 unit +69 integration tests,
+  Ruff/format, wheel CLI and8 fresh/repeat migrations pass. `npm run build` passes. A real
+  temporary Prefect server confirmed old states recover while a current attempt survives;
+  its Windows SQLite cleanup warning left a temporary file, with the server stopped.
+- A five-minute post-rollout compute sample estimates$27.06/month versus the earlier
+  one-hour$30.61 sample. History/backups add roughly$0.3–0.6/month used storage, within both
+  this observed reduction and approximately$2.7/month compute removed from the stopped
+  project. Samples are not a full-month bill or hard cap. Source growth still needs capacity
+  review; original bytes are never silently deleted. Logical copies share Railway's failure
+  domain, so keep off-cloud copies. Local collectors remain stopped; Actions remain disabled.
+- Evidence: [cloud operation and restore](evidence/cloud-history-operations.json),
+  [local validation](evidence/cloud-history-validation.txt), [operations guide](../deploy/README.md).
 
 ### Step16 history/dbt (2026-10-13 Asia/Beirut)
 

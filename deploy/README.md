@@ -119,7 +119,8 @@ outputs remain. Original NOAA files and derivations remain preserved locally; th
 database snapshot deployment, not a claim that those national files were downloaded again
 on Railway. Initialize PostGIS in the new database before restoring a schema-filtered dump.
 Never restore over the live database. Run `pipeline models --port los_angeles --start 2024-01-01
---end 2024-01-07 --local` with the history database selected. Publish only a successful 168-row
+--end 2024-01-08 --local` with the history database selected (the end is exclusive).
+Publish only a successful 168-row
 report to `data/status/history-models.json` and its static lineage HTML to `data/history/index.html`.
 Set `PORTWATCH_HISTORY_DB_NAME=portwatch_history_7d`. The pipeline page reads these bounded
 results; the map retains its original bounded replay. No dbt scheduler or service is added.
@@ -141,10 +142,11 @@ server fails closed. Server/runner loss exits the runtime; the API supervisor ex
 container with failure so Railway restarts the entire owned process tree. Deployment overlap
 must stay zero. Local collectors must remain stopped while cloud collectors run.
 
-Hourly maintenance bounds diagnostic logs to 5MiB plus one 1MiB tail and retains seven days
+Hourly maintenance truncates diagnostic logs larger than 5MiB, retaining one 1MiB tail,
+and retains seven days
 of terminal Prefect metadata for these deployments. Business audits and source bytes are not
 deleted. It creates daily `pg_dump -Fc` copies on the existing backend volume, retaining two
-per database, with SHA-256 receipts, a 512MiB/file ceiling, ten-minute timeout and the existing
+per database, with SHA-256 receipts, a 512MiB/file abort threshold, ten-minute timeout and the existing
 1GiB free-space reserve. Disposable activity-state projections are omitted; they can be
 recomputed. Check `data/status/maintenance.json`; a missing/recently failed backup is not
 backup success. Native Railway backups were rejected as Pro-only, so no plan upgrade or
@@ -152,8 +154,9 @@ additional storage service was created. A backup on the second Railway volume pr
 against database-volume failure, but is not independent protection against account/provider
 loss; keep an off-cloud copy. Test restores in an explicitly owned temporary database.
 
-History and compressed copies add roughly $0.3–0.6/month of used storage at current volume
-rates, within the compute removed from `appealing-upliftment`; finite import/model execution
+History and compressed copies add roughly $0.3–0.6/month of used storage at
+[current Railway volume rates](https://docs.railway.com/pricing/plans), within the compute
+removed from `appealing-upliftment`; finite import/model execution
 has a small one-time usage cost. Actual usage remains metered: this is not a hard spending
 cap. Monitor the two fixed volumes, source growth and CPU/RAM trend. Source retention beyond
 the available capacity still requires an archive policy; disk pressure stops collection
