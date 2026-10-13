@@ -1,0 +1,114 @@
+{
+  "history_import": {
+    "database": "portwatch_history_7d",
+    "restore_seconds": 179.441774263978,
+    "positions": 443296,
+    "database_bytes": 1135220403,
+    "raw_sources": "preserved_in_original_local_store",
+    "omitted_recomputable_activity_state_rows": true
+  },
+  "history_verification": {
+    "hours": 168,
+    "canonical_positions": 443296,
+    "reference_differences": 0,
+    "dbt_business_sha256": "24efbb918da302d845611f38b8f1f83c1caaaec8b32895e09b4d97ab0a1f2b25",
+    "baseline": [
+      168,
+      0,
+      167,
+      7,
+      0,
+      0
+    ],
+    "database_bytes": 1148139187,
+    "models": 11,
+    "tests": 36
+  },
+  "restart": {
+    "new_runtime_started_at_utc": "2026-10-13T18:37:45.965295+00:00",
+    "old_runtime_started_at_utc": "2026-10-13T18:23:14.784103+00:00",
+    "ports": {
+      "los_angeles": {
+        "completed_live_runs_after_restart": 2
+      },
+      "oakland": {
+        "completed_live_runs_after_restart": 2
+      }
+    },
+    "old_active_live_states": 0,
+    "recovery": {
+      "cutoff_utc": "2026-10-13T18:37:35.593344+00:00",
+      "cancelled": 0,
+      "crashed": 2
+    },
+    "history_sha256_unchanged": true,
+    "persistent_model_artifacts_present": true
+  },
+  "maintenance": {
+    "checked_at_utc": "2026-10-13T18:38:51.139145+00:00",
+    "metadata_days": 7,
+    "deleted_runs": 0,
+    "backups": []
+  },
+  "live_database_bytes": 554202803,
+  "backend_disk": {
+    "total": 4838498304,
+    "used": 719486976,
+    "free": 4102234112
+  },
+  "backup_restore": {
+    "finished_cloud_history_backup_restore": "passed",
+    "migrations": 8,
+    "positions": 443296,
+    "hours": 168,
+    "dbt_business_sha256": "24efbb918da302d845611f38b8f1f83c1caaaec8b32895e09b4d97ab0a1f2b25",
+    "owned_temporary_database_removed_after_check": true
+  },
+  "live_backup_restore": {
+    "backup_restore": "passed",
+    "migrations": 8,
+    "positions": 129737,
+    "hourly_rows": 275
+  },
+  "compute_samples": [
+    {
+      "service": "backend",
+      "samples": 11,
+      "average_ram_gb": 1.1631340450909091,
+      "average_cpu": 0.16828788787878787,
+      "monthly_compute_estimate": 14.997098208484848,
+      "window": {
+        "since": "2026-10-13T18:41:35.252818900+00:00",
+        "until": "2026-10-13T18:46:39.028101100+00:00"
+      }
+    },
+    {
+      "service": "database",
+      "samples": 10,
+      "average_ram_gb": 0.9459961856000001,
+      "average_cpu": 0.13009767,
+      "monthly_compute_estimate": 12.061915256000002,
+      "window": {
+        "since": "2026-10-13T18:41:39.894513200+00:00",
+        "until": "2026-10-13T18:46:42.313173200+00:00"
+      }
+    }
+  ],
+  "before_compute_monthly_estimate": 30.6124333678,
+  "backend_code_commit": "fa2abb78e9c3f69d434b2feed5da7f7acc77af7f",
+  "backend_deployment": "02446750-ef6e-4fb5-ae55-f173c5996e64",
+  "actions_enabled": false,
+  "budget": {
+    "no_plan_upgrade": true,
+    "no_new_services": true,
+    "resource_limits_unchanged": true,
+    "additional_storage_monthly_estimate_usd": [
+      0.3,
+      0.6
+    ],
+    "stopped_project": "appealing-upliftment",
+    "stopped_project_compute_monthly_estimate_usd": 2.7,
+    "retained_storage_still_billed": true,
+    "short_samples_not_a_hard_cap": true
+  }
+}

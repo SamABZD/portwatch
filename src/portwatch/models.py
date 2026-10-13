@@ -59,7 +59,7 @@ def run_models(settings: Settings, port: str, start: str, end: str, *, check_liv
         raise PipelineError("dbt_project_missing_use_repository_checkout")
     run_token = uuid4().hex
     schema = "pw_dbt_" + run_token
-    folder = settings.project_path(Path("artifacts/models") / run_token)
+    folder = settings.project_path(settings.dbt_artifacts_dir) / run_token
     folder.mkdir(parents=True, exist_ok=False)
     variables = dict(
         port_id=port,

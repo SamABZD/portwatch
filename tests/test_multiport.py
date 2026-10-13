@@ -114,6 +114,7 @@ def test_default_health_uses_the_configured_port(monkeypatch):
             context={},
             issues=[],
             runs={},
+            operations={"status": "not_enabled", "backups": []},
         )
 
     monkeypatch.setattr("portwatch.demo.api.collect_health", report)

@@ -11,10 +11,40 @@ import pytest
 from typer.testing import CliRunner
 
 from portwatch.cli import app
-from portwatch.health import age, collect_health, collector_health, disk_health, json_value
+from portwatch.health import (
+    age,
+    collect_health,
+    collector_health,
+    disk_health,
+    json_value,
+    operation_health,
+)
 from portwatch.settings import Settings
 
 NOW = datetime(2026, 10, 12, 18, tzinfo=UTC)
+
+
+def test_backup_health_never_treats_missing_or_truncated_copies_as_available(tmp_path, monkeypatch):
+    monkeypatch.setenv("PORTWATCH_CLOUD_LIVE", "1")
+    settings = Settings(raw_dir=tmp_path / "raw", live_status_dir=tmp_path / "status")
+    root = tmp_path / "backups"
+    root.mkdir()
+    settings.live_status_dir.mkdir()
+    (settings.live_status_dir / "maintenance.json").write_text(
+        json.dumps({"checked_at_utc": NOW.isoformat()})
+    )
+    assert operation_health(settings, NOW)["status"] == "degraded"
+    receipt = dict(
+        database=settings.db_name, status="complete", bytes=3, created_at_utc=NOW.isoformat()
+    )
+    (root / "portwatch-20261012.json").write_text(json.dumps(receipt))
+    payload = root / "portwatch-20261012.dump"
+    payload.write_bytes(b"123")
+    assert operation_health(settings, NOW)["status"] == "ok"
+    payload.write_bytes(b"12")
+    assert operation_health(settings, NOW)["status"] == "degraded"
+    payload.write_bytes(b"123")
+    assert operation_health(settings, NOW + timedelta(hours=27))["status"] == "degraded"
 
 
 def snapshot(**changes):

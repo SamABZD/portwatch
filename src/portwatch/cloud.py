@@ -87,6 +87,8 @@ def main():
     if os.environ.get("PORTWATCH_CLOUD_BOOTSTRAP", "1") == "1":
         bootstrap(settings)
     runtime = None
+    failed = threading.Event()
+    finished = threading.Event()
     try:
         if os.environ.get("PORTWATCH_CLOUD_LIVE", "0") == "1":
             runtime = subprocess.Popen([sys.executable, "-m", "portwatch.runtime"])
@@ -94,13 +96,27 @@ def main():
         port = int(os.environ.get("PORT", "8080"))
         if not 1 <= port <= 65535:
             raise ValueError("invalid_listen_port")
-        uvicorn.run(
-            public_app(settings),
-            host=os.environ.get("HOST", "0.0.0.0"),
-            port=port,
-            access_log=False,
+        server = uvicorn.Server(
+            uvicorn.Config(
+                public_app(settings),
+                host=os.environ.get("HOST", "0.0.0.0"),
+                port=port,
+                access_log=False,
+            )
         )
+
+        def supervise():
+            while not finished.wait(5):
+                if runtime is not None and runtime.poll() is not None:
+                    failed.set()
+                    server.should_exit = True
+                    return
+
+        if runtime:
+            threading.Thread(target=supervise, daemon=True).start()
+        server.run()
     finally:
+        finished.set()
         if runtime and runtime.poll() is None:
             subprocess.run(
                 [sys.executable, "-m", "portwatch.runtime", "--stop"],
@@ -112,6 +128,8 @@ def main():
             except subprocess.TimeoutExpired:
                 runtime.terminate()
                 runtime.wait(timeout=10)
+    if failed.is_set():
+        raise RuntimeError("owned_runtime_exited_restart_container")
 
 
 if __name__ == "__main__":

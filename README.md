@@ -9,11 +9,13 @@ Vessel reports arrive with duplicates, gaps and incomplete context. PortWatch tu
 **[Open the hosted PortWatch app](https://portwatch-iota.vercel.app)** — live observations and
 historical replay for both ports. Source freshness and incomplete coverage stay explicit.
 
-The [historical expansion and dbt guide](docs/HISTORY_DBT.md) documents the optional local
-seven-day Los Angeles dataset, explicit SQL lineage, typed hourly models and preliminary
-baselines. The hosted application retains its one-day replay and continuous live collection.
-Step16 verified443,296 observations/168 hours,36 dbt data tests and276 Python tests;
-[measured results](docs/evidence/history-dbt.json) retain source and baseline limitations.
+The [historical expansion and dbt guide](docs/HISTORY_DBT.md) documents seven days of Los Angeles
+history, SQL lineage, typed hourly models and preliminary baselines. The
+[pipeline history view](https://portwatch-iota.vercel.app/pipeline#history) reads the frozen
+Railway snapshot:443,296 positions,168 hours,11 models and36 data tests. The vessel map retains
+its bounded one-day replay and continuous live collection. The budgeted rollout passed282
+Python tests, cloud parity, an automatic restart drill and a finished-backup restore;
+[deployment evidence](docs/evidence/cloud-history-operations.json) records the limits.
 
 ## Product tour
 

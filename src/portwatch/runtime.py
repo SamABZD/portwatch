@@ -7,6 +7,7 @@ No boot task, hosting account, public listener or paid resource is created.
 import argparse
 import asyncio
 import json
+import os
 import shutil
 import signal
 import subprocess
@@ -89,6 +90,8 @@ async def run(ports):
     owned = []
     logs = []
     flags = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
+    cloud = os.environ.get("PORTWATCH_CLOUD_LIVE") == "1"
+    cutoff = datetime.now(UTC).isoformat()
 
     def launch(arguments, name):
         log = (root / f"{name}.log").open("ab")
@@ -103,8 +106,26 @@ async def run(ports):
         owned.append(child)
         return child
 
+    def maintenance():
+        # Popen duplicates stdout for the child; keep no hourly parent file descriptor.
+        with (root / "maintenance.log").open("ab") as log:
+            child = subprocess.Popen(
+                [sys.executable, "-m", "portwatch.maintenance"],
+                cwd=PROJECT_ROOT,
+                stdout=log,
+                stderr=log,
+                creationflags=flags,
+            )
+        owned[:] = [process for process in owned if process.poll() is None]
+        owned.append(child)
+        return child
+
     with collector_lock(root / "runtime-lock"):
         stop_file.unlink(missing_ok=True)
+        for name in ("prefect-server", "prefect-runner", "prefect-recovery"):
+            path = root / f"{name}.log"
+            if path.is_file() and path.stat().st_size > 1024 * 1024:
+                path.replace(root / f"{name}.previous.log")
         signal.signal(signal.SIGINT, lambda *_: stop.set())
         signal.signal(signal.SIGTERM, lambda *_: stop.set())
         try:
@@ -112,6 +133,8 @@ async def run(ports):
                 with urlopen("http://127.0.0.1:4200/api/health", timeout=3) as response:
                     if response.status != 200:
                         raise OSError("prefect_unavailable")
+                if cloud:
+                    raise RuntimeError("unexpected_existing_cloud_server")
             except OSError:
                 server = launch(["orchestrate", "server"], "prefect-server")
                 for _ in range(60):
@@ -125,20 +148,57 @@ async def run(ports):
                             raise RuntimeError("prefect_start_failed") from None
                 else:
                     raise RuntimeError("prefect_start_timeout")
+            if cloud:
+                with (root / "prefect-recovery.log").open("ab") as log:
+                    result = await asyncio.to_thread(
+                        subprocess.run,
+                        [
+                            sys.executable,
+                            "-m",
+                            "portwatch.recovery",
+                            "--ports",
+                            ",".join(ports),
+                            "--cutoff",
+                            cutoff,
+                        ],
+                        stdout=log,
+                        stderr=log,
+                        timeout=180,
+                        cwd=PROJECT_ROOT,
+                    )
+                if result.returncode:
+                    raise RuntimeError("cloud_schedule_recovery_failed")
             runner = launch(["orchestrate", "serve", "--port", ",".join(ports)], "prefect-runner")
             state = dict(
                 pid=psutil.Process().pid,
                 process_created_at=psutil.Process().create_time(),
                 ports=ports,
                 started_at_utc=datetime.now(UTC).isoformat(),
-                scope="local_machine_must_remain_awake",
+                scope="railway_singleton" if cloud else "local_machine_must_remain_awake",
                 status="running",
             )
             (root / "runtime.json").write_text(json.dumps(state, indent=2), "utf-8")
             collectors = [asyncio.create_task(collect(settings, port, stop)) for port in ports]
             emit("runtime_started", ports=ports)
+            server_failures = 0
+            tick = 0
+            cleaner = None
             while not stop.is_set():
                 await asyncio.sleep(1)
+                tick += 1
+                if cloud and (tick == 60 or tick % 3600 == 0):
+                    if cleaner is None or cleaner.poll() is not None:
+                        cleaner = maintenance()
+                if cloud and tick % 15 == 0:
+                    try:
+                        with urlopen("http://127.0.0.1:4200/api/health", timeout=3) as response:
+                            if response.status != 200:
+                                raise OSError("prefect_unavailable")
+                        server_failures = 0
+                    except OSError:
+                        server_failures += 1
+                    if server_failures >= 3 or server.poll() is not None:
+                        raise RuntimeError("owned_prefect_server_unavailable")
                 if stop_file.exists():
                     stop.set()
                 elif (
@@ -148,6 +208,8 @@ async def run(ports):
                     emit("runtime_disk_reserve_reached")
                     stop.set()
                 elif runner.poll() is not None:
+                    if cloud:
+                        raise RuntimeError("owned_prefect_runner_exited")
                     emit("runtime_runner_restart", exit_code=runner.returncode)
                     await asyncio.sleep(5)
                     runner = launch(

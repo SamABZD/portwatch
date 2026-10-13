@@ -3,7 +3,11 @@
 Step16 adds a bounded Los Angeles history run for **January1–7,2024 UTC** and an opt-in dbt
 SQL project. The original one-day configuration, Python ingestion/visit inference, Prefect,
 public reference tables and hosted live application retain their contracts. This stage uses
-local resources and adds no cloud deployment, storage service or paid subscription.
+local resources and added no cloud deployment, storage service or paid subscription.
+The owner later authorized a budgeted Railway rollout of this exact seven-day snapshot;
+see [deployment operations](../deploy/README.md) and
+[cloud verification](evidence/cloud-history-operations.json). Original source files remain
+local, while the separate cloud analytical database and dbt outputs preserve the same hash.
 
 ## Capacity and source selection
 

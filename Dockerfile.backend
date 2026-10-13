@@ -2,14 +2,18 @@ FROM ghcr.io/astral-sh/uv:0.13.0 AS uv
 FROM python:3.11-slim-trixie
 
 ENV PYTHONUNBUFFERED=1 UV_LINK_MODE=copy UV_COMPILE_BYTECODE=1 \
-    PATH="/app/.venv/bin:$PATH" PORT=8080
+    PATH="/app/.venv/bin:$PATH" PORT=8080 PORTWATCH_DBT_ARTIFACTS_DIR=data/models
 WORKDIR /app
 COPY --from=uv /uv /uvx /bin/
 COPY pyproject.toml uv.lock README.md .python-version ./
 COPY src ./src
 COPY configs ./configs
 COPY geo ./geo
-RUN uv sync --locked --no-dev && mkdir -p /app/data /app/artifacts
+COPY analytics ./analytics
+RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client-17 \
+    && rm -rf /var/lib/apt/lists/* \
+    && uv sync --locked --no-dev && uv sync --project analytics --locked --no-dev \
+    && mkdir -p /app/data /app/artifacts
 
 EXPOSE 8080
 CMD ["python", "-m", "portwatch.cloud"]

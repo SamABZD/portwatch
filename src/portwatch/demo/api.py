@@ -7,12 +7,13 @@ from threading import RLock
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from portwatch.db import connect_db
 from portwatch.demo.replay import ReplayError, fingerprint, load_dataset, load_prepared, stamp
 from portwatch.events import emit
 from portwatch.health import collect_health
+from portwatch.history import published_history
 from portwatch.settings import Settings, configured_ports, for_port, load_port_config
 
 
@@ -91,7 +92,7 @@ class ReplayService:
                 port not in self.health_cache
                 or time.monotonic() - self.health_checked.get(port, 0) > 10
             ):
-                report = collect_health(self.settings, port, include_unscoped=False)
+                report = collect_health(self.settings, port, include_unscoped=False, polling=True)
                 self.health_cache[port] = {
                     key: report[key]
                     for key in (
@@ -104,6 +105,7 @@ class ReplayService:
                         "context",
                         "issues",
                         "runs",
+                        "operations",
                     )
                 }
                 self.health_checked[port] = time.monotonic()
@@ -201,6 +203,17 @@ def create_app(settings=None, *, prepared=None, service=None):
             raise HTTPException(404, detail={"code": "unknown_port"})
         return service.health(port)
 
+    @app.get("/api/history")
+    def history():
+        return published_history(service.settings)
+
+    @app.get("/api/history-lineage")
+    def history_lineage():
+        path = service.settings.project_path(service.settings.raw_dir).parent / "history/index.html"
+        if not path.is_file():
+            raise HTTPException(404, detail={"code": "history_lineage_not_deployed"})
+        return FileResponse(path, media_type="text/html")
+
     @app.get("/api/pipeline")
     def pipeline():
         """Deliberately narrow public projection; no raw events, paths or task controls."""
@@ -228,6 +241,7 @@ def create_app(settings=None, *, prepared=None, service=None):
                     context=report["context"],
                     runs=report.get("runs"),
                     issues=report["issues"],
+                    operations=report.get("operations"),
                 )
             )
         return dict(

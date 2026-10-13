@@ -1,6 +1,7 @@
 """Read-only operational health with explicit historical/live/unknown distinctions."""
 
 import json
+import os
 import shutil
 from contextlib import nullcontext
 from datetime import UTC, datetime
@@ -29,6 +30,58 @@ COLLECTOR_STATES = {
     "stopped",
     "failed",
 }
+
+
+def operation_health(settings, now):
+    if os.environ.get("PORTWATCH_CLOUD_LIVE") != "1":
+        return {"status": "not_enabled", "backups": []}
+    root = settings.project_path(settings.raw_dir).parent
+    backups = []
+    for name in dict.fromkeys([settings.db_name, settings.history_db_name]):
+        if not name:
+            continue
+        saved = None
+        for path in sorted((root / "backups").glob("*.json"), reverse=True):
+            try:
+                document = json.loads(path.read_text("utf-8"))
+                if document.get("database") != name:
+                    continue
+                payload = path.with_suffix(".dump")
+                seconds = age(now, document.get("created_at_utc"))
+                saved = dict(
+                    database=name,
+                    created_at_utc=document.get("created_at_utc"),
+                    status="available"
+                    if payload.is_file()
+                    and payload.stat().st_size == document.get("bytes")
+                    and document.get("status") == "complete"
+                    and seconds is not None
+                    and seconds < 26 * 3600
+                    else "overdue_or_invalid",
+                )
+                break
+            except (ValueError, OSError, TypeError):
+                continue
+        backups.append(saved or dict(database=name, status="not_observed"))
+    try:
+        document = json.loads(
+            (settings.project_path(settings.live_status_dir) / "maintenance.json").read_text(
+                "utf-8"
+            )
+        )
+        seconds = age(now, document.get("checked_at_utc"))
+        recent = seconds is not None and seconds < 7200 and document.get("status") != "degraded"
+    except (ValueError, OSError, TypeError):
+        recent = False
+    return dict(
+        status="ok" if recent and all(x["status"] == "available" for x in backups) else "degraded",
+        maintenance_status="recent" if recent else "overdue_or_failed",
+        backups=backups,
+        backup_location="second_railway_volume",
+        backup_retained_copies=2,
+    )
+
+
 FAILURE_CODES = {
     "missing_api_key",
     "subscription_rejected",
@@ -424,7 +477,13 @@ def run_health(connection, port, *, include_unscoped=True):
 
 
 def collect_health(
-    settings: Settings, port="los_angeles", *, now=None, connection=None, include_unscoped=True
+    settings: Settings,
+    port="los_angeles",
+    *,
+    now=None,
+    connection=None,
+    include_unscoped=True,
+    polling=False,
 ):
     settings = for_port(settings, port)
     now = parsed_time(now or datetime.now(UTC))
@@ -447,6 +506,7 @@ def collect_health(
         live={"status": "unknown"},
         context=None,
         runs=None,
+        operations=operation_health(settings, now),
         thresholds=dict(
             status_stale_seconds=settings.health_status_stale_seconds,
             observation_stale_seconds=settings.health_observation_stale_seconds,
@@ -465,7 +525,7 @@ def collect_health(
     complete = []
     try:
         root = settings.project_path(settings.raw_dir)
-        items = RawStore(root).inspect() if root.is_dir() else []
+        items = RawStore(root).inspect(polling=polling) if root.is_dir() else []
         complete = [item for item in items if item.state == "complete"]
         report["raw_storage"] = dict(
             status="verified" if root.is_dir() else "missing",
@@ -473,6 +533,7 @@ def collect_health(
             invalid_batches=sum(item.state == "invalid" for item in items),
             pending_publications=sum(item.state == "pending" for item in items),
             unmanifested_files=sum(item.state == "unmanifested" for item in items),
+            checksum_recheck_max_seconds=300 if polling else 0,
         )
     except (ValueError, OSError):
         report["raw_storage"] = dict(status="unavailable", complete_batches=None)
@@ -500,6 +561,8 @@ def collect_health(
             error_class=type(error).__name__,
         )
     issues = []
+    if report["operations"]["status"] == "degraded":
+        issues.append("backup_or_maintenance_requires_attention")
     if report["database"]["status"] != "connected":
         issues.append("database_unavailable_or_schema_failure")
     if report["disk"]["status"] != "ok":

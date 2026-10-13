@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     db_host: str = Field(default="127.0.0.1", min_length=1)
     db_port: int = Field(default=5432, ge=1, le=65535)
     db_name: str = Field(default="portwatch", min_length=1)
+    history_db_name: str | None = None
+    dbt_artifacts_dir: Path = Path("artifacts/models")
     db_user: str = Field(default="portwatch", min_length=1)
     db_password: SecretStr = SecretStr("portwatch_dev_only")
     db_sslmode: Literal["disable", "allow", "prefer", "require", "verify-ca", "verify-full"] = (

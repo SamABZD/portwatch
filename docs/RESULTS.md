@@ -1,5 +1,19 @@
 # Measured results
 
+## Budgeted cloud rollout (2026-10-13 Asia/Beirut)
+
+The frozen seven-day history runs on the existing Railway PostGIS service. Actual cloud
+dbt execution passed11 models/36 tests; all168 rows and their business hash matched the
+local result. A controlled runner failure recovered automatically; both ports resumed
+minute jobs and history/artifacts survived. The finished cloud backup restored all443,296
+positions and the same168-hour hash in an owned temporary local database.
+
+Existing resource limits remain, with no new paid service or plan upgrade. The rollout
+passed213 unit/69 integration tests and the Next.js production build. Metered usage,
+source growth and the absence of an independent scheduled off-cloud backup remain limits.
+See [deployment evidence](evidence/cloud-history-operations.json) and
+[operations](../deploy/README.md). Thirty-day expansion remains skipped.
+
 ## Step16: bounded history and dbt (2026-10-13 Asia/Beirut)
 
 - Jan1–7,2024 LA:443,296 canonical observations across168 complete UTC hours; all seven
