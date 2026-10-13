@@ -13,7 +13,7 @@ from psycopg.types.json import Jsonb
 
 from portwatch.bookkeeping import finish_run, register_batch
 from portwatch.cleaning import historical_input, load_batch, transform_positions
-from portwatch.context import ARCHIVE_ENDPOINT, ContextError, plan_context
+from portwatch.context import ARCHIVE_ENDPOINT, ContextError, news_fallback, plan_context
 from portwatch.context_storage import cached_response, ingest_context
 from portwatch.db import connect_db
 from portwatch.download import DownloadError, acquire
@@ -521,12 +521,30 @@ def run_context(kind, port="los_angeles"):
         with owned_lock(connection, "workflow", key):
             run_id = begin_workflow(connection, key, "pipeline_" + kind)
             try:
-                result = ingest_context(settings, connection, request, refresh=True)
+                primary_error = None
+                try:
+                    result = ingest_context(settings, connection, request, refresh=True)
+                except ContextError as error:
+                    fallback = news_fallback(settings, request) if kind == "news" else None
+                    if fallback is None or error.code not in {
+                        "local_poll_cooldown",
+                        "source_rate_limited",
+                        "source_timeout",
+                        "source_connection_failure",
+                        "source_http_failure",
+                    }:
+                        raise
+                    primary_error = error.code
+                    request = fallback
+                    result = ingest_context(settings, connection, request, refresh=False)
                 report = dict(
                     batch_id=result.batch_id,
                     rows=result.rows,
                     retrieved_at=result.retrieved_at.isoformat(),
                     product=request.product,
+                    source_id=request.source_id,
+                    fallback_reason=primary_error,
+                    reused=result.reused,
                 )
                 connection.execute(
                     "UPDATE pipeline_runs SET details=%s WHERE run_id=%s", (Jsonb(report), run_id)
@@ -534,6 +552,25 @@ def run_context(kind, port="los_angeles"):
                 finish_run(connection, run_id, input_count=1, output_count=result.rows)
                 return report
             except Exception as error:
+                if isinstance(error, ContextError) and error.code in {
+                    "local_poll_cooldown",
+                    "context_connector_already_running",
+                }:
+                    # A checked schedule may defer work without claiming a provider fetch.
+                    report = dict(
+                        status="deferred",
+                        reason=error.code,
+                        product=request.product,
+                        next_allowed_utc=error.next_allowed_at.isoformat()
+                        if error.next_allowed_at
+                        else None,
+                    )
+                    connection.execute(
+                        "UPDATE pipeline_runs SET details=%s WHERE run_id=%s",
+                        (Jsonb(report), run_id),
+                    )
+                    finish_run(connection, run_id, input_count=0, output_count=0)
+                    return report
                 connection.execute(
                     "UPDATE pipeline_runs SET details=%s WHERE run_id=%s",
                     (Jsonb({"reason": sanitized(error).code}), run_id),

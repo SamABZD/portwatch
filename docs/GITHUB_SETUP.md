@@ -1,5 +1,18 @@
 # GitHub setup record
 
+## Owner override and current validation (2026-10-13)
+
+The owner explicitly requested GitHub Actions off and continuing the project. Repository
+Actions permissions now report `enabled:false`; Validate is `disabled_manually`, with no
+running/queued jobs. Keep this state. Earlier hosted-check gates below are superseded;
+local validation is the release gate, and no hosted CI pass is claimed.
+
+The health/deployment follow-up passed the full validator:194 unit and64 integration tests,
+Ruff/format, package/wheel/CLI and eight fresh migrations with zero repeat. The frontend
+production build passed locally and on Vercel. PR#3 includes the fixes and hosting source.
+Private repository visibility is preserved. Publication SHA/release evidence is recorded
+after actual merge/tag operations, not inferred from the absence of Actions checks.
+
 ## Step 14A preparation (2026-10-13 Asia/Beirut)
 
 The verified Step 13 code is pushed on `release/portfolio-v0.1.0` in

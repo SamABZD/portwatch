@@ -677,7 +677,9 @@ export default function Dashboard() {
                 </>
               )}
               <p className="panel-note">
-                Open-Meteo weather · GDELT article metadata when available
+                Open-Meteo weather · {health?.context?.recent_news?.using_fallback
+                  ? "Port of Oakland official releases (RSS fallback; limited coverage)"
+                  : "GDELT article metadata when available"}
               </p>
             </div>
           </section>

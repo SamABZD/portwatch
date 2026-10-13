@@ -5,7 +5,9 @@ import json
 import math
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
+from email.utils import parsedate_to_datetime
 from urllib.parse import unquote_plus, urlencode, urlsplit, urlunsplit
+from xml.etree import ElementTree
 
 import yaml
 
@@ -162,6 +164,80 @@ def decode_response(payload: bytes) -> dict:
     if not isinstance(body, dict) or body.get("error"):
         raise ContextError("provider_error_or_invalid_object")
     return body
+
+
+def news_fallback(settings: Settings, primary: ContextRequest) -> ContextRequest | None:
+    """A separately attributed official feed, never a retry around a throttled provider."""
+    from dataclasses import replace
+
+    port = load_port_config(
+        for_port(settings, primary.port_id).project_path(
+            for_port(settings, primary.port_id).port_config
+        )
+    )
+    if not port.news_rss_url:
+        return None
+    if port.news_rss_url != "https://www.portofoakland.com/feed/":
+        raise ContextError("unreviewed_news_fallback")
+    return replace(
+        primary,
+        source_id="port_oakland_rss",
+        endpoint=port.news_rss_url,
+        parameters=dict(maxrecords=port.news_max_records),
+    )
+
+
+def normalize_news_rss(payload: bytes, request: ContextRequest) -> "NormalizedContext":
+    if len(payload) > 2 * 1024 * 1024 or any(
+        token in payload.upper() for token in (b"<!DOCTYPE", b"<!ENTITY")
+    ):
+        raise ContextError("unsafe_or_oversized_rss")
+    try:
+        document = ElementTree.fromstring(payload)
+    except ElementTree.ParseError as error:
+        raise ContextError("invalid_rss_response") from error
+    if document.tag != "rss" or document.find("channel") is None:
+        raise ContextError("invalid_rss_channel")
+    articles, unknown, outside = [], 0, 0
+    items = document.findall("./channel/item")
+    for item in items:
+        try:
+            published = parsedate_to_datetime(item.findtext("pubDate", ""))
+            if published.utcoffset() is None:
+                raise ValueError("missing_timezone")
+            published = published.astimezone(UTC)
+        except (TypeError, ValueError, OverflowError):
+            unknown += 1
+            continue
+        if not request.start_utc <= published < request.end_utc:
+            outside += 1
+            continue
+        title, url = item.findtext("title"), item.findtext("link")
+        if not title or not url:
+            raise ContextError("malformed_article_metadata")
+        articles.append(
+            dict(
+                title=title,
+                url=url,
+                domain=urlsplit(url).hostname,
+                published_at=published.isoformat(),
+                language="English",
+            )
+        )
+    if items and unknown == len(items):
+        raise ContextError("rss_publication_dates_unavailable")
+    cap = int(request.parameters["maxrecords"])
+    result = normalize_news(json.dumps(dict(articles=articles[:cap])).encode(), request)
+    result.quality.update(
+        label="official Port of Oakland releases",
+        exhaustive=False,
+        feed_item_count=len(items),
+        outside_window=outside,
+        unknown_publication_items=unknown,
+        coverage="official authority feed only; not a broad disruption-news search",
+    )
+    result.metadata.update(provider="Port of Oakland", format="RSS 2.0", first_seen_field="unknown")
+    return result
 
 
 def finite_number(value):

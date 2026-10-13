@@ -204,6 +204,62 @@ def test_429_and_timeout_have_failed_runs_and_no_fabricated_empty_rows(connectio
     ).fetchall() == [(429, "source_rate_limited"), (None, "source_timeout")]
 
 
+def test_successful_news_poll_does_not_starve_another_port(connection, tmp_path):
+    from dataclasses import replace
+
+    settings, la = setup(tmp_path), request("news", False)
+    oakland = replace(la, port_id="oakland")
+    ingest_context(settings, connection, la, fetch=fetcher(news_payload()), now=NOW)
+    with pytest.raises(ContextError, match="local_poll_cooldown"):
+        ingest_context(
+            settings,
+            connection,
+            oakland,
+            fetch=fetcher(news_payload()),
+            now=NOW + timedelta(seconds=30),
+        )
+    result = ingest_context(
+        settings,
+        connection,
+        oakland,
+        fetch=fetcher(news_payload(), NOW + timedelta(seconds=61)),
+        now=NOW + timedelta(seconds=61),
+    )
+    assert result.rows == 1
+    with pytest.raises(ContextError, match="local_poll_cooldown"):
+        ingest_context(
+            settings,
+            connection,
+            la,
+            refresh=True,
+            fetch=fetcher(news_payload()),
+            now=NOW + timedelta(minutes=2),
+        )
+
+
+def test_news_provider_backoff_is_still_global_between_ports(connection, tmp_path):
+    from dataclasses import replace
+
+    settings, la = setup(tmp_path), request("news", False)
+
+    def limited(url):
+        raise ContextError(
+            "source_rate_limited", http_status=429, next_allowed_at=NOW + timedelta(hours=1)
+        )
+
+    with pytest.raises(ContextError, match="source_rate_limited"):
+        ingest_context(settings, connection, la, fetch=limited, now=NOW)
+    with pytest.raises(ContextError, match="local_poll_cooldown"):
+        ingest_context(
+            settings,
+            connection,
+            replace(la, port_id="oakland"),
+            fetch=fetcher(news_payload()),
+            now=NOW + timedelta(minutes=20),
+        )
+    assert connection.execute("SELECT count(*) FROM context_attempts").fetchone() == (1,)
+
+
 def test_current_news_and_forecast_cannot_enter_historical_partition(connection, tmp_path):
     settings = setup(tmp_path)
     historical, current = request(), request("weather", False)

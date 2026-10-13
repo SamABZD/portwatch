@@ -7,19 +7,46 @@
   work includes continuous two-port collection, timed vessel profiles and an interactive pipeline drawing.
 - User skips Step14 academy submission and Step17 scale study. Step14A portfolio publication
   is being prepared, followed by public24/7 hosting. Step16 history/dbt remains optional
-  and unimplemented. Stop at the Step14A boundary; do not bypass its merge/release check gates.
+  and unimplemented. Owner subsequently requested health fixes, disabled Actions, and authorized
+  proceeding with local validation and cloud deployment; this supersedes hosted-check gates below.
 - Frontend3000/API8000, PostgreSQL55432 and existing Prefect API4200 support the local app.
   An owned runtime collects Los Angeles/Oakland; six Prefect deployments are active.
   Check `artifacts/live/runtime.json` and current processes before starting another runtime.
 - Read [LIVE_MULTIPORT.md](LIVE_MULTIPORT.md) for commands, scopes, stop/restart and remaining
   always-on public hosting requirements. Use `git log -1` for the local checkpoint.
-- CI05A has been account-billing-blocked. User authorized$0 local continuation and the next
-  publication stage. Current API reports a private repository; preserve visibility. No public
-  hosting, release, unchecked merge, account or payment change is authorized by preparation.
+- CI05A was account-billing-blocked; repository Actions are now explicitly disabled by the owner.
+  Preserve private repository visibility. User authorized hosting on Sam's existing paid Railway
+  Hobby workspace with a Vercel frontend. Account/payment/plan changes remain outside this work.
 - Earlier stage evidence below is historical. Its paused/stopped collector descriptions are
   superseded by the live runtime. No source observations were invented for this extension.
 
 ## Verified commands and observed outcomes
+
+### Health fixes and deployment follow-up (2026-10-13 UTC)
+
+- `uv run --locked --extra dev python scripts/validate.py`: one uninterrupted pass,
+  194 unit +64 integration =258 tests; Ruff/109 formats, package/wheel/CLI, eight fresh
+  migrations and zero repeated. Next.js standalone build passed; Vercel also built in27s.
+- Corrected false cooldown failures and the raw-inspection concurrent-publication race.
+  Deferrals create no HTTP success/data and cannot clear an earlier real failure.
+- Refreshed actual Open-Meteo forecasts for both ports. LA GDELT returned200/valid_empty
+  at10:33:10.508915UTC. Oakland GDELT429 remains audited; its official RSS returned200
+  at11:09:02.221622UTC, with zero dated items in the requested24h window. The initial
+  XML layout validation failure is retained; it was fixed and retried after its cooldown.
+- Both local ports subsequently reported OK, healthy connected collectors and current
+  context; short unprocessed batches below120s remain ordinary processing backlog.
+- Repository Actions permissions disabled and Validate workflow disabled_manually;
+  no queued/running Actions. Workflow source remains for an explicit future re-enable.
+- Vercel project `abzd/portwatch` is ready at
+  [portwatch-iota.vercel.app](https://portwatch-iota.vercel.app). Initial frontend-only
+  build had no backend URL; full end-to-end deployment verification follows in the
+  [deployment record](../deploy/README.md). Git root is configured as `web`.
+- Railway CLI was signed into Adam; that workspace reported UNPAID. Switched normal
+  login to Sam, confirmed Sam's workspace ACTIVE/HOBBY, and created only a new PortWatch
+  project. Backend/database use separate persistent volumes; cloud live starts disabled.
+  No existing portfolio or other project was changed, and no plan/payment was changed.
+- Publication PR#3 remains the current review vehicle. Earlier preparation evidence and
+  hosted gates below describe their historical state; D-069 records the owner's override.
 
 ### Step14A preparation (2026-10-13 Asia/Beirut)
 

@@ -39,6 +39,30 @@ def test_public_run_history_excludes_other_ports_and_unscoped_manual_runs(connec
         assert [row["run_id"] for row in report["recent"]] == [identities[port]]
 
 
+def test_deferred_work_does_not_hide_a_prior_source_failure(connection):
+    from psycopg.types.json import Jsonb
+
+    from portwatch.health import run_health
+    from portwatch.pipeline import begin_workflow
+
+    key = "pipeline-v1:los_angeles:synthetic-news"
+    failed = begin_workflow(connection, key, "pipeline_news")
+    finish_run(connection, failed, error=RuntimeError("synthetic source failure"))
+    deferred = begin_workflow(connection, key, "pipeline_news")
+    connection.execute(
+        "UPDATE pipeline_runs SET details=%s WHERE run_id=%s",
+        (Jsonb(dict(status="deferred", reason="local_poll_cooldown")), deferred),
+    )
+    finish_run(connection, deferred, input_count=0, output_count=0)
+    report = run_health(connection, "los_angeles", include_unscoped=False)
+    assert report["recent"][0]["status"] == "deferred"
+    assert report["consecutive_failures_by_stage"]["pipeline_news"] == 1
+    finish_run(connection, begin_workflow(connection, key, "pipeline_news"))
+    assert (
+        run_health(connection, "los_angeles")["consecutive_failures_by_stage"]["pipeline_news"] == 0
+    )
+
+
 def test_unregistered_raw_backlog_then_old_historical_input_is_ready_not_stale(
     connection, tmp_path
 ):

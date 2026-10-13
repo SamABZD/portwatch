@@ -55,3 +55,5 @@ web/public/vendor/maplibre/
 *.tsbuildinfo
 
 # Keep small synthetic test fixtures under tests/fixtures/ trackable.
+.railway/
+.vercel/

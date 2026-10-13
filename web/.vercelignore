@@ -1,0 +1,9 @@
+.env*
+.vercel/
+node_modules/
+.next/
+out/
+test-results/
+playwright-report/
+*.tsbuildinfo
+public/vendor/maplibre/

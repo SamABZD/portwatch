@@ -1,10 +1,10 @@
 # PortWatch
 
-[![Validate](https://github.com/SamABZD/portwatch/actions/workflows/ci.yml/badge.svg)](https://github.com/SamABZD/portwatch/actions/workflows/ci.yml)
+[GitHub Actions: disabled by owner](https://github.com/SamABZD/portwatch/actions/workflows/ci.yml)
 
 Vessel reports arrive with duplicates, gaps and incomplete context. PortWatch turns them into traceable observations, experimental port visits and hourly analytics for **Los Angeles and Oakland**. It preserves original inputs, makes transformations replayable, and shows what the evidence supports on a live map and historical replay.
 
-**Works locally at $0:** Python/PostGIS processing, Prefect schedules, a read-only FastAPI service and a Next.js website. Historical replay needs no live API key; exported snapshots also work without a database. GitHub CI currently fails before job execution, the repository is private, and public 24/7 hosting is pending. The badge links to actual workflow status; it is not a validation claim.
+**Works locally at $0:** Python/PostGIS processing, Prefect schedules, a read-only FastAPI service and a Next.js website. Historical replay needs no live API key; exported snapshots also work without a database. The owner disabled GitHub Actions; release validation runs locally. The repository remains private. Cloud deployment uses Vercel for the frontend and the owner's paid Railway Hobby workspace for the backend and database; see the [deployment record](deploy/README.md) for verified status and operating requirements.
 
 ## Product tour
 
@@ -128,7 +128,7 @@ npm run typecheck
 npm run build
 ```
 
-Step 13 passed **242 tests: 185 unit and 57 integration**, lint/format, package/installed-wheel checks and eight fresh migrations with zero on repeat. Browser checks covered replay, both ports, prepared sessions, keyboard/mobile behavior and the drawing. Integration tests need PostgreSQL 17/PostGIS 3.6 and create owned temporary schemas. Deterministic tests reject provider connections.
+Step 13 passed **242 tests: 185 unit and 57 integration**. The health/deployment follow-up passed **258 tests: 194 unit and 64 integration**, lint/format, package/installed-wheel checks and eight fresh migrations with zero on repeat. The Next.js production build passed locally and on Vercel. Browser checks covered replay, both ports, prepared sessions, keyboard/mobile behavior and the drawing. Integration tests need PostgreSQL 17/PostGIS 3.6 and create owned temporary schemas. Deterministic tests reject provider connections.
 
 The [Validate workflow](.github/workflows/ci.yml) runs shared Python `quality` and `integration` gates. Hosted jobs were blocked before execution by GitHub account billing; local passes do not establish a remote pass. Next.js/browser verification is local. [GitHub setup](docs/GITHUB_SETUP.md) records pending gates.
 

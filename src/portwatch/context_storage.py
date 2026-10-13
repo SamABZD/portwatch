@@ -19,6 +19,7 @@ from portwatch.context import (
     ContextError,
     ContextRequest,
     normalize_news,
+    normalize_news_rss,
     normalize_weather,
     plan_context,
     utc,
@@ -64,7 +65,7 @@ def save_response(connection, store, request, response) -> ContextResult:
             source_start_utc=request.start_utc,
             source_end_utc=request.end_utc,
             processing_version=PARSER_VERSION,
-            file_suffix=".json",
+            file_suffix=".xml" if request.source_id == "port_oakland_rss" else ".json",
             remote_etag=response.etag,
             remote_last_modified=response.last_modified,
         ),
@@ -91,6 +92,8 @@ def save_response(connection, store, request, response) -> ContextResult:
     begin_batch_processing(connection, manifest.batch_id)
     try:
         normalize = normalize_weather if request.kind == "weather" else normalize_news
+        if request.source_id == "port_oakland_rss":
+            normalize = normalize_news_rss
         normalized = normalize(response.payload, request)
         with connection.transaction():
             connection.execute(
@@ -266,9 +269,13 @@ def _ingest_locked(settings, connection, request, *, refresh, fetch, now):
         register_batch(connection, store, manifest)
         return cached
     last = connection.execute(
-        """SELECT max(a.next_allowed_at) FROM context_attempts a
-        JOIN context_requests r USING (request_key) WHERE r.kind = %s""",
-        (request.kind,),
+        """SELECT max(CASE
+        WHEN %s <> 'news' OR r.port_id = %s OR a.status = 'failed'
+            THEN a.next_allowed_at
+        ELSE a.started_at + interval '60 seconds' END)
+        FROM context_attempts a JOIN context_requests r USING (request_key)
+        WHERE r.kind = %s AND r.source_id = %s""",
+        (request.kind, request.port_id, request.kind, request.source_id),
     ).fetchone()[0]
     if last and now < last:
         raise ContextError("local_poll_cooldown", next_allowed_at=last)

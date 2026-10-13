@@ -69,8 +69,8 @@ class BatchSpec(BaseModel):
     def valid_times_and_layout(self) -> "BatchSpec":
         if self.mode == "historical" and self.source_date is None:
             raise ValueError("historical batches require a source date")
-        if self.mode == "live" and self.file_suffix not in {".jsonl", ".json"}:
-            raise ValueError("live batches must be JSONL or an original JSON response")
+        if self.mode == "live" and self.file_suffix not in {".jsonl", ".json", ".xml"}:
+            raise ValueError("live batches must be JSONL or an original JSON/XML response")
         if (self.source_start_utc is None) != (self.source_end_utc is None):
             raise ValueError("source time range must contain both endpoints or neither")
         if self.source_start_utc is not None and self.source_end_utc < self.source_start_utc:
@@ -284,7 +284,10 @@ class RawStore:
     def inspect(self) -> list[Inspection]:
         inspections = []
         referenced = set()
-        for sidecar in sorted(self.root.rglob("*.manifest.json")):
+        inspected = set()
+
+        def inspect_manifest(sidecar):
+            inspected.add(sidecar)
             try:
                 manifest = Manifest.model_validate_json(sidecar.read_text("utf-8"))
                 path = self._path(manifest.local_path)
@@ -301,6 +304,9 @@ class RawStore:
                     inspections.append(Inspection(sidecar, "complete", manifest, "verified"))
             except (OSError, ValueError, TypeError):
                 inspections.append(Inspection(sidecar, "invalid", None, "manifest_invalid"))
+
+        for sidecar in sorted(self.root.rglob("*.manifest.json")):
+            inspect_manifest(sidecar)
         for path in sorted(self.root.rglob("*")):
             if (
                 path.is_file()
@@ -308,7 +314,13 @@ class RawStore:
                 and not path.name.startswith(".")
                 and not path.name.endswith((".part", ".manifest.json"))
             ):
-                inspections.append(Inspection(path, "unmanifested", None, "missing_manifest"))
+                # A collector can publish after the first directory scan. Its manifest
+                # precedes the payload; verify that new sidecar before declaring an orphan.
+                sidecar = Path(str(path) + ".manifest.json")
+                if sidecar not in inspected and sidecar.is_file():
+                    inspect_manifest(sidecar)
+                if path not in referenced:
+                    inspections.append(Inspection(path, "unmanifested", None, "missing_manifest"))
         return inspections
 
 

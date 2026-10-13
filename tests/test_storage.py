@@ -159,3 +159,24 @@ def test_invalid_manifest_or_unmanifested_file_is_not_input(tmp_path: Path) -> N
     (tmp_path / "synthetic.manifest.json").write_text('{"schema_version":99}')
     (tmp_path / "orphan.bin").write_bytes(SYNTHETIC)
     assert {item.state for item in store.inspect()} == {"invalid", "unmanifested"}
+
+
+def test_inspection_verifies_batch_published_between_directory_scans(
+    tmp_path: Path, spec: BatchSpec, monkeypatch
+) -> None:
+    store = RawStore(tmp_path)
+    original = Path.rglob
+    published = False
+
+    def concurrent_publication(path, pattern):
+        nonlocal published
+        if path == tmp_path and pattern == "*" and not published:
+            published = True
+            store.write([SYNTHETIC], spec)
+        return original(path, pattern)
+
+    monkeypatch.setattr(Path, "rglob", concurrent_publication)
+    result = store.inspect()
+    assert len(result) == 1
+    assert result[0].state == "complete"
+    assert result[0].manifest is not None

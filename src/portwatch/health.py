@@ -304,14 +304,16 @@ def context_health(connection, port, product, now, settings):
     with connection.cursor(row_factory=dict_row) as cursor:
         cursor.execute(
             """SELECT a.status,a.started_at,a.retrieved_at,a.http_status,
-            a.error_code,a.next_allowed_at
+            a.error_code,a.next_allowed_at,r.source_id
             FROM context_attempts a JOIN context_requests r USING(request_key)
-            WHERE r.port_id=%s AND r.product=%s ORDER BY a.started_at DESC LIMIT 1""",
+            WHERE r.port_id=%s AND r.product=%s
+            ORDER BY a.started_at DESC,a.ended_at DESC NULLS FIRST LIMIT 1""",
             (port, product),
         )
         attempt = cursor.fetchone()
         cursor.execute(
-            """SELECT r.selected_retrieved_at,r.selected_batch_id,c.row_count,r.start_utc,r.end_utc
+            """SELECT r.selected_retrieved_at,r.selected_batch_id,c.row_count,r.start_utc,r.end_utc,
+            r.source_id
             FROM context_requests r JOIN context_responses c ON c.batch_id=r.selected_batch_id
             WHERE r.port_id=%s AND r.product=%s ORDER BY r.selected_retrieved_at DESC LIMIT 1""",
             (port, product),
@@ -335,10 +337,16 @@ def context_health(connection, port, product, now, settings):
     else:
         status = "unavailable" if attempt else "not_requested"
     # Surface latest failure while preserving an earlier successful revision/fetch separately.
-    if attempt and attempt["status"] == "failed":
+    if (
+        attempt
+        and attempt["status"] == "failed"
+        and (not success or success["source_id"] == attempt["source_id"] or status == "stale")
+    ):
         status = "failed_with_saved_revision" if success else "unavailable"
     return dict(
         product=product,
+        source_id=success["source_id"] if success else attempt["source_id"] if attempt else None,
+        using_fallback=bool(success and success["source_id"] == "port_oakland_rss"),
         status=status,
         last_successful_fetch_utc=success["selected_retrieved_at"] if success else None,
         success_age_seconds=age(now, success["selected_retrieved_at"]) if success else None,
@@ -347,6 +355,7 @@ def context_health(connection, port, product, now, settings):
         valid_start_utc=success["start_utc"] if success else None,
         valid_end_utc=success["end_utc"] if success else None,
         last_attempt_status=attempt["status"] if attempt else None,
+        latest_attempt_source_id=attempt["source_id"] if attempt else None,
         last_http_status=attempt["http_status"] if attempt else None,
         latest_attempt_utc=attempt["started_at"] if attempt else None,
         next_allowed_utc=attempt["next_allowed_at"] if attempt else None,
@@ -358,7 +367,9 @@ def run_health(connection, port, *, include_unscoped=True):
     with connection.cursor(row_factory=dict_row) as cursor:
         cursor.execute(
             """WITH ranked AS (
-            SELECT id,run_id,stage,status,started_at,ended_at,input_count,
+            SELECT id,run_id,stage,
+            CASE WHEN status='succeeded' AND details->>'status'='deferred'
+                 THEN 'deferred' ELSE status END AS status,started_at,ended_at,input_count,
             output_count,error_summary,
             workflow_key,attempt_number,duration_seconds,
             row_number() OVER (PARTITION BY stage ORDER BY id DESC) AS sequence
@@ -374,7 +385,7 @@ def run_health(connection, port, *, include_unscoped=True):
     for stage in sorted({row["stage"] for row in recent}):
         failures = 0
         for row in [row for row in recent if row["stage"] == stage]:
-            if row["status"] == "running":
+            if row["status"] in {"running", "deferred"}:
                 continue
             if row["status"] in {"failed", "interrupted"}:
                 failures += 1

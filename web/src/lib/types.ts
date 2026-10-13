@@ -123,7 +123,7 @@ export type Health = {
   };
   context: Record<
     string,
-    { status: string; last_http_status: number | null }
+    { status: string; last_http_status: number | null; source_id?: string; using_fallback?: boolean }
   > | null;
   issues: string[];
 };

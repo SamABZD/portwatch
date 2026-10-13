@@ -147,6 +147,20 @@ Initial waiting heuristics remain 1.0 knot, 30 continuous minutes, maximum 15-mi
 
 ## Failure-state rules and Step 03 fallback
 
+### Current-context recovery (2026-10-13 UTC)
+
+Open-Meteo forecasts returned200 and48 rows for each port. LA GDELT returned200 with a
+valid empty response at10:33:10.508915UTC; Oakland GDELT remained429/rate limited.
+The reviewed [official Port of Oakland RSS](https://www.portofoakland.com/feed/) returned200
+at11:09:02.221622UTC. Its10 feed items were outside the requested24h window, yielding a
+valid empty result. This is a narrow official-release feed, not broad news/disruption coverage.
+
+Original XML is preserved privately and checksummed. Normalized outputs retain title/link,
+publisher/domain and known publication time, without feed bodies or invented first-seen time.
+Undated items are excluded and counted; an entirely undated feed fails explicitly. DTD/entity
+declarations are rejected. Primary source failures remain in the audit; fallback freshness
+and source identity are exposed separately. Publishers retain rights to their content.
+
 - **Failure:** non-2xx, parse error, timeout, or authentication error. Keep source error and last success separately; do not turn failure into empty data.
 - **Valid empty:** successful response with no matched records, including the observed GDELT `{}`. Record request bounds and response time.
 - **Zero observed messages:** a bounded successful AISStream window with no messages, only after a real subscription is established. It says nothing about vessel absence or full coverage.

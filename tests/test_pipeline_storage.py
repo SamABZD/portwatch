@@ -91,6 +91,97 @@ def test_checkpoint_after_commit_failure_resumes_and_counts_attempts(connection)
     assert "synthetic_secret" not in str(attempts)
 
 
+@pytest.mark.parametrize("reason", ["local_poll_cooldown", "context_connector_already_running"])
+def test_context_defers_without_fabricating_fetch_or_data(
+    isolated_pipeline, connection, monkeypatch, reason
+):
+    from datetime import UTC, datetime
+
+    import portwatch.pipeline as pipeline
+    from portwatch.context import ContextError
+    from portwatch.health import run_health
+
+    retry_at = datetime.now(UTC) + timedelta(minutes=15)
+
+    def blocked(*args, **kwargs):
+        raise ContextError(reason, next_allowed_at=retry_at)
+
+    monkeypatch.setattr(pipeline, "ingest_context", blocked)
+    report = pipeline.run_context("news", "los_angeles")
+    assert report == dict(
+        status="deferred",
+        reason=reason,
+        product="recent_news",
+        next_allowed_utc=retry_at.isoformat(),
+    )
+    row = connection.execute(
+        "SELECT status,input_count,output_count,error_summary,details FROM pipeline_runs"
+    ).fetchone()
+    assert row[:4] == ("succeeded", 0, 0, None) and row[4] == report
+    assert connection.execute("SELECT count(*) FROM context_attempts").fetchone() == (0,)
+    assert connection.execute("SELECT count(*) FROM context_responses").fetchone() == (0,)
+    health = run_health(connection, "los_angeles", include_unscoped=False)
+    assert health["recent"][0]["status"] == "deferred"
+    assert health["consecutive_failures_by_stage"]["pipeline_news"] == 0
+
+
+def test_context_provider_failure_remains_a_failure(isolated_pipeline, connection, monkeypatch):
+    import portwatch.pipeline as pipeline
+    from portwatch.context import ContextError
+
+    def limited(*args, **kwargs):
+        raise ContextError("source_rate_limited", http_status=429)
+
+    monkeypatch.setattr(pipeline, "ingest_context", limited)
+    with pytest.raises(PipelineError, match="source_rate_limited"):
+        pipeline.run_context("news", "los_angeles")
+    assert connection.execute("SELECT status FROM pipeline_runs").fetchone() == ("failed",)
+
+
+def test_official_news_fallback_preserves_primary_failure_and_raw_xml(
+    isolated_pipeline, connection, monkeypatch
+):
+    from datetime import UTC, datetime, timedelta
+
+    import portwatch.pipeline as pipeline
+    from portwatch.context import ContextError
+    from portwatch.context_http import HttpResponse
+    from portwatch.context_storage import ingest_context
+    from portwatch.health import context_health
+    from tests.test_news_rss import rss_payload
+
+    now = datetime.now(UTC)
+
+    def ingest(settings, connection, request, **kwargs):
+        def fetch(url):
+            if request.source_id == "gdelt_doc_v2":
+                raise ContextError("source_rate_limited", http_status=429)
+            return HttpResponse(rss_payload(request.end_utc - timedelta(hours=1)), now, 200)
+
+        return ingest_context(settings, connection, request, fetch=fetch, now=now, **kwargs)
+
+    monkeypatch.setattr(pipeline, "ingest_context", ingest)
+    report = pipeline.run_context("news", "oakland")
+    assert report["rows"] == 1 and report["source_id"] == "port_oakland_rss"
+    assert report["fallback_reason"] == "source_rate_limited"
+    attempts = connection.execute(
+        "SELECT r.source_id,a.status,a.http_status FROM context_attempts a "
+        "JOIN context_requests r USING(request_key) ORDER BY a.http_status DESC"
+    ).fetchall()
+    assert attempts == [
+        ("gdelt_doc_v2", "failed", 429),
+        ("port_oakland_rss", "valid_nonempty", 200),
+    ]
+    settings = isolated_pipeline[0]
+    health = context_health(connection, "oakland", "recent_news", now, settings)
+    assert health["status"] == "available" and health["using_fallback"]
+    assert (
+        connection.execute("SELECT local_path FROM ingestion_batches")
+        .fetchone()[0]
+        .endswith(".xml")
+    )
+
+
 def test_owned_lock_excludes_other_sessions_releases_after_failure(connection):
     with connect_db(Settings()) as other:
         schema = connection.execute("SELECT current_schema()").fetchone()[0]

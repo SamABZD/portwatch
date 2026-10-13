@@ -1,7 +1,7 @@
 # PortWatch v0.1.0 — release candidate
 
-Prepared October 13, 2026 (Asia/Beirut). These notes describe the candidate; no release tag or
-successful hosted CI is claimed until publication gates pass.
+Prepared October 13, 2026 (Asia/Beirut). These notes describe the candidate; publication
+status is recorded in GITHUB_SETUP. GitHub Actions are disabled at the owner's request.
 
 ## Implemented capabilities
 
@@ -14,6 +14,11 @@ successful hosted CI is claimed until publication gates pass.
   scoped measurements, mobile/keyboard controls and local map fallback.
 - Historical exports usable without a database/live key, health diagnostics, verified backup
   restore and isolated recovery drills.
+- Context schedules distinguish deferral from failure; Oakland can use its clearly attributed
+  official RSS fallback while preserving GDELT failures. Concurrent raw publication no longer
+  appears as an unmanifested file during inspection.
+- Container backend entry point with migrations, genuine historical bootstrap, safe readiness
+  and optional continuous runtime; Next.js standalone container support and Vercel deployment.
 
 ## Dataset and measured results
 
@@ -39,6 +44,8 @@ seconds. Measurements exclude downloading and are not service guarantees.
 Step 13 passed 185 unit plus 57 integration tests, Ruff/format, package/wheel checks, eight
 fresh migrations/repeat zero and the Next.js production build. Browser evidence covers
 12 replay, six multiport, three prepared-mode checks per port and four architecture checks.
+The health/hosting follow-up passed194 unit +64 integration =258 tests and the same full
+validator; Next.js also built successfully on Vercel. No hosted GitHub CI pass is claimed.
 
 Genuine historical recomputation preserved digests. Isolated synthetic drills verified database
 denial/recovery, retained publication on failure, late-report replacement, quarantine, duplicate
@@ -57,16 +64,17 @@ Live collection requires a private AISStream key and an awake, connected compute
 
 ## Known limits and publication gates
 
-- Previous GitHub Actions attempts were billing-blocked. Publication runs now report
-  `startup_failure` with zero jobs and no detailed API annotation. Current-head and resulting-main
-  hosted passes are required before merge/tag/release; local evidence remains separate.
+- Previous GitHub Actions attempts were billing-blocked. The owner subsequently disabled
+  Actions and authorized proceeding with local validation; earlier hosted gates are superseded.
 - Repository visibility was observed private and is preserved. Reviewers need access.
-- Public 24/7 hosting, HTTPS, boot supervision and off-device backup are pending.
+- Vercel frontend and Railway backend/database deployment status and HTTPS endpoints are
+  recorded in [deployment operations](../deploy/README.md). Off-device backup remains pending.
 - After abrupt local downtime, stale RUNNING Prefect states and obsolete scheduled entries
   can delay processing. Operator recovery was demonstrated; automatic recovery is unimplemented.
-- Docker startup is unverified; fresh reproduction used native PostgreSQL/PostGIS.
+- Local Docker startup is unverified; fresh reproduction used native PostgreSQL/PostGIS.
 - Coverage is incomplete; live timestamps use receipt fallback. Weather is model context.
-  Recorded real news requests returned 429; recent news is excluded from replay.
+  GDELT can return429; Oakland's official RSS covers releases only. Recent news is excluded
+  from replay. Successful empty results are not evidence of no traffic or disruption.
 - Approximate zones, inferred calls, waiting and dwell are experimental. Missing data and
   incomplete boundaries stay unknown. No confirmed queue or disruption cause is claimed.
 - Historical expansion/dbt is optional and unimplemented; academy submission and the scale
