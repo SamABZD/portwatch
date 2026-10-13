@@ -2,12 +2,13 @@
 
 Implemented locally on2026-10-12 before final audit and portfolio publication. User priorities
 skip Step14 academy submission and Step17 scale study, and move Step15 port generalization
-and these additions before Step14A. Step13 final audit remains next. Step16 history/dbt remains
+and these additions before Step14A. Step13 final audit is complete locally; see
+[RELEASE_CHECK.md](RELEASE_CHECK.md). Next is Step14A publication and remaining public hosting. Step16 history/dbt remains
 an optional, unimplemented extension. No GitHub push, release or public hosting happened here.
 
 ## Open and operate
 
-- Map: http://127.0.0.1:3000 — Live by default; refreshes saved positions every30 seconds.
+- Map: http://127.0.0.1:3000 — Live by default in DB mode; saved positions refresh every30 seconds. Prepared sessions select Historical automatically.
 - Pipeline: http://127.0.0.1:3000/pipeline — current measurements and scoped workflow runs.
 - Project: `C:\Users\samab\dataEngineering\portwatch`.
 - Ports: Los Angeles and Oakland. Frozen NOAA replay:2024-01-01 through2024-01-02 UTC.
@@ -117,3 +118,7 @@ The third command requires genuine active live reports from both ports; it makes
 requests itself. Browser automation blocks external tiles and checks the local map fallback.
 Synthetic records stay in owned temporary fixtures, never project data. See `RESULTS.md` and
 ignored `artifacts/multiport*` for measured evidence and limitations.
+
+Step13 adds owned fresh-DB historical reproduction and portable browser verification; see
+[RUNBOOK.md](RUNBOOK.md#step13-audit-reproduction). Its242-test result supersedes earlier
+stage counts. Hosted CI and Docker startup remain unverified; the native setup was exercised.

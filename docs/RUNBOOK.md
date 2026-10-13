@@ -2,6 +2,56 @@
 
 For the active two-port live runtime, use [LIVE_MULTIPORT.md](LIVE_MULTIPORT.md), including graceful stop commands and local-machine availability limits.
 
+## Step13 audit reproduction
+
+The final local assessment and limitations are in [RELEASE_CHECK.md](RELEASE_CHECK.md).
+Run from the project root after locked setup and genuine historical preparation:
+
+```powershell
+.\.bootstrap-venv\Scripts\uv.exe sync --locked --extra dev
+.\.bootstrap-venv\Scripts\uv.exe run --locked --extra dev python scripts/validate.py
+# Windows: start/stop a NEW private native cluster; existing services stay running.
+.\.venv\Scripts\python.exe -X utf8 scripts/verify_release.py --native
+# Elsewhere, omit --native to use the configured PG17/PostGIS3.6 server with an owned DB.
+```
+
+`verify_release.py` needs existing checksum-verified genuine NOAA/ERA5 raw artifacts and the
+documented regional derivatives; it makes no provider requests and uses no live key. It applies
+migrations in a newly owned database, compares first/forced-repeat business/metric/profile
+digests, launches temporary HTTP APIs, checks a prepared export without DB, runs isolated
+recovery drills and cleans up only its resources. Native binaries must already exist in
+`pg-runtime/bin`. Logs/data remain ignored under a unique `artifacts/step13` folder, with
+`latest.json` pointing to the successful run. Failed attempts are preserved for diagnosis.
+
+Historical weather can rebuild an empty DB from complete matching raw evidence, retaining
+original retrieval time without recording a new HTTP attempt. Explicit refresh and current
+forecast/news still follow connector/cooldown rules. This recovery does not make old context fresh.
+
+For portable frontend verification, start a separate prepared API on8077 and a production
+frontend on3002 with server-only `PORTWATCH_QUERY_URL=http://127.0.0.1:8077`, then run:
+
+```powershell
+.\.venv\Scripts\python.exe -X utf8 scripts/verify_prepared_browser.py --port los_angeles
+# After replacing the temporary API's snapshot with an Oakland export:
+.\.venv\Scripts\python.exe -X utf8 scripts/verify_prepared_browser.py --port oakland
+```
+
+The export CLI uses the configured default port. To export Oakland explicitly through the
+existing Python API, use a new path:
+
+```powershell
+@'
+from pathlib import Path
+from portwatch.settings import Settings, for_port
+from portwatch.demo.replay import export_prepared
+export_prepared(for_port(Settings(), "oakland"), Path("data/demo/new-oakland-snapshot.json"))
+'@ | .\.venv\Scripts\python.exe -
+```
+
+Retain its SHA-256 sidecar. The verifier checks automatic historical mode/snapshot port, actual noon
+metrics, no database use and desktop/mobile behavior. `--url` selects another frontend. Stop
+the temporary API/frontend in their owning terminals when done. Main live services are separate.
+
 ## Step12 frontend
 
 Current app: **http://127.0.0.1:3000**. Read-only query API:127.0.0.1:8000. PostgreSQL remains
@@ -37,7 +87,8 @@ For verified historical mode without DB/AIS credentials, replace the stopped API
 ```
 
 That ignored export and SHA-256 sidecar were created in Step12. Live/current health is
-explicitly unavailable in portable mode. Use a NEW path for another `demo export`.
+explicitly unavailable in portable mode; the frontend selects Historical and the saved port
+automatically. Use a NEW path for another `demo export`; current exports include timed profiles.
 
 Verification with API/frontend running:
 

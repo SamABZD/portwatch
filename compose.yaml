@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgis/postgis:16-3.5
+    image: postgis/postgis:17-3.6-alpine
     environment:
       POSTGRES_DB: ${PORTWATCH_DB_NAME:-portwatch}
       POSTGRES_USER: ${PORTWATCH_DB_USER:-portwatch}

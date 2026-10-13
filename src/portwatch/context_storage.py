@@ -23,7 +23,7 @@ from portwatch.context import (
     plan_context,
     utc,
 )
-from portwatch.context_http import fetch_context
+from portwatch.context_http import HttpResponse, fetch_context
 from portwatch.settings import Settings
 from portwatch.storage import BatchSpec, Manifest, RawStore
 
@@ -211,6 +211,40 @@ def _ingest_locked(settings, connection, request, *, refresh, fetch, now):
         ),
     )
     cached = cached_response(connection, request)
+    if not cached and not refresh and request.product == "historical_reanalysis":
+        # Rebuild an empty database from verified saved evidence without fabricating a fetch.
+        store = RawStore(settings.project_path(settings.raw_dir))
+        saved = [
+            item.manifest
+            for item in store.inspect()
+            if item.state == "complete"
+            and item.manifest.dataset_id == "ctx-" + request.request_key
+            and item.manifest.source_id == request.source_id
+            and item.manifest.source_url == request.endpoint
+            and item.manifest.mode == "historical"
+            and item.manifest.source_start_utc == request.start_utc
+            and item.manifest.source_end_utc == request.end_utc
+        ]
+        if saved:
+            manifest = max(saved, key=lambda item: item.received_at)
+            result = save_response(
+                connection,
+                store,
+                request,
+                HttpResponse(
+                    store._path(manifest.local_path).read_bytes(),
+                    manifest.received_at,
+                    200,
+                    manifest.remote_etag,
+                    manifest.remote_last_modified,
+                ),
+            )
+            connection.execute(
+                "UPDATE context_requests SET selected_batch_id=%s,selected_retrieved_at=%s "
+                "WHERE request_key=%s",
+                (result.batch_id, manifest.received_at, request.request_key),
+            )
+            return result
     if (
         cached
         and not refresh

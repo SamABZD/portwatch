@@ -100,3 +100,24 @@ def test_frame_cache_remains_separate_for_each_port(monkeypatch):
     assert service.frame("historical", BASE + timedelta(minutes=10), 15, 30, "los_angeles")[
         "cache_hit"
     ]
+
+
+def test_default_health_uses_the_configured_port(monkeypatch):
+    def report(settings, port, **kwargs):
+        return dict(
+            overall=port,
+            checked_at_utc=BASE,
+            database={},
+            collector={},
+            historical={},
+            live={},
+            context={},
+            issues=[],
+            runs={},
+        )
+
+    monkeypatch.setattr("portwatch.demo.api.collect_health", report)
+    service = ReplayService(for_port(Settings(), "oakland"))
+    with TestClient(create_app(service=service)) as client:
+        assert client.get("/api/health").json()["overall"] == "oakland"
+        assert client.get("/api/health?port=los_angeles").json()["overall"] == "los_angeles"

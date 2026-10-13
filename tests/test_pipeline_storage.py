@@ -199,14 +199,14 @@ def test_midnight_context_keeps_canonical_dataset_lineage_and_no_new_arrival(con
             ),
         )
 
-    first = parent(BASE, "synthetic_day1")
+    first = parent(BASE, "los_angeles_synthetic_day1")
     prepare_track(
         connection,
         tmp_path,
         first,
         [(1426, "outside"), (1430, "harbor"), (1432, "harbor"), (1439, "harbor")],
     )
-    second = parent(BASE + timedelta(days=1), "synthetic_day2")
+    second = parent(BASE + timedelta(days=1), "los_angeles_synthetic_day2")
     clean = prepare(connection, tmp_path, second)
     load_batch(
         connection,
@@ -239,7 +239,18 @@ def test_midnight_context_keeps_canonical_dataset_lineage_and_no_new_arrival(con
         ).fetchall()
         == before
     )
-    assert available_context(connection, second) == (first.dataset_id, second.dataset_id)
+    rival = parent(BASE, "oakland_synthetic_day1")
+    rival_input = prepare(connection, tmp_path, rival)
+    load_batch(
+        connection,
+        rival_input,
+        tmp_path / "quarantine",
+        records=records(rival, [(1430, "outside"), (1432, "outside")]),
+    )
+    assert available_context(connection, second, "los_angeles") == (
+        first.dataset_id,
+        second.dataset_id,
+    )
     assert CONFIG.analytical_version(scope) != CONFIG.analytical_version(
         replace(scope, context_dataset_ids=())
     )

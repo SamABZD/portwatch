@@ -4,11 +4,11 @@ from datetime import timedelta
 
 import pytest
 
-from portwatch.context import ContextError, plan_context
+from portwatch.context import PARSER_VERSION, ContextError, plan_context
 from portwatch.context_http import HttpResponse
 from portwatch.context_storage import ingest_context, read_demo_context
 from portwatch.settings import Settings
-from portwatch.storage import RawStore
+from portwatch.storage import BatchSpec, RawStore
 from tests.test_bookkeeping import connection as pg_connection
 from tests.test_context import NOW, news_payload, request, weather_payload
 
@@ -22,6 +22,41 @@ def setup(tmp_path):
 
 def fetcher(payload, at=NOW):
     return lambda url: HttpResponse(payload, at, 200)
+
+
+def test_empty_database_recovers_historical_weather_without_fake_fetch(connection, tmp_path):
+    from dataclasses import replace
+
+    settings = setup(tmp_path)
+    req = replace(request(), source_id="synthetic_saved_weather")
+    manifest = RawStore(tmp_path).write(
+        [weather_payload()],
+        BatchSpec(
+            source_id=req.source_id,
+            dataset_id="ctx-" + req.request_key,
+            source_url=req.endpoint,
+            mode="historical",
+            source_date=req.start_utc.date(),
+            received_at=NOW,
+            source_start_utc=req.start_utc,
+            source_end_utc=req.end_utc,
+            processing_version=PARSER_VERSION,
+            file_suffix=".json",
+        ),
+    )
+
+    def forbidden(url):
+        pytest.fail("saved historical evidence must recover without a provider request")
+
+    result = ingest_context(settings, connection, req, fetch=forbidden, now=NOW + timedelta(days=1))
+    assert result.batch_id == manifest.batch_id and result.rows == 24
+    assert result.retrieved_at == NOW
+    assert connection.execute("SELECT count(*) FROM context_attempts").fetchone() == (0,)
+    assert connection.execute("SELECT count(*) FROM weather_values").fetchone() == (24,)
+    assert connection.execute("SELECT selected_retrieved_at FROM context_requests").fetchone() == (
+        NOW,
+    )
+    assert ingest_context(settings, connection, req, fetch=forbidden).reused
 
 
 def test_duplicate_weather_replay_and_changed_revision_preserved(connection, tmp_path):

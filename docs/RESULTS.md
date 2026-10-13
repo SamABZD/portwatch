@@ -1,5 +1,40 @@
 # Measured results
 
+## Step13 final audit and pipeline drawing (2026-10-13 Asia/Beirut)
+
+- Added a selectable nine-component architecture drawing to `/pipeline`, connecting genuine
+  source paths, preserved raw evidence, Python, PostgreSQL/PostGIS, FastAPI and Next.js.
+  Prefect scheduling has separate dashed edges; component explanations work without health API.
+- Closed cross-port neighboring-day context selection, Compose/CI version drift, empty-DB
+  historical weather recovery, configured health-port and prepared-frontend startup defects.
+  No new migration/dependency;001–008 and both lockfiles remain unchanged.
+- Fresh owned native PG17.11/PostGIS3.6.2: eight migrations, repeat zero; genuine saved NOAA/
+  ERA5 processed without live credentials/provider requests. LA62,159 extracted/62,157 clean/
+  141 vessels/two duplicates; Oakland52,785/52,783/172/two duplicates. Zero historical rejects.
+  Both cover2024-01-01 UTC and share the7,293,408-row national input, counted once.
+- Fresh two-port processing124.84s (LA65.45/Oakland59.38); forced repeat49.48s preserves
+  business/profile/per-port mart digests. Complete verification295.53s, including launch,
+  API/export and recovery. Uncached noon0.457s/cached0.045s/prepared0.499s. Windows10,
+  Python3.11.9,8 logical CPUs,23.88GiB RAM, local saved inputs; timings are single local samples.
+- Recovery uses isolated synthetic resources: database-denial/backlog0.285s; late update0.121s;
+  rollback, duplicates, malformed quarantine and checksum detection pass. Loopback reconnect
+  gap0.297s stays unknown. Genuine historical recomputation digests are unchanged afterward.
+- Shared validator **185 unit18.28s +57 integration47.04s =242 passed**, no selected skips;
+  Ruff/101 files, packaging/installed-wheel CLI/resources and migrations pass. Production
+  Next.js build/type checks pass. Replay12 + multiport6 + prepared3 per port + diagram4
+  browser checks pass, zero page errors. Four viewport sizes and desktop/mobile inspected.
+  Design scan empty; minimum measured secondary-text contrast5.79:1.
+- Actual credential/history and ignored-data scan pass; Python112-package/npm production
+  audits found zero known vulnerabilities at audit time. No security guarantee is implied.
+- At20:57UTC2026-10-12 both real collectors connected, forecasts available and news429;
+  unavailable news kept overall health degraded. Current live counts change independently.
+  All temporary API/frontend/audit clusters stopped; main runtime and services remain active.
+
+Evidence and full twelve-area assessment: [RELEASE_CHECK.md](RELEASE_CHECK.md), ignored
+`artifacts/step13/latest.json`, `validation-final.txt`, browser/diagram reports and final-state.
+Step13 complete locally; Step14A/public24/7 hosting pending,14/17 skipped,16 optional.
+No push, release, deployment, payment or account change. Earlier stage results below are historical.
+
 ## Live multiport extension / Step15 (2026-10-12)
 
 - Implemented on `feat/live-multiport`: independent Los Angeles/Oakland AISStream collectors,
@@ -33,7 +68,7 @@
 
 Evidence: ignored `artifacts/multiport`, `artifacts/multiport-validation.txt`,
 `artifacts/multiport-web-build.txt`, and both browser logs; current copies are in chat `outputs`.
-Runtime, query API and frontend remain running locally. Step13 final audit is next; Step14 and
+Runtime, query API and frontend remain running locally. This extension preceded the completed Step13 audit above; Step14 and
 Step17 are skipped at the user's request, Step14A publication is pending, and Step16 is optional.
 Earlier results below retain their original stage-time meaning.
 

@@ -2,9 +2,14 @@
 
 Current live/multiport operation, vessel profiles and pipeline page: [LIVE_MULTIPORT.md](LIVE_MULTIPORT.md). Original Step12 results below precede this extension; live queries now contain the current and6 prior UTC hours.
 
+Step13 audit completed locally; see [RELEASE_CHECK.md](RELEASE_CHECK.md). Database sessions
+start in Live; prepared-only sessions automatically select Historical and the snapshot's port,
+with Live disabled. Replay verification now scopes hashes/audit counts to historical data so
+independent background collection cannot invalidate its read-only checks.
+
 Step12 implements the user's Next.js choice, replacing the original Streamlit/PyDeck launch.
 The single-page UI lives in `web/`; `src/portwatch/demo` provides the read-only FastAPI query
-service. The frozen January1,2024 NOAA day is the default. No render starts collection,
+service. Historical mode uses the frozen January1,2024 NOAA day. No render starts collection,
 migrations, downloads, Prefect jobs or durable transformations.
 
 ## Open and develop
@@ -118,8 +123,8 @@ the previous published status is preserved. Real source files are not modified b
 
 ## Portable historical mode
 
-The prepared export contains only cleaned regional observations, approximate zones, rules,
-period/version provenance, declared input coverage and matching saved weather. It has a SHA-256
+The prepared export contains only historical cleaned regional observations, timed profiles,
+approximate zones, rules, period/version provenance, declared input coverage and matching saved weather. It has a SHA-256
 sidecar and refuses existing paths. It is generated/ignored, not committed or published.
 
 ```powershell
@@ -132,8 +137,11 @@ Set-Location -LiteralPath 'C:\Users\samab\dataEngineering\portwatch'
 Run one API instance on8000 at a time. The second command can replace database mode after its
 owning process stops. Actual verification used an unset AIS key and database configured to closed
 port9; historical requests succeeded with `database=not_used`. Live mode is unavailable in a
-prepared snapshot and current pipeline health is explicitly unconnected. The export is22,749,112
-bytes and round-trips to the same noon vessels/metrics. Publishing/redistribution and hosting are
+prepared snapshot and current pipeline health is explicitly unconnected. The original Step12
+export was22,749,112 bytes; current exports also include timed profile evidence. Step13 verified
+current LA and Oakland exports in the browser and matched LA noon vessels/metrics over HTTP
+without a DB. Older exports remain readable with unavailable profile fields unknown.
+Publishing/redistribution and hosting are
 later work; no hosting account or deployment was created.
 
 ## Basemap and verification

@@ -6,12 +6,12 @@ PortWatch is an academy data engineering portfolio project focused first on the 
 
 ## Architecture
 
-Frontend choice updated2026-10-12: the user wants Next.js. Step12 will use a React/TypeScript
+Frontend choice updated2026-10-12: the user wants Next.js. Step12 implements a React/TypeScript
 frontend under `web/`, with a thin read-only Python query API over the existing pipeline/database.
 This supersedes the original Streamlit/PyDeck UI choice. All replay, lineage, freshness and
 data-quality acceptance criteria remain. See [FRONTEND_PLAN.md](FRONTEND_PLAN.md).
 
-The `portwatch` Python package owns validation, CLI entry points, and future pipeline orchestration. Original provider files and responses are stored unchanged in `data/raw/` before any transformation; provider products can have prior provider-side cleaning. Quarantine is separate from raw, and derived datasets are separate from both. PostGIS runs locally through Compose with a persistent named volume. Future UI components may read curated outputs but will not own ingestion or migrations.
+The `portwatch` Python package owns validation, CLI entry points, and pipeline orchestration. Original provider files and responses are stored unchanged in `data/raw/` before any transformation; provider products can have prior provider-side cleaning. Quarantine is separate from raw, and derived datasets are separate from both. PostGIS runs through the documented private native PostgreSQL17 cluster here; Compose provides an alternative PostgreSQL17/PostGIS3.6 setup. UI components read curated outputs and do not own ingestion or migrations.
 
 Historical and live AIS are distinct datasets with explicit source provenance. Their overlapping observations are never blended in a metric until a documented precedence policy exists. Weather and disruption-news context will be separate sources with their own collection and freshness states. Persist timestamps in UTC. Preserve source event time, local receipt time, and timestamp quality when available; use `America/Los_Angeles` only for display. Do not imply source precision or total maritime coverage from a local data freshness measure.
 

@@ -83,7 +83,10 @@ class ReplayService:
                     context=None,
                     issues=["Historical snapshot only; current pipeline health is not connected."],
                 )
-            port = port or "los_angeles"
+            port = (
+                port
+                or load_port_config(self.settings.project_path(self.settings.port_config)).port_id
+            )
             if (
                 port not in self.health_cache
                 or time.monotonic() - self.health_checked.get(port, 0) > 10

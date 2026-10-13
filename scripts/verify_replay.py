@@ -1,21 +1,54 @@
 """Measure real HTTP replay, compare SQL activity and verify unchanged project business data."""
 
+import hashlib
 import json
 import time
 from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import urlencode
 from urllib.request import urlopen
+from uuid import uuid4
 
 from verify_marts import mart_hash
-from verify_positions import business_hash
 
 from portwatch.db import connect_db
-from portwatch.demo.replay import load_prepared, stamp
+from portwatch.demo.replay import export_prepared, load_prepared, stamp
 from portwatch.marts import configured_marts, read_prefix_hours
 from portwatch.settings import Settings
 
 BASE_URL = "http://127.0.0.1:8000/api/"
+
+
+def historical_hash(connection, scope):
+    """Background live collection must not invalidate a historical read-only check."""
+    digest = hashlib.sha256()
+    for table, order in (
+        ("vessel_positions", "observation_id,processing_version"),
+        ("vessel_static_messages", "source_record_id,processing_version"),
+        ("vessel_profile_reports", "source_record_id,processing_version"),
+    ):
+        digest.update(table.encode())
+        with connection.transaction(), connection.cursor(name="replay_history_hash") as cursor:
+            cursor.execute(
+                f"SELECT row_to_json(t)::text FROM {table} t WHERE source_id=%s AND dataset_id=%s "
+                f"ORDER BY {order}",
+                (scope.source_id, scope.dataset_id),
+            )
+            while rows := cursor.fetchmany(4096):
+                for (row,) in rows:
+                    digest.update(row.encode())
+                    digest.update(b"\n")
+    return digest.hexdigest()
+
+
+def historical_audits(connection, scope):
+    key = "pipeline-v1:los_angeles:" + scope.dataset_id
+    pattern = key.replace("!", "!!").replace("_", "!_").replace("%", "!%") + ":%"
+    return connection.execute(
+        "SELECT count(*) FROM pipeline_runs WHERE workflow_key=%s "
+        "OR workflow_key LIKE %s ESCAPE '!'",
+        (key, pattern),
+    ).fetchone()[0]
 
 
 def request(command, parameters=None):
@@ -30,11 +63,13 @@ def main():
     settings = Settings()
     with connect_db(settings) as connection:
         scope, config = configured_marts(settings, connection, "los_angeles")
-        source_before = business_hash(connection)
+        source_before = historical_hash(connection, scope)
         mart_before = mart_hash(connection, config.partition_id(scope))
-        audits_before = connection.execute("SELECT count(*) FROM pipeline_runs").fetchone()[0]
+        audits_before = historical_audits(connection, scope)
     catalog, catalog_seconds = request("catalog")
-    assert [d["observation_count"] for d in catalog["datasets"]] == [62157, 26]
+    assert catalog["datasets"][0]["observation_count"] == 62157
+    assert catalog["datasets"][0]["dataset_id"] == scope.dataset_id
+    assert catalog["datasets"][1]["source_id"] != scope.source_id
     frames = []
     noon = None
     for cutoff in (
@@ -97,19 +132,22 @@ def main():
         assert noon["metrics"]["completed_dwell_sample_count"] == sum(
             r["completed_dwell_sample_count"] or 0 for r in rows
         )
-        assert business_hash(connection) == source_before
+        assert historical_hash(connection, scope) == source_before
         assert mart_hash(connection, config.partition_id(scope)) == mart_before
-        assert (
-            connection.execute("SELECT count(*) FROM pipeline_runs").fetchone()[0] == audits_before
-        )
+        assert historical_audits(connection, scope) == audits_before
     live, live_seconds = request("frame", dict(mode="live"))
     assert live["dataset"]["source_id"] != noon["dataset"]["source_id"]
-    assert all(v["stale"] for v in live["vessels"])
-    assert live["metrics"]["fresh_port_occupancy"] is None
-    assert live["metrics"]["candidate_waiting"] is None
+    assert all(
+        stamp(v["last_observation_utc"]) <= stamp(live["cutoff_utc"]) for v in live["vessels"]
+    )
+    if not live["metrics"]["fresh_vessels"]:
+        assert live["metrics"]["fresh_port_occupancy"] is None
+        assert live["metrics"]["candidate_waiting"] is None
     health, _ = request("health")
-    assert health["collector"]["status"] == "stopped"
-    portable = load_prepared(settings.project_path(Path("data/demo/los-angeles-2024-01-01.json")))
+    portable_path = settings.project_path(Path("artifacts/step13") / f"replay-{uuid4().hex}.json")
+    portable_path.parent.mkdir(parents=True, exist_ok=True)
+    export_prepared(settings, portable_path)
+    portable = load_prepared(portable_path)
     portable_frame = portable.frame(stamp(noon["cutoff_utc"]))
     assert portable_frame["metrics"] == noon["metrics"]
     assert portable_frame["vessels"] == noon["vessels"]
@@ -122,17 +160,19 @@ def main():
         genuine_uncached_sample_repeat_seconds=uncached_sample_cached_seconds,
         live_query_seconds=live_seconds,
         live_saved_positions=live["prefix_observations"],
-        live_occupancy_unknown=True,
+        live_occupancy_unknown=live["metrics"]["fresh_port_occupancy"] is None,
+        collector_status=health["collector"]["status"],
         historical_news_excluded=True,
         sql_activity_reconciled=True,
         prepared_roundtrip_matches=True,
         source_hash=source_before,
         mart_hash=mart_before,
-        sql_audit_count_unchanged=True,
+        historical_sql_audit_count_unchanged=True,
+        hash_scope="Los Angeles historical positions, static messages and profile evidence",
         collector_started=False,
         provider_fetches=0,
     )
-    folder = settings.project_path(Path("artifacts/step12"))
+    folder = settings.project_path(Path("artifacts/step13"))
     folder.mkdir(exist_ok=True)
     (folder / "replay-verification.json").write_text(
         json.dumps(report, indent=2) + "\n", encoding="utf-8"

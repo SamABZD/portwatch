@@ -2,11 +2,12 @@
 
 ## Current stage state
 
-- Project: `C:/Users/samab/dataEngineering/portwatch`; branch `feat/live-multiport`.
-- Steps00,00A,01-12 and Step15 port generalization completed locally. Additional pre-release
-  work includes continuous two-port collection, timed vessel profiles and a public pipeline page.
-- User skips Step14 academy submission and Step17 scale study. Step13 final audit is next,
-  then Step14A portfolio publication. Step16 history/dbt remains an optional unimplemented extension.
+- Project: `C:/Users/samab/dataEngineering/portwatch`; branch `feat/final-audit`.
+- Steps00,00A,01-13 and Step15 port generalization completed locally. Additional pre-release
+  work includes continuous two-port collection, timed vessel profiles and an interactive pipeline drawing.
+- User skips Step14 academy submission and Step17 scale study. Next is Step14A portfolio
+  publication, then the remaining public24/7 hosting work. Step16 history/dbt remains optional
+  and unimplemented. Stop at the Step13 boundary until continuing the next assigned stage.
 - Frontend3000/API8000, PostgreSQL55432 and existing Prefect API4200 support the local app.
   An owned runtime collects Los Angeles/Oakland; six Prefect deployments are active.
   Check `artifacts/live/runtime.json` and current processes before starting another runtime.
@@ -18,6 +19,30 @@
   superseded by the live runtime. No source observations were invented for this extension.
 
 ## Verified commands and observed outcomes
+
+### Step13 final audit (2026-10-13 Asia/Beirut)
+
+- Diagram checkpoint `202618b` on `feat/pipeline-diagram`; audit branch descends from it.
+  Use `git log -1` for the final audit checkpoint. [RELEASE_CHECK.md](RELEASE_CHECK.md)
+  records all12 audit areas, corrections, measurements and unverified items.
+- Locked sync and `scripts/validate.py` pass:185 unit +57 integration =242, lint/101 formats,
+  packages/installed-wheel CLI and8 empty-DB migrations/repeat0. Next.js build/type checks pass.
+- `scripts/verify_release.py --native` pass: owned PG17.11/PostGIS3.6.2, real NOAA/ERA5,
+  no live key/provider requests; both ports first/forced repeat stable, API/prepared match,
+  recovery drills, owned DB removal/cluster stop. Total295.53s; historical124.84s; cached0.045s.
+- Replay12/multiport6 checks pass; prepared3 each port pass with DBport9/keyblank; diagram4
+  checks pass including keyboard/mobile/offline/contrast. Zero page errors. Evidence:
+  ignored `artifacts/step13`, latest pointer `latest.json`; chat `outputs` has reviewed copies.
+- Core corrections: port-scoped neighboring-day context; preserved historical weather can
+  rebuild empty DB without fake HTTP receipt; configured default health port; automatic
+  historical/snapshot-port frontend; Compose17/3.6 aligned with CI. Migrations/locks unchanged.
+- Final read-only SQL: UTC session, no coordinate/timestamp/ledger errors; original historical
+  mart digests unchanged. At20:57UTC both real collectors connected and forecasts available;
+  both news429. Main frontend3000/query8000/Prefect4200/PG55432/runtime remain running.
+  Temporary8077/3002 and all owned audit clusters stopped. Check actual status before reuse.
+- GitHub remote main observed `f784a9374942c704630bd412704a67c4896ead24`; current code
+  remains local. Billing-blocked Actions/Compose Docker startup/public hosting are unverified.
+  Local evidence must be deliberately reviewed/packaged at14A; generated bulk stays ignored.
 
 ### Live multiport extension / Step15 (2026-10-12)
 

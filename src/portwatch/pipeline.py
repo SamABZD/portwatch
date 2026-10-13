@@ -163,16 +163,18 @@ def day_request(settings, port, day):
     return plan(settings, port, False, day, end)[0]
 
 
-def available_context(connection, spec):
+def available_context(connection, spec, port):
     """At most seven contiguous processed UTC days; a missing day breaks the context."""
     rows = connection.execute(
         """SELECT DISTINCT b.dataset_id,b.source_start_utc FROM ingestion_batches b
         JOIN clean_batches c ON c.raw_batch_id=b.batch_id WHERE b.source_id=%s
         AND c.processing_version=%s AND c.status='processed'
+        AND b.dataset_id LIKE %s ESCAPE '!'
         AND b.source_start_utc>=%s AND b.source_start_utc<%s""",
         (
             spec.source_id,
             PROCESSING_VERSION,
+            port.replace("_", "!_") + "!_%",
             spec.source_start_utc - timedelta(days=6),
             spec.source_end_utc + timedelta(days=6),
         ),
@@ -334,7 +336,7 @@ def execute_step(port, day, step, key, parent, *, force=False):
             spec.dataset_id,
             params.start_utc,
             params.end_utc,
-            context_dataset_ids=available_context(connection, spec),
+            context_dataset_ids=available_context(connection, spec, port),
         )
         request = day_weather(settings, port, params.start_utc, params.end_utc)
         weather = cached_response(connection, request)

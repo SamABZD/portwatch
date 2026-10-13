@@ -328,10 +328,14 @@ def main():
     parser.add_argument(
         "--collector-only", action="store_true", help="Bounded loopback disconnect drill."
     )
+    parser.add_argument(
+        "--output", type=Path, default=Path("artifacts/step11/recovery-verification.json")
+    )
     args = parser.parse_args()
     settings = Settings()
     started = time.perf_counter()
-    workspace = settings.project_path(Path("artifacts/step11/drills") / uuid4().hex)
+    destination = settings.project_path(args.output)
+    workspace = destination.parent / "drills" / uuid4().hex
     workspace.mkdir(parents=True)
     if args.collector_only:
         result = asyncio.run(disconnected_collector(settings, workspace))
@@ -352,6 +356,9 @@ def main():
         scope, config = configured_marts(settings, conn, "los_angeles")
         before_source = business_hash(conn)
         before_mart = mart_hash(conn, config.partition_id(scope))
+        before_owned_databases = conn.execute(
+            "SELECT datname FROM pg_database WHERE datname LIKE 'pw_step11_%' ORDER BY datname"
+        ).fetchall()
         reruns = []
         for _ in range(2):
             tick = time.perf_counter()
@@ -371,9 +378,12 @@ def main():
     with connect_db(settings) as conn:
         assert business_hash(conn) == before_source
         assert mart_hash(conn, config.partition_id(scope)) == before_mart
-        assert not conn.execute(
-            "SELECT datname FROM pg_database WHERE datname LIKE 'pw_step11_%'"
-        ).fetchall()
+        assert (
+            conn.execute(
+                "SELECT datname FROM pg_database WHERE datname LIKE 'pw_step11_%' ORDER BY datname"
+            ).fetchall()
+            == before_owned_databases
+        )
     report = dict(
         verified_at_utc=datetime.now(UTC).isoformat(),
         elapsed_seconds=time.perf_counter() - started,
@@ -385,7 +395,7 @@ def main():
         recovery_promise="Persisted demonstrated inputs survived downstream recovery; "
         "unflushed buffers and unreceived upstream events are excluded",
     )
-    path = settings.project_path(Path("artifacts/step11/recovery-verification.json"))
+    path = destination
     path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     emit(
         "recovery_drills_verified",

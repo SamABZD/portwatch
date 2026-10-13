@@ -30,7 +30,7 @@
 .architecture-scheduler { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 32px; align-items: center; margin-bottom: 0; }
 .architecture-scheduler .architecture-node { grid-column: 3 / 5; min-height: 78px; flex-direction: row; text-align: left; padding: 12px 20px; background: var(--primary-soft); }
 .architecture-scheduler-note { grid-column: 5 / 7; color: var(--muted); font-size: 12px; }
-.architecture-board { position: relative; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 32px; align-items: center; height: 344px; margin-top: 0; }
+.architecture-board { position: relative; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 32px; align-items: center; height: 392px; margin-top: 0; }
 .architecture-wires { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--teal); pointer-events: none; }
 .architecture-schedule-wires { color: var(--primary); }
 .architecture-sources { display: flex; flex-direction: column; gap: 16px; position: relative; }
@@ -45,7 +45,7 @@
 .architecture-glyph svg { width: 100%; height: 100%; }
 .architecture-raw .architecture-glyph, .architecture-prefect .architecture-glyph { color: var(--primary); }
 .architecture-api .architecture-glyph, .architecture-web .architecture-glyph { color: var(--ink); }
-.architecture-sources .architecture-node { min-height: 104px; height: 104px; flex-direction: row; justify-content: flex-start; gap: 10px; padding: 12px; text-align: left; }
+.architecture-sources .architecture-node { min-height: 120px; height: 120px; flex-direction: row; justify-content: flex-start; gap: 10px; padding: 12px; text-align: left; }
 .architecture-sources .architecture-glyph { width: 28px; height: 28px; }
 .architecture-sources strong { font-size: 13px; }
 .architecture-sources small { font-size: 11px; }

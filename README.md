@@ -2,7 +2,9 @@
 
 PortWatch is a $0, local-first data engineering portfolio project for Los Angeles and Oakland. It collects real AISStream vessel reports, preserves immutable evidence, validates and transforms it with Python/PostGIS and Prefect, and serves a Next.js live map, historical replay and public read-only pipeline page. Historical replay works without an AIS key; prepared snapshots also work without a database. No hosted deployment exists; GitHub CI remains billing-blocked.
 
-The app starts in **Live** mode. Select a port, search by vessel name or MMSI, or open **Data pipeline** for real processing measurements and workflow runs. Start continuous collection with `python -m portwatch.runtime`; see [live operation and coverage](docs/LIVE_MULTIPORT.md). The computer must remain awake and connected.
+The app starts in **Live** mode when connected to the database API; prepared snapshot sessions select **Historical** mode and their saved port automatically. Select a port, search by vessel name or MMSI, or open **Data pipeline** for the selectable architecture drawing, real processing measurements and workflow runs. Start continuous collection with `python -m portwatch.runtime`; see [live operation and coverage](docs/LIVE_MULTIPORT.md). The computer must remain awake and connected.
+
+Step13 final audit passed locally:242 tests, fresh two-port historical reproduction and browser checks. See the [release-readiness assessment](docs/RELEASE_CHECK.md) for evidence and remaining CI/hosting limits.
 
 ## Local setup
 
@@ -40,7 +42,7 @@ stale/rate limited or live observations are old. See [health/recovery contracts]
 and the [diagnosis, backup and recovery commands](docs/RUNBOOK.md).
 
 Step10 adds complete resumable workflows. With the existing PostgreSQL cluster running, apply
-all seven migrations, then keep this local Prefect server terminal open:
+all eight migrations, then keep this local Prefect server terminal open:
 
 ```powershell
 .\.bootstrap-venv\Scripts\uv.exe sync --locked --extra dev
@@ -93,6 +95,10 @@ Skip `docker compose up` when using this native cluster. Check status with `& .\
 The reviewed collection box, approximate geofence and one-day UTC demo are in `configs/ports/los_angeles.yaml` and `configs/demo.yaml`. `doctor` reports database connectivity and PostGIS separately and exits nonzero if a required check fails. Raw storage and recovery rules are in [docs/DATA_CONTRACTS.md](docs/DATA_CONTRACTS.md). Default tests run without a database; setting `PORTWATCH_TEST_DB=1` enables real PostgreSQL tests in newly created isolated test schemas.
 
 ## Historical demo
+
+Fresh setup uses PostgreSQL17/PostGIS3.6 in Compose, matching the validation contract.
+An existing PostgreSQL16 volume needs an explicit dump/restore migration before use with17;
+changing the image does not upgrade its stored files. The current native17 cluster is separate.
 
 With the local database running and migrations applied:
 

@@ -1,5 +1,23 @@
 # Data contracts
 
+## Live multiport evidence and audit corrections
+
+Migration008 adds timed reported vessel profiles and accepted-input enrichment checkpoints;
+001–007 remain unchanged. Profile grain is source-record/processing-version, with source/dataset,
+MMSI, availability UTC and bounded reported fields. Availability is NOAA observation time or
+live local receipt time. Replay merges only fields available by its cutoff; no ETA year or
+confirmed destination is inferred. Foreign keys retain accepted clean-record/input lineage.
+
+Installed port configurations now include Los Angeles and Oakland. Historical/live source IDs,
+regional datasets, cache keys, geofence versions and API scopes stay separate. Neighboring-day
+backfill context also requires the selected port's dataset prefix, with SQL wildcard escaping.
+
+An empty database can rebuild historical weather from matching checksum-verified raw artifacts.
+It preserves original retrieval time and records no fabricated HTTP attempt. Explicit refresh
+still uses the connector's provider/cooldown rules. Current forecast/news are not reconstructed
+as fresh historical context. Prepared-only frontend sessions select historical mode and the
+snapshot's port automatically. See [RELEASE_CHECK.md](RELEASE_CHECK.md) for measured audit evidence.
+
 ## Step10 workflow state
 
 Migration007 extends the existing pipeline audit with workflow/parent identity, attempts, safe

@@ -67,6 +67,7 @@ export default function Dashboard() {
   const [mode, setMode] = useState<Mode>("live");
   const [port, setPort] = useState("los_angeles");
   const [ports, setPorts] = useState<{ port_id: string; name: string }[]>([]);
+  const [preparedMode, setPreparedMode] = useState(false);
   const portRef = useRef(port);
   portRef.current = port;
   const [minute, setMinute] = useState(750);
@@ -108,8 +109,15 @@ export default function Dashboard() {
 
   const loadCatalog = useCallback(() => {
     setCatalogError(null);
-    query<{ datasets: Dataset[]; ports: { port_id: string; name: string }[] }>(`catalog?port=${port}`)
-      .then((data) => { if (port !== portRef.current) return; setDatasets(data.datasets); setPorts(data.ports); })
+    query<{ datasets: Dataset[]; ports: { port_id: string; name: string }[]; prepared_mode: boolean }>(`catalog?port=${port}`)
+      .then((data) => {
+        if (port !== portRef.current) return;
+        setDatasets(data.datasets); setPorts(data.ports); setPreparedMode(data.prepared_mode);
+        if (data.prepared_mode) {
+          setMode("historical");
+          if (data.ports[0] && !data.ports.some(item => item.port_id === port)) setPort(data.ports[0].port_id);
+        }
+      })
       .catch((e) => {
         setCatalogError(e.message);
         setBusy(false);
@@ -250,6 +258,8 @@ export default function Dashboard() {
           </button>
           <button
             aria-pressed={mode === "live"}
+            disabled={preparedMode}
+            aria-describedby={preparedMode ? "prepared-mode-note" : undefined}
             onClick={() => switchMode("live")}
           >
             <span className="small-dot" />
@@ -257,6 +267,8 @@ export default function Dashboard() {
           </button>
         </div>
       </section>
+
+      {preparedMode && <p className="panel-note" id="prepared-mode-note">Historical snapshot session. Live collection is unavailable.</p>}
 
       {catalogError && (
         <div className="unavailable" role="alert">

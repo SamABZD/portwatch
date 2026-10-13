@@ -1,9 +1,14 @@
 # GitHub workflow
 
-Current state: Steps00–12 and15/live multiport extension validated locally; Steps06 onward unpushed.
-Step13 audit precedes14A portfolio publication; user skips14 and17. The existing
+Current state: Steps00–13 and15/live multiport extension validated locally; Steps06 onward unpushed.
+Step13 audit is complete locally;14A portfolio publication remains pending. User skips14 and17. The existing
 CI billing-lock deferral persists: no payment, push, merge or branch-rule/account change.
 See [HANDOFF.md](HANDOFF.md) and [LIVE_MULTIPORT.md](LIVE_MULTIPORT.md).
+
+Step13 verified242 tests through the shared local validator, fresh native reproduction and
+Next.js build/browser checks. No current-commit Actions run exists; the workflow covers Python
+quality/integration, while frontend verification was local. Compose now matches its PG17/
+PostGIS3.6 image, guarded by a regression test. See [RELEASE_CHECK.md](RELEASE_CHECK.md).
 
 ## Repository boundary
 
