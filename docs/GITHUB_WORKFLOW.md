@@ -1,9 +1,10 @@
 # GitHub workflow
 
-Current state: Steps00–13 and15/live multiport extension validated locally; Steps06 onward unpushed.
-Step13 audit is complete locally;14A portfolio publication remains pending. User skips14 and17. The existing
-CI billing-lock deferral persists: no payment, push, merge or branch-rule/account change.
-See [HANDOFF.md](HANDOFF.md) and [LIVE_MULTIPORT.md](LIVE_MULTIPORT.md).
+Step 14A packages the locally verified Step 13 code and presentation on
+`release/portfolio-v0.1.0`. Current remote visibility is private, superseding earlier public
+records. Keep privacy and account settings unchanged. A current-head hosted validation pass
+and resulting-main pass remain required for merge and `v0.1.0`; preparation/push/PR do not
+establish a release. See [GITHUB_SETUP.md](GITHUB_SETUP.md) for observed remote evidence.
 
 Step13 verified242 tests through the shared local validator, fresh native reproduction and
 Next.js build/browser checks. No current-commit Actions run exists; the workflow covers Python
@@ -49,7 +50,10 @@ Tests use small labeled synthetic data, loopback HTTP/WebSocket servers, and tem
 
 `.github/workflows/ci.yml` runs on branch pushes, PRs targeting `main`, and manual dispatch. Distinct job names are `quality` and `integration`, each with an Ubuntu 24.04 runner and 15-minute timeout. Concurrency cancels obsolete runs for the same branch/PR. Permissions default to `contents: read`; checkout does not persist credentials. No provider secrets, failure artifact uploads, workspace caches, or scheduled AIS collectors are configured.
 
-The repository is public and uses a standard hosted runner, whose execution is [free under GitHub's billing policy](https://docs.github.com/en/actions/concepts/billing-and-usage). No paid runner, deployment service, or artifact upload is requested.
+The repository was public when CI was configured; it is now private. Standard hosted-runner
+usage follows the account's available allowance and billing state. The account lock previously
+prevented execution before any runner started. No paid runner, deployment service, artifact
+upload or account/payment change is requested.
 
 Official action versions verified on 2026-10-11:
 

@@ -1,17 +1,28 @@
 # GitHub setup record
 
-Current state: Steps00–13 and15/live multiport extension validated locally; Steps06 onward unpushed.
-Step13 audit is complete locally;14A portfolio publication remains pending. User skips14 and17. The existing
-CI billing-lock deferral persists: no payment, push, merge or branch-rule/account change.
-See [HANDOFF.md](HANDOFF.md) and [LIVE_MULTIPORT.md](LIVE_MULTIPORT.md).
+## Step 14A preparation (2026-10-13 Asia/Beirut)
+
+The verified Step 13 code is being packaged on `release/portfolio-v0.1.0` for a publication PR.
+README, genuine historical screenshots, portable setup, demo guide, reviewed audit evidence
+and `RELEASE_NOTES.md` are included. Source, migrations and lockfiles are unchanged from
+audit checkpoint `55e895f`. Release/tag/main merge require passing current-head checks.
+
+Authenticated `SamABZD` has ADMIN access to `SamABZD/portwatch`, with only the verified
+origin remote. Current API inspection reports **private**, superseding the earlier public
+foundation record below. Visibility is preserved. Main remains
+`f784a9374942c704630bd412704a67c4896ead24`; CI PR #2 remains open at `35b230c`.
+The branch-rule/ruleset APIs return 403 requiring Pro or public visibility; no setting was changed.
+The owner previously declined payment; preparation uses $0 and does not change account settings.
+
+See [HANDOFF.md](HANDOFF.md), [release notes](RELEASE_NOTES.md) and [reviewed evidence](evidence/README.md).
 
 Step13 verified242 tests through the shared local validator, fresh native reproduction and
 Next.js build/browser checks. No current-commit Actions run exists; the workflow covers Python
 quality/integration, while frontend verification was local. See [RELEASE_CHECK.md](RELEASE_CHECK.md).
 
-## Verified repository
+## Historical repository setup record
 
-- Project root: `C:\Users\samab\dataEngineering\portwatch`. The parent `dataEngineering` folder is unrelated and is not a Git repository.
+- Project root: `.`. The parent `dataEngineering` folder is unrelated and is not a Git repository.
 - Authenticated GitHub account and target owner: `SamABZD`, verified with `gh api user --jq .login` and `gh api users/SamABZD --jq .login`.
 - Repository: [SamABZD/portwatch](https://github.com/SamABZD/portwatch), created as public during Step 00A. `gh repo view` reports `isPrivate: false` and default branch `main`.
 - Only remote: `origin`, with fetch and push URL `https://github.com/SamABZD/portwatch.git`.

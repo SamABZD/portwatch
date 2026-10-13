@@ -1,0 +1,140 @@
+{
+  "verified_at_utc": "2026-10-12T20:36:25.728464+00:00",
+  "verified": true,
+  "catalog_seconds": 0.5371671000029892,
+  "frames": [
+    {
+      "cutoff_utc": "2024-01-01T00:00:00+00:00",
+      "first_request_seconds": 0.021100699988892302,
+      "first_request_cache_hit": false,
+      "cached_seconds": 0.004936700002872385,
+      "prefix_observations": 3,
+      "metrics": {
+        "seen_vessels": 3,
+        "fresh_vessels": 3,
+        "fresh_port_occupancy": 3,
+        "zone_counts": {
+          "la_harbor": 3
+        },
+        "candidate_waiting": 0,
+        "completed_dwell_sample_count": 0,
+        "completed_dwell_median_seconds": null,
+        "partial_visit_count": 0
+      },
+      "completed_chart_hours": 0
+    },
+    {
+      "cutoff_utc": "2024-01-01T12:30:00+00:00",
+      "first_request_seconds": 0.050306300006923266,
+      "first_request_cache_hit": true,
+      "cached_seconds": 0.03095759999996517,
+      "prefix_observations": 32632,
+      "metrics": {
+        "seen_vessels": 124,
+        "fresh_vessels": 99,
+        "fresh_port_occupancy": 99,
+        "zone_counts": {
+          "la_harbor": 85,
+          "terminal_island_vicinity": 8,
+          "pier400_vicinity": 5,
+          "fenix_vicinity": 1
+        },
+        "candidate_waiting": 0,
+        "completed_dwell_sample_count": 6,
+        "completed_dwell_median_seconds": 1142.75,
+        "partial_visit_count": 160
+      },
+      "completed_chart_hours": 12
+    },
+    {
+      "cutoff_utc": "2024-01-01T20:40:00+00:00",
+      "first_request_seconds": 0.8132897000032244,
+      "first_request_cache_hit": false,
+      "cached_seconds": 0.03863830000045709,
+      "prefix_observations": 53436,
+      "metrics": {
+        "seen_vessels": 131,
+        "fresh_vessels": 99,
+        "fresh_port_occupancy": 94,
+        "zone_counts": {
+          "la_harbor": 81,
+          "san_pedro_bay_candidate": 4,
+          "terminal_island_vicinity": 6,
+          "outside": 1,
+          "pier400_vicinity": 6,
+          "fenix_vicinity": 1
+        },
+        "candidate_waiting": 0,
+        "completed_dwell_sample_count": 10,
+        "completed_dwell_median_seconds": 2953.0,
+        "partial_visit_count": 195
+      },
+      "completed_chart_hours": 20
+    },
+    {
+      "cutoff_utc": "2024-01-01T20:45:00+00:00",
+      "first_request_seconds": 0.8304587000020547,
+      "first_request_cache_hit": false,
+      "cached_seconds": 0.03665940000792034,
+      "prefix_observations": 53652,
+      "metrics": {
+        "seen_vessels": 131,
+        "fresh_vessels": 97,
+        "fresh_port_occupancy": 94,
+        "zone_counts": {
+          "la_harbor": 82,
+          "san_pedro_bay_candidate": 2,
+          "terminal_island_vicinity": 5,
+          "outside": 1,
+          "pier400_vicinity": 6,
+          "fenix_vicinity": 1
+        },
+        "candidate_waiting": 0,
+        "completed_dwell_sample_count": 10,
+        "completed_dwell_median_seconds": 2953.0,
+        "partial_visit_count": 197
+      },
+      "completed_chart_hours": 20
+    },
+    {
+      "cutoff_utc": "2024-01-02T00:00:00+00:00",
+      "first_request_seconds": 0.9878730000054929,
+      "first_request_cache_hit": false,
+      "cached_seconds": 0.033927099997526966,
+      "prefix_observations": 62157,
+      "metrics": {
+        "seen_vessels": 141,
+        "fresh_vessels": 97,
+        "fresh_port_occupancy": 95,
+        "zone_counts": {
+          "la_harbor": 83,
+          "terminal_island_vicinity": 7,
+          "pier400_vicinity": 4,
+          "san_pedro_bay_candidate": 1,
+          "outside": 1,
+          "fenix_vicinity": 1
+        },
+        "candidate_waiting": 0,
+        "completed_dwell_sample_count": 14,
+        "completed_dwell_median_seconds": 4495.5,
+        "partial_visit_count": 216
+      },
+      "completed_chart_hours": 24
+    }
+  ],
+  "genuine_uncached_frame_seconds": 0.4931912000029115,
+  "genuine_uncached_sample_repeat_seconds": 0.037129700009245425,
+  "live_query_seconds": 0.17132049999781884,
+  "live_saved_positions": 1206,
+  "live_occupancy_unknown": false,
+  "collector_status": "healthy_connected",
+  "historical_news_excluded": true,
+  "sql_activity_reconciled": true,
+  "prepared_roundtrip_matches": true,
+  "source_hash": "d3b60f890910c6397dadb4ec508eec5d0ab2911e163c4b4a5f505d9725bd3e5b",
+  "mart_hash": "6f6ca8ecaa8e3824040aa481cd85d88cd0b52990ba2a0307daf14001ad223112",
+  "historical_sql_audit_count_unchanged": true,
+  "hash_scope": "Los Angeles historical positions, static messages and profile evidence",
+  "collector_started": false,
+  "provider_fetches": 0
+}

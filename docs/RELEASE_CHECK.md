@@ -26,16 +26,16 @@ All pass locally within the stated scope; remote execution remains unverified.
 
 | Area | Evidence and result |
 | --- | --- |
-| UTC/source vs receipt | [Timestamp tests](../tests/test_positions.py); [read-only SQL](../artifacts/step13/final-state.json): UTC session, zero invalid historical time choices/ranges. Live remains receipt fallback with separate provider text. |
-| Idempotency/uniqueness | [Fresh real-data verification](../artifacts/step13/latest.json), [cleaning tests](../tests/test_cleaning.py): both-port forced reruns preserve business, profile and per-port mart digests; duplicate lineage retained. |
+| UTC/source vs receipt | [Timestamp tests](../tests/test_positions.py); read-only SQL (local `artifacts/step13/final-state.json`): UTC session, zero invalid historical time choices/ranges. Live remains receipt fallback with separate provider text. |
+| Idempotency/uniqueness | [Fresh real-data verification](evidence/reproducibility.json), [cleaning tests](../tests/test_cleaning.py): both-port forced reruns preserve business, profile and per-port mart digests; duplicate lineage retained. |
 | Coordinates/units | [Zone tests](../tests/test_zones.py), [storage tests](../tests/test_zone_storage.py), SQL: zero mismatched longitude/X, latitude/Y or SRID; WGS84 and metric-distance rules covered. |
 | Join multiplication | [Mart integration tests](../tests/test_mart_storage.py): weather revisions/articles do not multiply vessel metrics; distinct primary-zone counts reconcile. |
-| Gaps/unknown | [Visit tests](../tests/test_visits.py), [replay tests](../tests/test_replay.py), [recovery drill](../artifacts/step13/b10119e6ea8c4327ace9b807fca53ebe/recovery-verification.json): report/connection gaps remain unknown and break inference/trails. |
-| Source/port/future isolation | [Multiport tests](../tests/test_multiport.py), [midnight regression](../tests/test_pipeline_storage.py), [replay verification](../artifacts/step13/replay-verification.json): source, port, profile availability and cutoff isolation. |
+| Gaps/unknown | [Visit tests](../tests/test_visits.py), [replay tests](../tests/test_replay.py), recovery drill (local `artifacts/step13/b10119e6ea8c4327ace9b807fca53ebe/recovery-verification.json`): report/connection gaps remain unknown and break inference/trails. |
+| Source/port/future isolation | [Multiport tests](../tests/test_multiport.py), [midnight regression](../tests/test_pipeline_storage.py), [Replay verification](evidence/replay.json): source, port, profile availability and cutoff isolation. |
 | Cache invalidation | [Replay tests](../tests/test_replay.py): revision/display parameters change cache keys; [mart tests](../tests/test_mart_storage.py) replace obsolete late-data partitions transactionally. |
 | Commit/checkpoint order | [Pipeline integration tests](../tests/test_pipeline_storage.py): committed business data precedes checkpoints; interruption resumes, session locks release and abandoned audits recover. |
 | Schema/unknown messages | [Parser tests](../tests/test_positions.py), [collector tests](../tests/test_live.py), [profile tests](../tests/test_profiles.py): invalid required shapes quarantine, unknown/control messages are explicit, optional unknowns stay missing. |
-| Secrets/bulk data | [Scan](../artifacts/step13/security.json): private AIS credentials absent from tracked content/history; the documented public localhost DB sample is deliberately tracked and currently used locally. Bulk/private paths ignored; migrations001–008 and both lockfiles unchanged. Python112-package and npm production audits found zero known vulnerabilities at audit time. |
+| Secrets/bulk data | [Scan](evidence/security.json): private AIS credentials absent from tracked content/history; the documented public localhost DB sample is deliberately tracked and currently used locally. Bulk/private paths ignored; migrations001–008 and both lockfiles unchanged. Python112-package and npm production audits found zero known vulnerabilities at audit time. |
 | Claims/labels | README/contracts/runbook updated; pipeline drawing separates architecture from real health. Approximate zones, proxy metrics, incomplete coverage, portable limits and local hosting remain explicit. |
 | Workflow drift | Shared [validator](../scripts/validate.py) passes; Compose/CI versions match. Existing [workflow](../.github/workflows/ci.yml) runs locked Python quality/integration gates. Next.js build/browser checks were local; there is no frontend Actions job and no current-commit hosted run. |
 
@@ -84,18 +84,18 @@ continued during checks. Cache/disk/runtime conditions affect timings.
 
 - `uv sync --locked --extra dev` succeeded. The Step05A shared validator passed **185 unit +
   57 integration =242 tests**, Ruff/101 formatted Python files, wheel/sdist, installed-wheel
-  CLI/resources and empty-database migrations. [Final log](../artifacts/step13/validation-final.txt).
+  CLI/resources and empty-database migrations. [Final log](evidence/validation.txt).
   One upstream Starlette/httpx TestClient deprecation warning is non-failing.
 - Next.js type checking/production build passed for `/` and `/pipeline`.
-  [Build log](../artifacts/step13/web-build.txt).
+  [Build log](evidence/web-build.txt).
 - Existing replay12 and multiport6 browser checks pass. Prepared-only actual HTTP sessions
   pass3 checks for each port with blank AIS credentials/closed DB port9; LA noon99, Oakland75.
-  [LA](../artifacts/step13/prepared-browser/los_angeles.json),
-  [Oakland](../artifacts/step13/prepared-browser/oakland.json).
+  [LA](evidence/browser-los-angeles.json),
+  [Oakland](evidence/browser-oakland.json).
 - The nine-component architecture drawing passes4 checks: selection/keyboard, four viewport
   sizes/no clipped labels, secondary-text contrast (minimum5.79:1), and disconnected-health
-  operation. Desktop/mobile inspected; zero page errors. [Report](../artifacts/step13/diagram/verification.json).
-  [Design scan](../artifacts/step13/design-scan.json) found no deterministic issues.
+  operation. Desktop/mobile inspected; zero page errors. [Report](evidence/diagram.json).
+  Design scan (local `artifacts/step13/design-scan.json`) found no deterministic issues.
 
 ## Failed, deferred and unverified items
 
@@ -121,8 +121,9 @@ parent database for leaked test resources; both were corrected before the succes
   do not establish official calls, queues or causality. See [source audit](SOURCE_AUDIT.md)
   and [metric definitions](ANALYTICS.md).
 - Code links in the website target GitHub `main`; they become current at Step14A publication.
-  Raw files, snapshots, credentials and generated evidence stay ignored. Local evidence links
-  above require this checkout; select reviewed public reports/screenshots during Step14A.
+  Raw files, snapshots, credentials and generated evidence stay ignored. Remaining local artifact identifiers
+  require the audit checkout; [selected reports](evidence/README.md) and
+  [screenshots](assets/README.md) are packaged for repository review.
 
 Reproduction and launch/stop commands: [RUNBOOK.md](RUNBOOK.md),
 [LIVE_MULTIPORT.md](LIVE_MULTIPORT.md), [REPLAY.md](REPLAY.md).

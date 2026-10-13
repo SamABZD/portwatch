@@ -2,23 +2,52 @@
 
 ## Current stage state
 
-- Project: `C:/Users/samab/dataEngineering/portwatch`; branch `feat/final-audit`.
+- Project: this repository; current publication branch `release/portfolio-v0.1.0`.
 - Steps00,00A,01-13 and Step15 port generalization completed locally. Additional pre-release
   work includes continuous two-port collection, timed vessel profiles and an interactive pipeline drawing.
-- User skips Step14 academy submission and Step17 scale study. Next is Step14A portfolio
-  publication, then the remaining public24/7 hosting work. Step16 history/dbt remains optional
-  and unimplemented. Stop at the Step13 boundary until continuing the next assigned stage.
+- User skips Step14 academy submission and Step17 scale study. Step14A portfolio publication
+  is being prepared, followed by public24/7 hosting. Step16 history/dbt remains optional
+  and unimplemented. Stop at the Step14A boundary; do not bypass its merge/release check gates.
 - Frontend3000/API8000, PostgreSQL55432 and existing Prefect API4200 support the local app.
   An owned runtime collects Los Angeles/Oakland; six Prefect deployments are active.
   Check `artifacts/live/runtime.json` and current processes before starting another runtime.
 - Read [LIVE_MULTIPORT.md](LIVE_MULTIPORT.md) for commands, scopes, stop/restart and remaining
   always-on public hosting requirements. Use `git log -1` for the local checkpoint.
-- CI05A remains blocked by account billing. User authorized$0 local continuation. Steps06
-  onward remain unpushed; no public hosting, release, merge, account or payment change.
+- CI05A has been account-billing-blocked. User authorized$0 local continuation and the next
+  publication stage. Current API reports a private repository; preserve visibility. No public
+  hosting, release, unchecked merge, account or payment change is authorized by preparation.
 - Earlier stage evidence below is historical. Its paused/stopped collector descriptions are
   superseded by the live runtime. No source observations were invented for this extension.
 
 ## Verified commands and observed outcomes
+
+### Step14A preparation (2026-10-13 Asia/Beirut)
+
+- Based on completed audit checkpoint `55e895f`; source, migrations and dependency locks
+  are unchanged. README now leads with the actual problem, genuine screenshots, architecture,
+  portable setup, source attribution, measured results, recovery and explicit limits.
+- Four unchanged reviewed historical/diagram PNGs total426,928 bytes; the asset manifest
+  records hashes and provenance. Eight selected audit reports include242-test/build transcripts,
+  fresh reproduction and browser evidence. Machine-specific transcript prefixes are redacted.
+  Provider raw/live data, snapshots, local databases, secrets and bulk artifacts stay ignored.
+- Added demo guide and release-candidate notes before the PR. Removed personal checkout paths
+  and converted ignored-artifact hyperlinks to local identifiers or tracked evidence links.
+- Remote checked through authenticated GitHub CLI: owner/repository match; main unchanged;
+  CI PR#2 open. Visibility is private despite historical public records. Branch protection and
+  ruleset access return403 requiring Pro/public; no paid or visibility change was made.
+- Publication recheck: the default validator passed185 unit tests/lint/format/package checks,
+  then failed DB connectivity because the owned native cluster had stopped. Restarted only
+  `pgdata/portwatch` on55432; `doctor` passed and `scripts/validate.py --group integration`
+  passed57 tests, eight migrations/repeat0. `npm run typecheck` and `npm run build` passed.
+  The initial failed attempt is retained locally; no single uninterrupted default-run pass is claimed.
+- Checked187 repository-relative Markdown links/case, four image hashes and the current
+  tree/reachable Git history for private credential values: zero broken links, personal
+  user-directory paths or credential findings. README images and Mermaid rendered in a local
+  browser preview. GitHub visual rendering is unavailable in the unsigned-in browser;
+  the private repository returns404 and its status badge is unavailable anonymously.
+- Updated About description/topics for both ports and the implemented stack. Homepage stays
+  empty because no hosted app exists. Publication PR/run evidence follows actual operations.
+  Tag/release requires passing current-head and resulting-main hosted checks.
 
 ### Step13 final audit (2026-10-13 Asia/Beirut)
 
@@ -377,7 +406,7 @@ Step 02 changed files: `.env.example`, `README.md`, `pyproject.toml`, `src/portw
 ### Step 00A
 
 - `gh --version`: 2.97.0. `gh auth status` showed active account `SamABZD`; `gh api user --jq .login` returned `SamABZD`. `gh repo view SamABZD/portwatch --json name,owner,isPrivate,defaultBranchRef,url` failed before creation because the target repository did not exist.
-- `git init -b main`: initialized the independent repository at `C:\Users\samab\dataEngineering\portwatch`. Existing global author name and email were reused in repository-local settings; no global Git settings were changed.
+- `git init -b main`: initialized the independent repository at `.`. Existing global author name and email were reused in repository-local settings; no global Git settings were changed.
 - `git check-ignore -v` on `.env`, both virtual environments, raw/derived/quarantine paths, artifacts, and logs: every tested private or generated path was ignored. `git diff --cached --check`: passed. `git grep --cached -n -I -E 'gho_[A-Za-z0-9]{20}|ghp_[A-Za-z0-9]{20}|sk-[A-Za-z0-9]{20}'`: no matches. `git ls-files --cached --eol` reported LF normalized staged files.
 - `git commit -m "Establish PortWatch foundation and GitHub workflow"`: created foundation commit `01c9f0b0c16e256b6c80f092e41e33097becb8bc` with 22 intended project files.
 - `gh repo create SamABZD/portwatch --public --source . --remote origin --push`: succeeded and pushed `main`.
@@ -387,7 +416,7 @@ Step 02 changed files: `.env.example`, `README.md`, `pyproject.toml`, `src/portw
 ### Step 00
 
 - `python --version`: Python 3.11.9. `py -0p`: Python 3.14 and 3.11 installed, no 3.12. `py -3.14 --version`: Python 3.14.0. `git --version`: Git 2.53.0.windows.2. `uv --version` and `docker --version`: commands unavailable on the original PATH; Docker Compose is unavailable with Docker.
-- `git rev-parse --show-toplevel` from `C:\Users\samab\dataEngineering`: failed because the parent is not a Git repository. No repository or remote was created in Step 00.
+- `git rev-parse --show-toplevel` from `the parent project directory`: failed because the parent is not a Git repository. No repository or remote was created in Step 00.
 - `py -3.11 -m venv .bootstrap-venv` followed by `.\.bootstrap-venv\Scripts\python.exe -m pip install uv`: succeeded; project-local uv 0.13.0. The bootstrap environment is ignored by Git.
 - `.\.bootstrap-venv\Scripts\uv.exe sync --extra dev`: succeeded, resolved and installed 25 packages using Python 3.11.9, and wrote `uv.lock`.
 - `.\.bootstrap-venv\Scripts\uv.exe sync --locked --extra dev`: succeeded, checked the same 25 packages without changing the lockfile.

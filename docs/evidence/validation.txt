@@ -1,0 +1,69 @@
++ <project>\.bootstrap-venv\Scripts\uv.exe sync --locked --extra dev
+Resolved 129 packages in 1ms
+Checked 125 packages in 13ms
++ <project>\.venv\Scripts\python.exe -m ruff check .
+All checks passed!
++ <project>\.venv\Scripts\python.exe -m ruff format --check .
+101 files already formatted
++ <project>\.venv\Scripts\python.exe -m pytest -q --maxfail=1 -m not integration -o faulthandler_timeout=30 --junitxml=<temp>\portwatch-validation-juje_2gt\unit.xml
+........................................................................ [ 38%]
+........................................................................ [ 77%]
+.........................................                                [100%]
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  <project>\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+185 passed, 57 deselected, 1 warning in 18.28s
++ <project>\.bootstrap-venv\Scripts\uv.exe build --out-dir <temp>\portwatch-validation-juje_2gt\dist
+Building source distribution...
+Building wheel from source distribution...
+Successfully built <temp>\portwatch-validation-juje_2gt\dist\portwatch-0.1.0.tar.gz
+Successfully built <temp>\portwatch-validation-juje_2gt\dist\portwatch-0.1.0-py3-none-any.whl
++ <project>\.venv\Scripts\python.exe -I -c <Python verification> <temp>\portwatch-validation-juje_2gt\dist\portwatch-0.1.0-py3-none-any.whl 001_raw_bookkeeping.sql 002_clean_positions.sql 003_port_zones.sql 004_visits_waiting.sql 005_weather_news.sql 006_analytical_marts.sql 007_orchestration.sql 008_vessel_profiles.sql
+Built wheel imports and includes every committed SQL migration
+
+ Usage: portwatch [OPTIONS] COMMAND [ARGS]...
+
+ PortWatch local data engineering commands.
+
++- Options -------------------------------------------------------------------+
+| --log-json              --no-log-json      Structured events on stderr.     |
+|                                            [default: no-log-json]           |
+| --install-completion                       Install completion for the       |
+|                                            current shell.                   |
+| --show-completion                          Show completion for the current  |
+|                                            shell, to copy it or customize   |
+|                                            the installation.                |
+| --help                                     Show this message and exit.      |
++-----------------------------------------------------------------------------+
++- Commands ------------------------------------------------------------------+
+| health       Read-only historical readiness, live freshness, backlog and    |
+|              source health.                                                 |
+| doctor       Check package, configuration, local storage, database, and     |
+|              PostGIS.                                                       |
+| db           PostgreSQL schema commands.                                    |
+| storage      Verify raw files and recover database registration.            |
+| ingest       Acquire historical AIS or collect live AIS independently.      |
+| transform    Normalize saved source batches with deterministic lineage.     |
+| geo          Load immutable approximate analytical geofences.               |
+| pipeline     Finite historical, live and context workflows; local recovery. |
+| orchestrate  Local Prefect server and scheduled finite jobs.                |
+| demo         Read-only Next.js query API and portable historical            |
+|              preparation.                                                   |
++-----------------------------------------------------------------------------+
+
++ <project>\.venv\Scripts\python.exe -c <Python verification>
+Database: PostgreSQL 17, PostGIS 3.6.2
+Migrations: 8 applied; repeat applied zero
++ <project>\.venv\Scripts\python.exe -m pytest -q --maxfail=1 -m integration --junitxml=<temp>\portwatch-validation-juje_2gt\integration.xml
+.........................................................                [100%]
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  <project>\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+57 passed, 185 deselected, 1 warning in 47.04s
+PASS: all validation

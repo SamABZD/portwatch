@@ -21,7 +21,7 @@ the API does not depend on Prefect or a live AIS key.
 Terminal1:
 
 ```powershell
-Set-Location -LiteralPath 'C:\Users\samab\dataEngineering\portwatch'
+# Run from the cloned PortWatch project root.
 .\.bootstrap-venv\Scripts\uv.exe sync --locked --extra dev
 .\.venv\Scripts\python.exe -m portwatch demo serve --listen-port 8000
 ```
@@ -29,7 +29,7 @@ Set-Location -LiteralPath 'C:\Users\samab\dataEngineering\portwatch'
 Terminal2:
 
 ```powershell
-Set-Location -LiteralPath 'C:\Users\samab\dataEngineering\portwatch\web'
+Set-Location -LiteralPath './web'
 npm ci
 npm run typecheck
 npm run build
@@ -128,7 +128,7 @@ approximate zones, rules, period/version provenance, declared input coverage and
 sidecar and refuses existing paths. It is generated/ignored, not committed or published.
 
 ```powershell
-Set-Location -LiteralPath 'C:\Users\samab\dataEngineering\portwatch'
+# Run from the cloned PortWatch project root.
 # This stage already created the first file; use a NEW path for another export.
 .\.venv\Scripts\python.exe -m portwatch demo export --output data/demo/another-los-angeles-snapshot.json
 .\.venv\Scripts\python.exe -m portwatch demo serve --listen-port 8000 --prepared data/demo/los-angeles-2024-01-01.json

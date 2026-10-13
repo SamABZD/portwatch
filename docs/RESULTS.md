@@ -476,7 +476,7 @@ Both files have adjacent `.manifest.json` sidecars. The derived manifest records
 | 2024-01-01 00:00:02 | -118.261400 | 33.726090 |
 | 2024-01-01 00:00:02 | -118.226350 | 33.732650 |
 
-The [scatter plot](../artifacts/step03-los-angeles.png) contains a deterministic sample of 4,782 positions, the collection box, and geographic reference points from [SOURCE_AUDIT.md](SOURCE_AUDIT.md). Visual inspection found plausible harbor and approach clusters near the outer harbor and Pier 400; the Long Beach Pier F reference is outside the eastern edge. It is a coordinate plot without a basemap or official analytical polygon. The verifier also checks every regional coordinate, not just the plotted sample.
+The scatter plot (local `artifacts/step03-los-angeles.png`) contains a deterministic sample of 4,782 positions, the collection box, and geographic reference points from [SOURCE_AUDIT.md](SOURCE_AUDIT.md). Visual inspection found plausible harbor and approach clusters near the outer harbor and Pier 400; the Long Beach Pier F reference is outside the eastern edge. It is a coordinate plot without a basemap or official analytical polygon. The verifier also checks every regional coordinate, not just the plotted sample.
 
 ### Reproduce
 

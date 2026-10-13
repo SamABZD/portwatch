@@ -10,7 +10,7 @@ an optional, unimplemented extension. No GitHub push, release or public hosting 
 
 - Map: http://127.0.0.1:3000 — Live by default in DB mode; saved positions refresh every30 seconds. Prepared sessions select Historical automatically.
 - Pipeline: http://127.0.0.1:3000/pipeline — current measurements and scoped workflow runs.
-- Project: `C:\Users\samab\dataEngineering\portwatch`.
+- Project: `.`.
 - Ports: Los Angeles and Oakland. Frozen NOAA replay:2024-01-01 through2024-01-02 UTC.
 
 From the project directory, with private `.env` configured and PostgreSQL running:
@@ -29,7 +29,7 @@ From the project directory, with private `.env` configured and PostgreSQL runnin
 
 ```powershell
 # Terminal3: frontend.
-Set-Location -LiteralPath 'C:\Users\samab\dataEngineering\portwatch\web'
+Set-Location -LiteralPath './web'
 npm ci
 npm run build
 npm run start

@@ -61,12 +61,12 @@ Detailed contracts, development/portable mode and interaction checks: [REPLAY.md
 For a fresh start, keep both terminals open:
 
 ```powershell
-Set-Location -LiteralPath 'C:\Users\samab\dataEngineering\portwatch'
+# Run from the cloned PortWatch project root.
 .\.venv\Scripts\python.exe -m portwatch demo serve --listen-port 8000
 ```
 
 ```powershell
-Set-Location -LiteralPath 'C:\Users\samab\dataEngineering\portwatch\web'
+Set-Location -LiteralPath './web'
 npm ci
 npm run typecheck
 npm run build
@@ -101,9 +101,36 @@ Verification with API/frontend running:
 Browser automation blocks external tiles and checks the fallback/controls. Normal manual
 basemap use follows OSM's caching, attribution and no-bulk-download policy.
 
+## Native Windows database
+
+The existing local cluster uses PostgreSQL 17.11/PostGIS 3.6.2, ignored `pg-runtime/`,
+`pgdata/portwatch` and localhost port55432. Keep its existing private `.env`. These commands
+restart that initialized cluster; they do not initialize a new one or reset stored data.
+From the cloned project root, first check status:
+
+```powershell
+& .\pg-runtime\bin\pg_ctl.exe -D pgdata\portwatch status
+```
+
+Only when that owned cluster is stopped:
+
+```powershell
+$portwatchPg = Start-Process -FilePath "$PWD\pg-runtime\bin\pg_ctl.exe" -ArgumentList @('-D','pgdata\portwatch','-l','pgdata\portwatch-server.log','-o','"-h 127.0.0.1 -p 55432"','-w','start') -WindowStyle Hidden -PassThru
+if (-not $portwatchPg.WaitForExit(15000)) { throw 'Check the owned PostgreSQL log before retrying' }
+.\.venv\Scripts\python.exe -m portwatch doctor
+```
+
+Stop only this cluster with `& .\pg-runtime\bin\pg_ctl.exe -D pgdata\portwatch -m fast -w stop`.
+Keep its private runtime because the extension libraries resolve through it. Do not use
+`Start-Process -Wait` for startup; it can wait on the long-lived server descendants.
+On a new Windows installation, use the README's Compose setup or install a matching native
+server/extension and initialize your own separate cluster. `scripts/prepare_postgis.py` can
+prepare the pinned official PostGIS bundle over copied installed PG17 binaries, with checksum
+verification; it does not initialize/start the server. It is not a PostgreSQL installer.
+
 ## Step11 diagnosis and recovery
 
-Run commands in `C:\Users\samab\dataEngineering\portwatch`. Preserve `.env`, original raw
+Run commands in `.`. Preserve `.env`, original raw
 files/manifests and the existing database. See [HEALTH_RECOVERY.md](HEALTH_RECOVERY.md) for status,
 latency, logging and guarantee limits. UTC timestamps are labeled in reports; local operator
 dates use Asia/Beirut.
@@ -111,7 +138,7 @@ dates use Asia/Beirut.
 Start with:
 
 ```powershell
-Set-Location -LiteralPath 'C:\Users\samab\dataEngineering\portwatch'
+# Run from the cloned PortWatch project root.
 .\.venv\Scripts\python.exe -m portwatch health --port los_angeles
 .\.venv\Scripts\python.exe -m portwatch --log-json health --port los_angeles --json
 .\.venv\Scripts\python.exe -m portwatch doctor
@@ -127,7 +154,7 @@ zero traffic. A stopped collector can coexist with a ready historical demo.
 | --- | --- | --- | --- |
 | Missing/invalid AIS key | `collector.api_key_configured=false`, `not_configured`, or failed subscription; check private `.env` presence without printing its value. | Set/correct private `PORTWATCH_AIS_API_KEY`; run finite capture command below. Use historical demo if live credentials are unavailable. | Confirm subscription/Pong and stopped status after finite capture; reports remain a separate freshness signal. |
 | Disconnect/provider rate limit | `reconnecting`, reconnect counter/gap; context latest HTTP429/cooldown. Existing saved revision remains separate from latest failure. | Allow collector's bounded reconnect; honor source `next_allowed_utc`. After cooldown use the explicit context refresh commands below. Fix a rejected subscription before restarting. | Health shows connection recovery or new successful context receipt; disconnected upstream interval stays unknown. |
-| Database unavailable | Health retains raw/disk checks but marks database unavailable; `doctor` and exact native `pg_ctl status` below. | Restart only the existing PortWatch cluster using README's native command, then `db migrate` and cached pipeline commands below. Do not initialize/reset its data. | `doctor` passes; health connected; saved raw hashes unchanged and backlog drains. |
+| Database unavailable | Health retains raw/disk checks but marks database unavailable; `doctor` and exact native `pg_ctl status` below. | Restart only the existing PortWatch cluster using the native command above, then `db migrate` and cached pipeline commands below. Do not initialize/reset its data. | `doctor` passes; health connected; saved raw hashes unchanged and backlog drains. |
 | Complete raw file unregistered | `storage inspect` reports complete manifests; health `awaiting_registration>0`. | `storage reconcile`, then the corresponding cached historical/live processing command below. | Registration/backlog counts fall; each clean batch has committed lineage, source bytes remain unchanged. |
 | Corrupt/truncated batch | Invalid checksum/publication state in `storage inspect` and health. | Preserve damaged evidence; restore exact bytes from a verified raw copy and inspect again, or acquire a new immutable source revision. Never rewrite manifests to accept damage. A malformed record is quarantined by cleaning while valid records follow batch policy. | Saved checksum matches; original/reject lineage is preserved, valid records continue, rejected records do not enter positions. |
 | Transform/schema failure | Latest failed attempt/consecutive failures, safe error class; `doctor`, storage inspection and migration checks. | Correct configuration/code, run `db migrate`, then historical `--rebuild --local` below or live processing. Previous valid published metrics remain usable during failure. | Success audit and reconciliation; visits/hours replace obsolete rows without duplicates. |
@@ -149,7 +176,7 @@ Exact recovery commands (select the relevant source/action):
 .\.venv\Scripts\python.exe -m portwatch orchestrate pause
 ```
 
-The native start command is in [README](../README.md); it uses existing `pgdata/portwatch` and
+The native start command is [above](#native-windows-database); it uses existing `pgdata/portwatch` and
 private `pg-runtime` at localhost55432. `--rebuild` forces workflow publication/checkpoint work;
 it does not repair manually deleted canonical rows under a processed clean ledger. Restore a
 verified database into a deliberately chosen recovery destination or use a separately scoped
@@ -207,14 +234,14 @@ do not start a second API server on4200. Start only the processes you intend to 
 
 ## Step10 local workflows
 
-Use `C:\Users\samab\dataEngineering\portwatch` in each terminal. Restart the existing native
-PostgreSQL cluster with the command in [README](../README.md) if `pg_ctl status` reports stopped.
+Use `.` in each terminal. Restart the existing native
+PostgreSQL cluster with the [native command above](#native-windows-database) if `pg_ctl status` reports stopped.
 Keep the existing `.env`, native runtime and databases.
 
 Terminal1 (keep local API/UI open):
 
 ```powershell
-Set-Location -LiteralPath 'C:\Users\samab\dataEngineering\portwatch'
+# Run from the cloned PortWatch project root.
 .\.bootstrap-venv\Scripts\uv.exe sync --locked --extra dev
 .\.venv\Scripts\python.exe -m portwatch db migrate
 .\.venv\Scripts\python.exe -m portwatch orchestrate server
@@ -223,7 +250,7 @@ Set-Location -LiteralPath 'C:\Users\samab\dataEngineering\portwatch'
 Terminal2 (demo/backfill, then keep serving open):
 
 ```powershell
-Set-Location -LiteralPath 'C:\Users\samab\dataEngineering\portwatch'
+# Run from the cloned PortWatch project root.
 .\.venv\Scripts\python.exe -m portwatch pipeline run --port los_angeles --demo
 .\.venv\Scripts\python.exe -m portwatch pipeline backfill --port los_angeles --start 2024-01-01 --end 2024-01-02
 .\.venv\Scripts\python.exe -m portwatch orchestrate serve --port los_angeles
@@ -232,7 +259,7 @@ Set-Location -LiteralPath 'C:\Users\samab\dataEngineering\portwatch'
 Terminal3 when continuous collection is wanted (existing private key needed):
 
 ```powershell
-Set-Location -LiteralPath 'C:\Users\samab\dataEngineering\portwatch'
+# Run from the cloned PortWatch project root.
 .\.venv\Scripts\python.exe -m portwatch ingest live --port los_angeles
 ```
 
@@ -382,7 +409,7 @@ candidate. No actual queue is established. Do not average partial spans as compl
 
 ## Local geofence and zone checks
 
-From the project root `C:\Users\samab\dataEngineering\portwatch`, use the running native
+From the project root `.`, use the running native
 PostGIS cluster and saved historical inputs:
 
 ```powershell
@@ -401,12 +428,12 @@ initial statistics issue and limitations. CLI classification does not acquire pr
 
 ## Step 04: live collector
 
-The collector runs independently of the dashboard and analytical jobs. PostgreSQL bookkeeping must be migrated and running; PostGIS is not used in this stage. The existing native cluster can be restarted using [README.md](../README.md). Historical replay remains available when live credentials or service access are unavailable.
+The collector runs independently of the dashboard and analytical jobs. PostgreSQL bookkeeping must be migrated and running; PostGIS is not used in this stage. The existing native cluster can be restarted using the [native command above](#native-windows-database). Historical replay remains available when live credentials or service access are unavailable.
 
 ### Configure and capture
 
 1. Sign in at [AISStream account](https://aisstream.io/account), create a key, and add `PORTWATCH_AIS_API_KEY=<your key>` to the existing ignored local `.env`. Keep the configured native database port. Do not paste the key into commands, screenshots, logs, or Git.
-2. From `C:\Users\samab\dataEngineering\portwatch`, run a finite capture:
+2. From `.`, run a finite capture:
 
    ```powershell
    .\.bootstrap-venv\Scripts\uv.exe run python -m portwatch ingest live --port los_angeles --duration 60
