@@ -20,7 +20,7 @@ export async function GET(
     });
     if (endpoint === "history-lineage" && response.ok)
       return new NextResponse(await response.text(), {
-        headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=3600" },
+        headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" },
       });
     return NextResponse.json(await response.json(), {
       status: response.status,

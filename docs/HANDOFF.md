@@ -36,7 +36,7 @@
 - Kept existing PortWatch services,5000MB volumes, backend1CPU/2GB and database0.5CPU/1GB
   limits. Both restart policies are `ALWAYS`. No plan upgrade or new paid service.
   Backend deployment `02446750-ef6e-4fb5-ae55-f173c5996e64` uses code
-  `fa2abb78e9c3f69d434b2feed5da7f7acc77af7f`; subsequent changes are documentation.
+  `fa2abb78e9c3f69d434b2feed5da7f7acc77af7f`; backend code is unchanged afterward.
 - Restored a checksum-verified compact snapshot into the separate `portwatch_history_7d`
   database on the existing private PostGIS service. All443,296 positions, clean-record
   lineage, profiles and reference marts remain; only recomputable activity-state rows
@@ -46,6 +46,8 @@
   and business hash `24efbb918da302d845611f38b8f1f83c1caaaec8b32895e09b4d97ab0a1f2b25`.
   Baselines have0–167 preceding hours; anomaly labels stay null. The pipeline page reads
   these bounded results and static lineage; the original map replay stays bounded.
+  The viewer uses dbt's `static_index.html` with embedded manifest/catalog, a distinct
+  static-view URL and no-store proxy responses so older loader documents do not remain cached.
 - A real owned-runner SIGKILL triggered whole-container recovery. Runtime restarted at
   `2026-10-13T18:37:45.965295UTC`, recovered two old active flow states, and both ports
   completed two new live runs with no old active states. History hashes and persistent

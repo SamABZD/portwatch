@@ -40,7 +40,7 @@ export default function HistoryResults() {
           </tr>)}</tbody>
         </table></div>
         <p className="panel-note">{data.limitations} Current history provides at most 167 preceding hours; labels require 168 preceding hours across seven days.</p>
-        <p><a href="/api/history-lineage" target="_blank" rel="noreferrer">Explore SQL models and lineage</a> · <a href="/api/history" target="_blank" rel="noreferrer">View all hourly results</a></p>
+        <p><a href="/api/history-lineage?view=static" target="_blank" rel="noreferrer">Explore SQL models and lineage</a> · <a href="/api/history" target="_blank" rel="noreferrer">View all hourly results</a></p>
       </>}
   </section>;
 }

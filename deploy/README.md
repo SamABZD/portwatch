@@ -121,7 +121,9 @@ on Railway. Initialize PostGIS in the new database before restoring a schema-fil
 Never restore over the live database. Run `pipeline models --port los_angeles --start 2024-01-01
 --end 2024-01-08 --local` with the history database selected (the end is exclusive).
 Publish only a successful 168-row
-report to `data/status/history-models.json` and its static lineage HTML to `data/history/index.html`.
+report to `data/status/history-models.json`. Copy `target/static_index.html`, which embeds
+the manifest/catalog, to `data/history/index.html`; `target/index.html` needs external JSON
+files and is unsuitable for this single-document route.
 Set `PORTWATCH_HISTORY_DB_NAME=portwatch_history_7d`. The pipeline page reads these bounded
 results; the map retains its original bounded replay. No dbt scheduler or service is added.
 Cloud dbt logs, manifests and result files use `PORTWATCH_DBT_ARTIFACTS_DIR=data/models`
