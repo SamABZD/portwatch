@@ -57,10 +57,13 @@ Live collection requires a private AISStream key and an awake, connected compute
 
 ## Known limits and publication gates
 
-- GitHub Actions has been billing-blocked before execution. Current-head and resulting-main
+- Previous GitHub Actions attempts were billing-blocked. Publication runs now report
+  `startup_failure` with zero jobs and no detailed API annotation. Current-head and resulting-main
   hosted passes are required before merge/tag/release; local evidence remains separate.
 - Repository visibility was observed private and is preserved. Reviewers need access.
 - Public 24/7 hosting, HTTPS, boot supervision and off-device backup are pending.
+- After abrupt local downtime, stale RUNNING Prefect states and obsolete scheduled entries
+  can delay processing. Operator recovery was demonstrated; automatic recovery is unimplemented.
 - Docker startup is unverified; fresh reproduction used native PostgreSQL/PostGIS.
 - Coverage is incomplete; live timestamps use receipt fallback. Weather is model context.
   Recorded real news requests returned 429; recent news is excluded from replay.

@@ -130,6 +130,26 @@ verification; it does not initialize/start the server. It is not a PostgreSQL in
 
 ## Step11 diagnosis and recovery
 
+### Abrupt runtime downtime and Prefect backlog
+
+The publication-stage restart found two RUNNING flows whose old processes had vanished,
+plus217 obsolete scheduled entries before the restoration time. They delayed new processing
+through held deployment slots and unnecessary catch-up work. Recovery preserved all state
+history and saved data: only the six verified PortWatch deployments were briefly paused;
+obsolete SCHEDULED entries were marked Cancelled, the two confirmed vanished RUNNING entries
+were marked Crashed, and those deployments resumed. Current local live processing then drained
+both ports to zero pending batches. Detailed local evidence is
+`artifacts/live/publication-schedule-recovery.json`.
+
+When recovering a later interruption, inspect actual process ownership, deployment IDs,
+flow names, start times and state history in the local Prefect UI/API. Scope any transition
+to PortWatch and the period before that restoration. Never mark a surviving active process
+crashed or treat future scheduled work as obsolete. Preserve saved source batches; rerun
+`pipeline live --port los_angeles --local` and `pipeline live --port oakland --local` to
+reconcile durable inputs, then check health and subsequent scheduled processing. Missing
+provider observations from downtime remain unknown. This is an operator procedure;
+automatic stale-state cleanup/coalescing and supervised boot restart are not implemented.
+
 Run commands in `.`. Preserve `.env`, original raw
 files/manifests and the existing database. See [HEALTH_RECOVERY.md](HEALTH_RECOVERY.md) for status,
 latency, logging and guarantee limits. UTC timestamps are labeled in reports; local operator

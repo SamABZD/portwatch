@@ -4,7 +4,7 @@
 
 Vessel reports arrive with duplicates, gaps and incomplete context. PortWatch turns them into traceable observations, experimental port visits and hourly analytics for **Los Angeles and Oakland**. It preserves original inputs, makes transformations replayable, and shows what the evidence supports on a live map and historical replay.
 
-**Works locally at $0:** Python/PostGIS processing, Prefect schedules, a read-only FastAPI service and a Next.js website. Historical replay needs no live API key; exported snapshots also work without a database. GitHub CI is billing-blocked, the repository is currently private, and public 24/7 hosting is pending. The badge links to actual workflow status; it is not a validation claim.
+**Works locally at $0:** Python/PostGIS processing, Prefect schedules, a read-only FastAPI service and a Next.js website. Historical replay needs no live API key; exported snapshots also work without a database. GitHub CI currently fails before job execution, the repository is private, and public 24/7 hosting is pending. The badge links to actual workflow status; it is not a validation claim.
 
 ## Product tour
 

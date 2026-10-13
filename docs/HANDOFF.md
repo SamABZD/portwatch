@@ -59,6 +59,19 @@
   Step14A preparation is published for review, but completion is blocked on hosted validation.
   Resume by inspecting the current PR head and actual Actions failure in an authenticated
   GitHub session; preserve the $0 constraint and required main-pass/tag gates.
+- Restored the existing local database/API/frontend/runtime after downtime. Both collectors
+  receive recent real reports. Operational recovery canceled217 obsolete scheduled entries
+  predating runtime restoration and marked two pre-restoration RUNNING flows Crashed after
+  confirming their old processes were gone. Only the six verified PortWatch deployments were
+  touched; schedules were temporarily paused/resumed and state history is preserved. No
+  provider artifact/business data was deleted. Local evidence:
+  `artifacts/live/publication-schedule-recovery.json`.
+- Both `pipeline live --port <port> --local` commands passed. At10:21:30UTC the API reported
+  recent observations,0 pending batches,2,217 LA and1,408 Oakland canonical live positions.
+  Browser map showed81 fresh LA vessels. These are time-specific recovery observations;
+  source coverage and unknown downtime remain explicit. News remains unavailable/rate limited.
+  Current live reports continue while the computer stays awake. Automatic crash-state/schedule
+  recovery is not implemented; see the operator limitation in RUNBOOK/RELEASE_NOTES.
 
 ### Step13 final audit (2026-10-13 Asia/Beirut)
 
