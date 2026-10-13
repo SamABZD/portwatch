@@ -69,8 +69,8 @@ class BatchSpec(BaseModel):
     def valid_times_and_layout(self) -> "BatchSpec":
         if self.mode == "historical" and self.source_date is None:
             raise ValueError("historical batches require a source date")
-        if self.mode == "live" and self.file_suffix not in {".jsonl", ".json", ".xml"}:
-            raise ValueError("live batches must be JSONL or an original JSON/XML response")
+        if self.mode == "live" and self.file_suffix not in {".jsonl", ".json", ".xml", ".html"}:
+            raise ValueError("live batches must be JSONL or an original JSON/XML/HTML response")
         if (self.source_start_utc is None) != (self.source_end_utc is None):
             raise ValueError("source time range must contain both endpoints or neither")
         if self.source_start_utc is not None and self.source_end_utc < self.source_start_utc:

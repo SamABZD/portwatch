@@ -170,19 +170,24 @@ def news_fallback(settings: Settings, primary: ContextRequest) -> ContextRequest
     """A separately attributed official feed, never a retry around a throttled provider."""
     from dataclasses import replace
 
-    port = load_port_config(
-        for_port(settings, primary.port_id).project_path(
-            for_port(settings, primary.port_id).port_config
-        )
-    )
-    if not port.news_rss_url:
+    selected = for_port(settings, primary.port_id)
+    port = load_port_config(selected.project_path(selected.port_config))
+    endpoint = port.news_rss_url or port.news_archive_url
+    if not endpoint:
         return None
-    if port.news_rss_url != "https://www.portofoakland.com/feed/":
+    reviewed = {
+        "oakland": ("port_oakland_rss", "https://www.portofoakland.com/feed/"),
+        "los_angeles": (
+            "port_los_angeles_releases",
+            "https://portoflosangeles.org/news/news-release-archive",
+        ),
+    }
+    if primary.port_id not in reviewed or endpoint != reviewed[primary.port_id][1]:
         raise ContextError("unreviewed_news_fallback")
     return replace(
         primary,
-        source_id="port_oakland_rss",
-        endpoint=port.news_rss_url,
+        source_id=reviewed[primary.port_id][0],
+        endpoint=endpoint,
         parameters=dict(maxrecords=port.news_max_records),
     )
 

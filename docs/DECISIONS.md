@@ -2,6 +2,7 @@
 
 | ID | Stage | Decision | Reason / revisit point |
 | --- | --- | --- | --- |
+| D-074 | News resilience | Add the reviewed official Los Angeles release archive as an independent fallback. | A real hourly GDELT429 reproduced degraded health after deployment. Preserve original HTML and failed primary attempts; publication dates retain day precision and an explicit Pacific calendar-day overlap assumption, with no invented UTC instant/first-seen time. Official releases are limited coverage. |
 | D-069 | Health / hosting | Respect the owner's explicit request to disable repository Actions and proceed with local validation. | Supersedes the hosted-check gates in earlier preparation records. No hosted pass is claimed; retain workflow source and verify the intended publication tree locally. |
 | D-070 | Health | Treat cooldown/busy context schedules as deferred, preserving actual provider failures and successful fetch receipts. | A skipped poll must create neither fake data nor a false source failure. Successful per-port news polls remain spaced by at least one minute across ports; failures and Retry-After still impose provider-wide backoff. |
 | D-071 | News | Use the reviewed official Oakland RSS as a separately attributed fallback when GDELT is unavailable. | Preserve XML bytes, known publication times, request windows and primary failure history. Official releases have narrow, non-exhaustive coverage; a valid empty feed does not prove absence of disruption. |

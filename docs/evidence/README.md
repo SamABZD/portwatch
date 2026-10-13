@@ -12,6 +12,7 @@ raw payloads, database dump, prepared snapshot or bulk dataset is included.
 | [Fresh reproduction](reproducibility.json) | Both-port genuine saved inputs, repeated digests, API/prepared timings and owned-resource cleanup. |
 | [Validation transcript](validation.txt) | 185 unit + 57 integration tests, lint/format, actual package checks and migrations. |
 | [Health/hosting follow-up](health-hosting-validation.txt) | 194 unit +64 integration tests, lint/format, installed wheel/CLI and eight fresh migrations/repeat zero. Absolute prefixes redacted. |
+| [LA fallback follow-up](la-news-fallback-validation.txt) | 201 unit +65 integration tests, strict official archive/date handling and preserved primary failures; full validator and repeated migrations pass. |
 | [Frontend build](web-build.txt) | Successful Next.js production build for map and pipeline. |
 | [Replay](replay.json) | Read-only historical prefix and integrity checks. |
 | [LA browser](browser-los-angeles.json), [Oakland browser](browser-oakland.json) | Automatic prepared mode, real noon metrics, desktop/mobile and zero page errors. |

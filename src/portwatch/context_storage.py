@@ -25,6 +25,7 @@ from portwatch.context import (
     utc,
 )
 from portwatch.context_http import HttpResponse, fetch_context
+from portwatch.news_archive import normalize_official_archive
 from portwatch.settings import Settings
 from portwatch.storage import BatchSpec, Manifest, RawStore
 
@@ -65,7 +66,10 @@ def save_response(connection, store, request, response) -> ContextResult:
             source_start_utc=request.start_utc,
             source_end_utc=request.end_utc,
             processing_version=PARSER_VERSION,
-            file_suffix=".xml" if request.source_id == "port_oakland_rss" else ".json",
+            file_suffix={
+                "port_oakland_rss": ".xml",
+                "port_los_angeles_releases": ".html",
+            }.get(request.source_id, ".json"),
             remote_etag=response.etag,
             remote_last_modified=response.last_modified,
         ),
@@ -94,6 +98,8 @@ def save_response(connection, store, request, response) -> ContextResult:
         normalize = normalize_weather if request.kind == "weather" else normalize_news
         if request.source_id == "port_oakland_rss":
             normalize = normalize_news_rss
+        elif request.source_id == "port_los_angeles_releases":
+            normalize = normalize_official_archive
         normalized = normalize(response.payload, request)
         with connection.transaction():
             connection.execute(
