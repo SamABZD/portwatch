@@ -438,7 +438,8 @@ def transform_positions(
             columns = sql.SQL(",").join(sql.Identifier("c", name) for name in COUNT_COLUMNS)
             rows = connection.execute(
                 sql.SQL(
-                    "SELECT c.input_id,c.input_sha256,{} FROM clean_batches c "
+                    "SELECT c.input_id,c.input_sha256,{},b.source_url,b.content_sha256,"
+                    "b.local_path,b.byte_count FROM clean_batches c "
                     "JOIN vessel_profile_inputs p USING(input_id,processing_version) "
                     "JOIN ingestion_batches b ON b.batch_id=c.raw_batch_id "
                     "WHERE c.status='processed' AND c.processing_version=%s "
@@ -446,11 +447,19 @@ def transform_positions(
                 ).format(columns),
                 (PROCESSING_VERSION, spec.source_id, spec.dataset_id),
             )
-            completed = {(row[0], row[1]): Counts(*row[2:]) for row in rows}
+            completed = {(row[0], row[1]): (Counts(*row[2:7]), row[7:]) for row in rows}
         for source in inputs:
             saved = completed.get((source.input_id, source.content_sha256))
             if saved is not None:
-                reports.append((source.input_id, saved, True))
+                parent = source.parent
+                if saved[1] != (
+                    parent.source_url,
+                    parent.content_sha256,
+                    parent.local_path,
+                    parent.byte_count,
+                ):
+                    raise ValueError("registered batch conflicts with manifest")
+                reports.append((source.input_id, saved[0], True))
                 continue
             register_batch(connection, store, source.parent)
             report, reused = load_batch(

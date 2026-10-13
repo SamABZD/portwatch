@@ -123,6 +123,8 @@ Never restore over the live database. Run `pipeline models --port los_angeles --
 report to `data/status/history-models.json` and its static lineage HTML to `data/history/index.html`.
 Set `PORTWATCH_HISTORY_DB_NAME=portwatch_history_7d`. The pipeline page reads these bounded
 results; the map retains its original bounded replay. No dbt scheduler or service is added.
+Cloud dbt logs, manifests and result files use `PORTWATCH_DBT_ARTIFACTS_DIR=data/models`
+on the existing persistent volume; local runs keep `artifacts/models` by default.
 
 The API's raw-byte checksum cache lasts at most five minutes and invalidates when file
 identity, size or timestamps change. Manifests are inspected on each poll. Explicit CLI

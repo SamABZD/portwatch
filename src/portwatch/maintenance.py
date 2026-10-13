@@ -10,6 +10,7 @@ import subprocess
 import time
 from datetime import UTC, datetime, timedelta
 
+from portwatch.live_spool import collector_lock
 from portwatch.settings import Settings, configured_ports
 
 
@@ -17,6 +18,11 @@ def backup_databases(settings):
     """Two logical copies on the existing second volume; never delete raw inputs."""
     root = settings.project_path(settings.raw_dir).parent / "backups"
     root.mkdir(parents=True, exist_ok=True)
+    with collector_lock(root / "backup-lock"):
+        return _backup_databases(settings, root)
+
+
+def _backup_databases(settings, root):
     result = []
     for name in dict.fromkeys([settings.db_name, settings.history_db_name]):
         if not name:

@@ -34,7 +34,7 @@ def test_live_poll_reuses_completed_counts_and_repairs_interrupted_profiles(
         mode="live",
         file_suffix=".jsonl",
     )
-    RawStore(settings.raw_dir).write([b""], spec)
+    batch = RawStore(settings.raw_dir).write([b""], spec)
     monkeypatch.setattr(cleaning, "live_spec", lambda *_: (spec, None))
     first = cleaning.transform_positions(
         settings, connection, "los_angeles", demo=False, pending_live=True
@@ -52,6 +52,12 @@ def test_live_poll_reuses_completed_counts_and_repairs_interrupted_profiles(
         settings, connection, "los_angeles", demo=False, pending_live=True
     )
     assert again[0][1] == first[0][1] and again[0][2] and calls == []
+    connection.execute("UPDATE ingestion_batches SET content_sha256=%s", ("0" * 64,))
+    with pytest.raises(ValueError, match="registered batch conflicts"):
+        cleaning.transform_positions(
+            settings, connection, "los_angeles", demo=False, pending_live=True
+        )
+    connection.execute("UPDATE ingestion_batches SET content_sha256=%s", (batch.content_sha256,))
     connection.execute("DELETE FROM vessel_profile_inputs")
     cleaning.transform_positions(settings, connection, "los_angeles", demo=False, pending_live=True)
     assert calls == [1]
