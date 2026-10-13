@@ -5,7 +5,7 @@ export async function GET(
   context: { params: Promise<{ endpoint: string }> },
 ) {
   const { endpoint } = await context.params;
-  if (!["catalog", "frame", "health", "pipeline"].includes(endpoint))
+    if (!["catalog", "frame", "health", "pipeline", "history", "history-lineage"].includes(endpoint))
     return NextResponse.json(
       { detail: { code: "unknown_query" } },
       { status: 404 },
@@ -18,6 +18,10 @@ export async function GET(
       cache: "no-store",
       signal: AbortSignal.timeout(20000),
     });
+    if (endpoint === "history-lineage" && response.ok)
+      return new NextResponse(await response.text(), {
+        headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=3600" },
+      });
     return NextResponse.json(await response.json(), {
       status: response.status,
       headers: { "Cache-Control": "no-store" },

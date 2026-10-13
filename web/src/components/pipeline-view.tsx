@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import PipelineDiagram from "@/components/pipeline-diagram";
+import HistoryResults from "@/components/history-results";
 
 type Series = {
   status: string;
@@ -59,6 +60,7 @@ export default function PipelineView() {
       <p className="panel-note">Refreshes every 30 seconds. Live coverage depends on received AIS reports; gaps never establish that the sea is empty.</p>
     </section>
     <PipelineDiagram />
+    <HistoryResults />
     {error && <div role="alert" className="query-error">Pipeline status is disconnected. {report && "The last received results below are stale."} <button onClick={() => setRetry(v => v + 1)}>Retry pipeline</button></div>}
     {!report && !error && <p role="status">Reading pipeline measurements…</p>}
     {report && <>

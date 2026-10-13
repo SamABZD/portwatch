@@ -16,6 +16,55 @@ from portwatch.storage import BatchSpec, RawStore, quarantine_record
 SYNTHETIC = b"synthetic fixture only\nrecord-1\nrecord-2\n"
 
 
+def test_polling_reuses_hash_but_mutations_and_explicit_audits_rehash(tmp_path, spec, monkeypatch):
+    import portwatch.storage as storage
+
+    store = RawStore(tmp_path)
+    batch = store.write([SYNTHETIC], spec)
+    original = storage.checksum_file
+    calls = []
+
+    def hash_file(path):
+        calls.append(path)
+        return original(path)
+
+    monkeypatch.setattr(storage, "checksum_file", hash_file)
+    monkeypatch.setattr(storage.time, "monotonic", lambda: 300)
+    assert store.inspect(polling=True)[0].state == "complete"
+    assert store.inspect(polling=True)[0].state == "complete"
+    assert len(calls) == 1
+    store.inspect()
+    assert len(calls) == 2
+    monkeypatch.setattr(storage.time, "monotonic", lambda: 601)
+    store.inspect(polling=True)
+    assert len(calls) == 3
+    (tmp_path / batch.local_path).write_bytes(b"X" + SYNTHETIC[1:])
+    assert store.inspect(polling=True)[0].state == "invalid"
+
+
+def test_scoped_live_inspection_avoids_historical_bytes_but_full_audit_finds_corruption(
+    tmp_path, spec, monkeypatch
+):
+    store = RawStore(tmp_path)
+    historical = store.write([SYNTHETIC], spec)
+    (tmp_path / historical.local_path).write_bytes(b"corrupt")
+    live = spec.model_copy(
+        update={
+            "source_id": "synthetic_live",
+            "mode": "live",
+            "source_date": None,
+            "file_suffix": ".jsonl",
+        }
+    )
+    store.write([SYNTHETIC], live)
+    assert [item.state for item in store.inspect(source_id="synthetic_live", mode="live")] == [
+        "complete"
+    ]
+    assert "invalid" in [item.state for item in store.inspect()]
+    with pytest.raises(ValueError):
+        store.inspect(source_id="../escape")
+
+
 def test_exact_bytes_checksum_and_revision_no_overwrite(tmp_path: Path, spec: BatchSpec) -> None:
     store = RawStore(tmp_path)
     first = store.write([SYNTHETIC[:8], SYNTHETIC[8:]], spec)

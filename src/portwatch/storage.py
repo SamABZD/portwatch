@@ -5,10 +5,12 @@ import json
 import os
 import re
 import tempfile
+import time
 from collections.abc import Iterable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
+from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 from urllib.parse import urlsplit, urlunsplit
@@ -126,6 +128,19 @@ def checksum_file(path: Path) -> tuple[str, int]:
             digest.update(chunk)
             size += len(chunk)
     return digest.hexdigest(), size
+
+
+@lru_cache(maxsize=8192)
+def _cached_checksum(path, stat_identity, period):
+    # Only polling health uses this cache. Writers and explicit storage audits always hash.
+    # The five-minute period also detects a same-size mutation with restored timestamps.
+    return checksum_file(path)
+
+
+def polling_checksum(path):
+    stat = path.stat()
+    identity = (stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns)
+    return _cached_checksum(path, identity, int(time.monotonic() // 300))
 
 
 def _sync_directory(path: Path) -> None:
@@ -281,7 +296,15 @@ class RawStore:
                 raise ValueError("shared source target integrity failure")
         return manifest
 
-    def inspect(self) -> list[Inspection]:
+    def inspect(self, *, source_id=None, mode=None, polling=False) -> list[Inspection]:
+        if source_id is not None and not re.fullmatch(SLUG, source_id):
+            raise ValueError("invalid source scope")
+        if mode is not None and (mode not in {"historical", "live"} or source_id is None):
+            raise ValueError("mode scope requires a source")
+        root = self.root / source_id if source_id else self.root
+        if mode:
+            root /= mode
+        checksum = polling_checksum if polling else checksum_file
         inspections = []
         referenced = set()
         inspected = set()
@@ -296,7 +319,7 @@ class RawStore:
                 referenced.add(path)
                 if not path.is_file():
                     inspections.append(Inspection(sidecar, "pending", manifest, "missing_raw"))
-                elif checksum_file(path) != (manifest.content_sha256, manifest.byte_count):
+                elif checksum(path) != (manifest.content_sha256, manifest.byte_count):
                     inspections.append(
                         Inspection(sidecar, "invalid", manifest, "checksum_mismatch")
                     )
@@ -305,9 +328,9 @@ class RawStore:
             except (OSError, ValueError, TypeError):
                 inspections.append(Inspection(sidecar, "invalid", None, "manifest_invalid"))
 
-        for sidecar in sorted(self.root.rglob("*.manifest.json")):
+        for sidecar in sorted(root.rglob("*.manifest.json")):
             inspect_manifest(sidecar)
-        for path in sorted(self.root.rglob("*")):
+        for path in sorted(root.rglob("*")):
             if (
                 path.is_file()
                 and path not in referenced

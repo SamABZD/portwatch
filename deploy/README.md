@@ -73,7 +73,7 @@ Both volumes are5000MB. The collector preserves the default1GB free-space reserv
 stops explicitly before exhausting disk. Retention, volume growth and off-device backups
 need continuing operation; no raw-file deletion is automatic.
 
-Railway health check: `/readyz`,600s startup allowance; restart on failure, at most3 retries;
+Railway health check: `/readyz`,600s startup allowance; restart policy `ALWAYS`;
 overlap0s and45s drain for backend replacement. Volume-backed updates incur brief downtime.
 Service settings were applied through the current API. Legacy `railway.json` configuration
 was rejected as deprecated and is not shipped; see [Railway IaC](https://docs.railway.com/infrastructure-as-code)
@@ -95,9 +95,64 @@ before adopting declarative infrastructure.
 
 Inspect `railway status`, bounded `railway logs --service backend --lines 50` and the public
 read-only pipeline page. Never print all cloud variables or expose Prefect/Postgres ports.
-For abrupt failures, follow [RUNBOOK](../docs/RUNBOOK.md); stale Prefect state/schedule cleanup
-remains an operator task. Back up PostgreSQL and the immutable backend volume together;
+For abrupt failures, follow [RUNBOOK](../docs/RUNBOOK.md) and the recovery behavior below.
+Back up PostgreSQL and the immutable backend volume together;
 the existing verified restore procedure is in [HEALTH_RECOVERY](../docs/HEALTH_RECOVERY.md).
 
 `Dockerfile.frontend` provides an optional standalone Node container. Its production Next.js
 build was checked locally; the deployed frontend uses Vercel's Next.js integration instead.
+
+## Budgeted history and continuous operation
+
+The owner approved merging Step16 and deploying its seven-day history, with no additional
+spending and no 30-day expansion. They also explicitly requested stopping the separate
+`appealing-upliftment` project without deleting it. Its three deployments were stopped and
+the two GitHub auto-deploy settings disabled; project, sources and PostgreSQL volume remain.
+Retained storage and prior usage still bill. Its observed pre-stop compute was approximately
+$2.7/month at Railway's current RAM/CPU rates; this is an estimate, not a credit or refund.
+
+Keep PortWatch's existing two services, CPU/RAM limits and 5000MB volumes. The frozen
+`portwatch_history_7d` database shares the existing private PostGIS service. Import a verified
+custom-format snapshot of Step16's public schema, excluding disposable `vessel_activity_states`
+rows. Original canonical positions, record lineage, profiles, visits and hourly reference
+outputs remain. Original NOAA files and derivations remain preserved locally; this is a
+database snapshot deployment, not a claim that those national files were downloaded again
+on Railway. Initialize PostGIS in the new database before restoring a schema-filtered dump.
+Never restore over the live database. Run `pipeline models --port los_angeles --start 2024-01-01
+--end 2024-01-07 --local` with the history database selected. Publish only a successful 168-row
+report to `data/status/history-models.json` and its static lineage HTML to `data/history/index.html`.
+Set `PORTWATCH_HISTORY_DB_NAME=portwatch_history_7d`. The pipeline page reads these bounded
+results; the map retains its original bounded replay. No dbt scheduler or service is added.
+
+The API's raw-byte checksum cache lasts at most five minutes and invalidates when file
+identity, size or timestamps change. Manifests are inspected on each poll. Explicit CLI
+audits and all writers hash bytes directly. Live cleaning scans only its source's live tree
+and bulk-reuses committed counts only after profile enrichment completed; interrupted
+enrichment still resumes. This prevents seven-day NOAA files from entering every minute job.
+
+The runtime owns a single mounted-volume OS lock, starts its private Prefect server, then
+recovers only its six exact deployments before starting its runner. It checks deployment
+flow names and port parameters, takes the existing per-port SQL mutation lock, and re-reads
+each state before cancelling obsolete schedules or marking pre-start active attempts crashed.
+Current attempts and foreign deployments are excluded. An already running cloud Prefect
+server fails closed. Server/runner loss exits the runtime; the API supervisor exits the
+container with failure so Railway restarts the entire owned process tree. Deployment overlap
+must stay zero. Local collectors must remain stopped while cloud collectors run.
+
+Hourly maintenance bounds diagnostic logs to 5MiB plus one 1MiB tail and retains seven days
+of terminal Prefect metadata for these deployments. Business audits and source bytes are not
+deleted. It creates daily `pg_dump -Fc` copies on the existing backend volume, retaining two
+per database, with SHA-256 receipts, a 512MiB/file ceiling, ten-minute timeout and the existing
+1GiB free-space reserve. Disposable activity-state projections are omitted; they can be
+recomputed. Check `data/status/maintenance.json`; a missing/recently failed backup is not
+backup success. Native Railway backups were rejected as Pro-only, so no plan upgrade or
+additional storage service was created. A backup on the second Railway volume protects
+against database-volume failure, but is not independent protection against account/provider
+loss; keep an off-cloud copy. Test restores in an explicitly owned temporary database.
+
+History and compressed copies add roughly $0.3–0.6/month of used storage at current volume
+rates, within the compute removed from `appealing-upliftment`; finite import/model execution
+has a small one-time usage cost. Actual usage remains metered: this is not a hard spending
+cap. Monitor the two fixed volumes, source growth and CPU/RAM trend. Source retention beyond
+the available capacity still requires an archive policy; disk pressure stops collection
+before losing preserved bytes. Do not silently delete original data to claim endless uptime.

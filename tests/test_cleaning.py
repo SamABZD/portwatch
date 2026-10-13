@@ -20,6 +20,44 @@ parent = synthetic_parent
 pytestmark = pytest.mark.integration
 
 
+def test_live_poll_reuses_completed_counts_and_repairs_interrupted_profiles(
+    connection, tmp_path, monkeypatch
+):
+    import portwatch.cleaning as cleaning
+    from portwatch.settings import Settings
+
+    settings = Settings(raw_dir=tmp_path / "raw", quarantine_dir=tmp_path / "quarantine")
+    spec = BatchSpec(
+        source_id="synthetic_live",
+        dataset_id="synthetic_live_fixture",
+        source_url="wss://example.invalid/live",
+        mode="live",
+        file_suffix=".jsonl",
+    )
+    RawStore(settings.raw_dir).write([b""], spec)
+    monkeypatch.setattr(cleaning, "live_spec", lambda *_: (spec, None))
+    first = cleaning.transform_positions(
+        settings, connection, "los_angeles", demo=False, pending_live=True
+    )
+    assert len(first) == 1 and not first[0][2]
+    original = cleaning.register_batch
+    calls = []
+
+    def register(*args):
+        calls.append(1)
+        return original(*args)
+
+    monkeypatch.setattr(cleaning, "register_batch", register)
+    again = cleaning.transform_positions(
+        settings, connection, "los_angeles", demo=False, pending_live=True
+    )
+    assert again[0][1] == first[0][1] and again[0][2] and calls == []
+    connection.execute("DELETE FROM vessel_profile_inputs")
+    cleaning.transform_positions(settings, connection, "los_angeles", demo=False, pending_live=True)
+    assert calls == [1]
+    assert connection.execute("SELECT count(*) FROM vessel_profile_inputs").fetchone() == (1,)
+
+
 def prepare(connection, tmp_path, parent, unit="national_row"):
     store = RawStore(tmp_path / "raw")
     register_batch(connection, store, parent)

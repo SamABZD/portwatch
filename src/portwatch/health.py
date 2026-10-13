@@ -424,7 +424,13 @@ def run_health(connection, port, *, include_unscoped=True):
 
 
 def collect_health(
-    settings: Settings, port="los_angeles", *, now=None, connection=None, include_unscoped=True
+    settings: Settings,
+    port="los_angeles",
+    *,
+    now=None,
+    connection=None,
+    include_unscoped=True,
+    polling=False,
 ):
     settings = for_port(settings, port)
     now = parsed_time(now or datetime.now(UTC))
@@ -465,7 +471,7 @@ def collect_health(
     complete = []
     try:
         root = settings.project_path(settings.raw_dir)
-        items = RawStore(root).inspect() if root.is_dir() else []
+        items = RawStore(root).inspect(polling=polling) if root.is_dir() else []
         complete = [item for item in items if item.state == "complete"]
         report["raw_storage"] = dict(
             status="verified" if root.is_dir() else "missing",
@@ -473,6 +479,7 @@ def collect_health(
             invalid_batches=sum(item.state == "invalid" for item in items),
             pending_publications=sum(item.state == "pending" for item in items),
             unmanifested_files=sum(item.state == "unmanifested" for item in items),
+            checksum_recheck_max_seconds=300 if polling else 0,
         )
     except (ValueError, OSError):
         report["raw_storage"] = dict(status="unavailable", complete_batches=None)

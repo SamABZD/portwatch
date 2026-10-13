@@ -73,7 +73,7 @@ def historical_input(settings: Settings, store: RawStore, spec, parameters) -> C
 
     pointer = selection_path(store, spec)
     matches = []
-    for item in store.inspect():
+    for item in store.inspect(source_id=spec.source_id, mode="historical"):
         parent = item.manifest
         if parent and (parent.source_id, parent.dataset_id, parent.source_url) == (
             spec.source_id,
@@ -409,7 +409,7 @@ def transform_positions(
             inputs.append(historical_input(settings, store, spec, parameters))
     else:
         spec, _ = live_spec(settings, port)
-        for item in store.inspect():
+        for item in store.inspect(source_id=spec.source_id, mode="live"):
             if (
                 item.manifest
                 and item.manifest.source_id == spec.source_id
@@ -431,7 +431,27 @@ def transform_positions(
     run_id = start_run(connection, "clean")
     reports = []
     try:
+        # Completed live batches are immutable. Inspect their bytes above, then reuse the
+        # committed counts in one query. An interrupted profile enrichment stays pending.
+        completed = {}
+        if pending_live:
+            columns = sql.SQL(",").join(sql.Identifier("c", name) for name in COUNT_COLUMNS)
+            rows = connection.execute(
+                sql.SQL(
+                    "SELECT c.input_id,c.input_sha256,{} FROM clean_batches c "
+                    "JOIN vessel_profile_inputs p USING(input_id,processing_version) "
+                    "JOIN ingestion_batches b ON b.batch_id=c.raw_batch_id "
+                    "WHERE c.status='processed' AND c.processing_version=%s "
+                    "AND b.source_id=%s AND b.dataset_id=%s"
+                ).format(columns),
+                (PROCESSING_VERSION, spec.source_id, spec.dataset_id),
+            )
+            completed = {(row[0], row[1]): Counts(*row[2:]) for row in rows}
         for source in inputs:
+            saved = completed.get((source.input_id, source.content_sha256))
+            if saved is not None:
+                reports.append((source.input_id, saved, True))
+                continue
             register_batch(connection, store, source.parent)
             report, reused = load_batch(
                 connection, source, settings.project_path(settings.quarantine_dir)
