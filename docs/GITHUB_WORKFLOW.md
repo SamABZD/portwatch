@@ -6,9 +6,15 @@ records. Keep privacy and account settings unchanged. A current-head hosted vali
 and resulting-main pass remain required for merge and `v0.1.0`; preparation/push/PR do not
 establish a release. See [GITHUB_SETUP.md](GITHUB_SETUP.md) for observed remote evidence.
 
+[Publication PR#3](https://github.com/SamABZD/portwatch/pull/3) is open. Initial publication
+push/PR runs completed `startup_failure` with zero jobs/checks and no detailed API annotation.
+An empty check list is not a pass; do not merge until quality/integration actually execute
+successfully on the intended current head. The old account billing lock is the last diagnosed
+cause, separate from the current startup failure whose exact cause is not exposed by the API.
+
 Step13 verified242 tests through the shared local validator, fresh native reproduction and
-Next.js build/browser checks. No current-commit Actions run exists; the workflow covers Python
-quality/integration, while frontend verification was local. Compose now matches its PG17/
+Next.js build/browser checks. Publication attempts have not executed any hosted tests;
+the workflow covers Python quality/integration, while frontend verification was local. Compose matches its PG17/
 PostGIS3.6 image, guarded by a regression test. See [RELEASE_CHECK.md](RELEASE_CHECK.md).
 
 ## Repository boundary

@@ -2,7 +2,8 @@
 
 ## Step 14A preparation (2026-10-13 Asia/Beirut)
 
-The verified Step 13 code is being packaged on `release/portfolio-v0.1.0` for a publication PR.
+The verified Step 13 code is pushed on `release/portfolio-v0.1.0` in
+[publication PR #3](https://github.com/SamABZD/portwatch/pull/3), attached to the current chat.
 README, genuine historical screenshots, portable setup, demo guide, reviewed audit evidence
 and `RELEASE_NOTES.md` are included. Source, migrations and lockfiles are unchanged from
 audit checkpoint `55e895f`. Release/tag/main merge require passing current-head checks.
@@ -16,9 +17,28 @@ The owner previously declined payment; preparation uses $0 and does not change a
 
 See [HANDOFF.md](HANDOFF.md), [release notes](RELEASE_NOTES.md) and [reviewed evidence](evidence/README.md).
 
-Step13 verified242 tests through the shared local validator, fresh native reproduction and
-Next.js build/browser checks. No current-commit Actions run exists; the workflow covers Python
-quality/integration, while frontend verification was local. See [RELEASE_CHECK.md](RELEASE_CHECK.md).
+Publication commit `0caf861a4e09cafd855b0f07861af4310251e7dc` triggered
+[push run38381488934](https://github.com/SamABZD/portwatch/actions/runs/38381488934) and
+[PR run38381515855](https://github.com/SamABZD/portwatch/actions/runs/38381515855).
+Both completed `startup_failure` before creating any jobs/check runs. The API reports
+`path: BuildFailed`, empty jobs, no downloadable logs and no detailed failure annotation.
+The earlier account billing lock is the last confirmed diagnosis; the current API does not
+prove its cause. Both official action commit pins still resolve, the workflow is active and
+local YAML parses the intended quality/integration jobs. No remote validation pass is claimed.
+
+Publication recheck passed185 unit tests plus lint/format/wheel checks, then stopped because
+the native cluster was down. Restarting only that cluster restored `doctor`; an integration
+group rerun passed57 tests, eight migrations/repeat0. TypeScript and production build passed.
+All187 relative documentation links and four screenshot hashes checked; tree/history private
+credential scans found zero matches. Local README images/Mermaid render; GitHub browser
+rendering/status badge is unavailable anonymously for this private repository.
+
+About description/topics now reflect both ports and the implemented stack; homepage remains
+empty. Main, CI PR#2 and visibility are unchanged. `v0.1.0` is unused; no tag or release was
+created because the required hosted passes are absent. Do not merge PR#3 solely because
+GitHub reports it mergeable or lists no checks. Recheck its actual head/run before resuming.
+Documentation follow-up commits may have their own run; final exact-head evidence is also
+recorded in the chat's publication report. See [RELEASE_CHECK.md](RELEASE_CHECK.md).
 
 ## Historical repository setup record
 

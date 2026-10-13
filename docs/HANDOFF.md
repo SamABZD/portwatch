@@ -48,6 +48,17 @@
 - Updated About description/topics for both ports and the implemented stack. Homepage stays
   empty because no hosted app exists. Publication PR/run evidence follows actual operations.
   Tag/release requires passing current-head and resulting-main hosted checks.
+- Published the completed local project and presentation in
+  [PR#3](https://github.com/SamABZD/portwatch/pull/3), attached to this chat, initial head
+  `0caf861a4e09cafd855b0f07861af4310251e7dc`. Its push38381488934 and PR38381515855
+  runs both report `startup_failure`, zero jobs/checks and no detailed API annotation/logs.
+  Official action pins resolve and local YAML parses. Previous billing lock remains the last
+  diagnosed blocker; current API does not confirm a specific cause. No hosted pass is claimed.
+- Main remains`f784a9374942c704630bd412704a67c4896ead24`, CI PR#2 remains open,
+  repository remains private and v0.1.0 is unused. PR#3 stays unmerged; no tag/release was made.
+  Step14A preparation is published for review, but completion is blocked on hosted validation.
+  Resume by inspecting the current PR head and actual Actions failure in an authenticated
+  GitHub session; preserve the $0 constraint and required main-pass/tag gates.
 
 ### Step13 final audit (2026-10-13 Asia/Beirut)
 
