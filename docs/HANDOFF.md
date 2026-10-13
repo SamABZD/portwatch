@@ -40,7 +40,7 @@
   recent real observations, successful minute jobs, fresh forecasts and valid empty news.
   Cloud clean counts were274 LA/218 Oakland live positions, with one pending batch each;
   NOAA historical counts remain62,157/52,783. These are time-specific observations.
--193 relative documentation links, four asset hashes, current content and reachable-history
+- 193 relative documentation links, four asset hashes, current content and reachable-history
   credential scans passed before publication. Actions remain disabled_manually/permissions
   false, with zero queued/running jobs. Vercel deployment checks passed separately.
 
