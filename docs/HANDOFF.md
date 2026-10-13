@@ -2,6 +2,13 @@
 
 ## Current stage state
 
+- PortWatch completion **Phase 1 is complete locally**: current Railway billing/resource
+  baseline inspected, hidden polling and request overlap corrected, genuine prepared replay
+  checked, and cost/stop/rollback evidence recorded in [COST_CONTROL](COST_CONTROL.md).
+  Tested code commit: `01ac067`, local branch `feat/phase1-cost-controls`.
+  No provider setting, deployment, paid resource or account limit changed. Vercel billing
+  access and a comparable hosted monetary delta remain explicit release gates; no verified
+  hosted cost reduction is claimed. Phase 2 has not started.
 - Project: this repository; default branch `main`. Publication PR#3 merged at
   `8fcaa933971f5ce98816d97761a5979e7e2c2560`; first release
   [v0.1.0](https://github.com/SamABZD/portwatch/releases/tag/v0.1.0) points to that exact
@@ -26,6 +33,68 @@
   superseded by the live runtime. No source observations were invented for this extension.
 
 ## Verified commands and observed outcomes
+
+### Completion phase 1: cost controls (2026-10-13 Asia/Beirut)
+
+- Started with clean `main` at `7d34eed`. Inspected working agreement, product/design,
+  current operations/decisions, installed Next.js fetching/route documentation and provider
+  documentation. Detailed billing responses, service table and source/API fixtures remain
+  outside Git; sanitized results are in [phase1-cost-controls.json](evidence/phase1-cost-controls.json).
+- Read `railway usage --json`, `railway usage projects --project portwatch --json`,
+  `railway usage projects --json`, `railway usage limit status --json`, existing one-day
+  metric series and `railway status --json`. PortWatch still has two services, one active
+  deployment/running instance each, existing CPU/RAM limits and two 5000 MB volumes.
+  Actual compute spending limit was absent; the separate agent limit is not a compute cap.
+  Other projects and account settings were not changed. Neither earlier monthly estimate
+  was adopted as a budget. Provider disk metrics and volume inventory differ; an actual
+  filesystem/growth audit remains necessary before claiming a capacity deadline.
+- Both saved cloud health responses reported `healthy_connected`, one connection per port,
+  available logical backups and recent maintenance. No local collector was running or
+  started. SSH process/filesystem inspection failed because no registered key was available;
+  no new key/access was created. Browser account access failed and local Vercel authentication
+  was unavailable, so its plan, usage and spend controls are unresolved.
+- Added a visibility-aware request lifecycle for catalog/frame/health/pipeline: hidden idle,
+  abort on hide/cleanup, one active-resource refresh on return, no overlapping loads and no
+  stale delivery. Successful catalogs unsubscribe until a port/revision change or retry.
+  Historical frames/catalogs have no recurring timer. Hidden replay playback does not advance;
+  existing manual refresh/retry remains. Proxy requests combine client cancellation and the
+  existing 20-second deadline. Hosting platforms/backend handlers determine cancellation
+  after disconnect; only client cancellation was exercised end to end. Existing cache
+  keys, static lineage view/no-store fix and backend news/weather acquisition stay intact.
+- Cost investigation found retained live-byte audits, all-time publication fingerprints,
+  potentially whole-history visit recomputation, checksum-LRU thrashing and repeated frozen
+  history backup as growth risks. An isolated synthetic 8193-entry rescan reproduced zero
+  cache hits. Preserve audit/writer integrity and source bytes; no speculative SQL, larger
+  cache, source deletion or cadence change was applied.
+- From `web/`, `node --test scripts/visible-polling.test.mjs`: **11 passed**, zero failed;
+  `npm run typecheck` and `npm run build`: **passed**. Initial checks caught removal of the
+  existing explicit refresh trigger; restoring that state fixed the failure. No dependency
+  or lockfile changed.
+- From the root, `.\.venv\Scripts\python.exe -m scripts.verify_polling_browser --help`;
+  then the same module with `--fixtures <private-baseline-directory> --output artifacts/phase1`:
+  **seven browser scenarios passed**, zero page errors, both ports/modes/routes and
+  desktop/mobile captures. Fake clock/visibility and delayed/error responses remained test
+  controls; saved genuine API bodies stayed isolated. Timing assertions were corrected to
+  await dispatched requests before the final passing run. External source calls and tiles
+  were blocked; analytical storage was not accessed. The temporary frontend was stopped.
+- `.\.venv\Scripts\ruff.exe check scripts/verify_polling_browser.py` and
+  `ruff format --check` passed; Impeccable detector returned `[]`; cavecrew reviewer reported
+  **No issues** for code. A final evidence statement implying a known traffic delta was
+  corrected to unresolved, and the browser report refreshed after the catalog change.
+  `git diff --check` passed. Complete release validation is deferred to its
+  assigned phase, not claimed here.
+- Bounded `TestClient(create_app(..., prepared=...))` checks for both existing checksummed
+  historical exports used `db_port=9` and no AIS key: catalog/frame/health **200**, vessels
+  present, database **not_used**, live **422 / prepared_mode_has_no_live_connection**.
+  The initial probe expected 503; its assertion was corrected to the existing 422 contract,
+  with no API change. LA noon had 124 displayed vessels; Oakland 126. Hosted Python prepared
+  serving still consumes resources and is not advertised as free static hosting.
+- Production recurring change from this phase is zero because no rollout/configuration
+  occurred. Sustained-hidden sessions reduce requests; frequent short resume cycles can add
+  refreshes, so overall hosted query/money delta and rollout usage remain unresolved. Bounded
+  reads can incur existing metered usage. No news repair, design/navigation refactor, public
+  visibility change, profile publication, new collector, database, service or CI enablement
+  was included. Stop at Phase 1; Phase 2 requires the next assignment.
 
 ### Budgeted cloud history and operation (2026-10-13 Asia/Beirut)
 
