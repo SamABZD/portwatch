@@ -149,12 +149,29 @@ async def retain_runs(settings):
                         )
                     ),
                 ),
-                limit=500,
+                limit=200,
             )
             for run in runs:
                 await client.delete_flow_run(run.id)
                 deleted += 1
     return dict(checked_at_utc=datetime.now(UTC).isoformat(), metadata_days=7, deleted_runs=deleted)
+
+
+def maintenance_report(settings):
+    try:
+        report = asyncio.run(retain_runs(settings))
+    except Exception as error:
+        report = dict(
+            checked_at_utc=datetime.now(UTC).isoformat(),
+            status="degraded",
+            metadata_error_class=type(error).__name__,
+        )
+    if os.environ.get("PORTWATCH_CLOUD_LIVE") == "1":
+        try:
+            report["backups"] = backup_databases(settings)
+        except Exception as error:
+            report.update(status="degraded", backup_error_class=type(error).__name__)
+    return report
 
 
 def main():
@@ -163,9 +180,7 @@ def main():
     from portwatch.orchestration import configure_local
 
     configure_local()
-    report = asyncio.run(retain_runs(settings))
-    if os.environ.get("PORTWATCH_CLOUD_LIVE") == "1":
-        report["backups"] = backup_databases(settings)
+    report = maintenance_report(settings)
     (settings.project_path(settings.live_status_dir) / "maintenance.json").write_text(
         json.dumps(report, indent=2), "utf-8"
     )

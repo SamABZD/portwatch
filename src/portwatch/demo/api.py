@@ -105,6 +105,7 @@ class ReplayService:
                         "context",
                         "issues",
                         "runs",
+                        "operations",
                     )
                 }
                 self.health_checked[port] = time.monotonic()
@@ -240,6 +241,7 @@ def create_app(settings=None, *, prepared=None, service=None):
                     context=report["context"],
                     runs=report.get("runs"),
                     issues=report["issues"],
+                    operations=report.get("operations"),
                 )
             )
         return dict(

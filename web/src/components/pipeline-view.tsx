@@ -23,6 +23,7 @@ type Report = {
     context: Record<string, {status: string; last_http_status?: number | null}> | null;
     historical: Series; live: Series;
     runs: { recent: { run_id: string; stage: string; status: string; started_at: string; duration_seconds: number | null; input_count: number | null; output_count: number | null }[] } | null;
+    operations?: { status: string; backups: { database: string; status: string; created_at_utc?: string }[] };
   }[];
 };
 const words = (value: string) => value.replaceAll("_", " ");
@@ -84,6 +85,7 @@ export default function PipelineView() {
           {port.runs.recent.slice(0, 6).map(run => <tr key={run.run_id}><td>{words(run.stage)}</td><td>{words(run.status)}</td><td>{date(run.started_at)}</td><td>{count(run.duration_seconds)} s</td><td>{count(run.input_count)} / {count(run.output_count)}</td></tr>)}
         </tbody></table></div> : <p>No workflow history is connected for this port.</p>}
         <p className="panel-note">Counts belong to each workflow’s stage and may use different units. Checked {date(port.checked_at_utc)}.</p>
+        {port.operations?.backups.length ? <p className="panel-note">Database backups: {port.operations.backups.map(backup => `${backup.database}: ${words(backup.status)}${backup.created_at_utc ? ` (${date(backup.created_at_utc)})` : ""}`).join(" · ")}. Two compressed copies are kept on the second Railway volume.</p> : null}
       </section>)}
       <section className="pipeline-section"><h2>Evidence behind the result</h2><p>Raw batches have SHA-256 checksums. Clean records retain their source batch and record offset. Spatial assignments carry port and geofence versions; visits and hourly marts record their inference rules and workflow lineage.</p><p>Vessel properties and destinations are reported AIS data. Waiting candidates and visits are experimental inferences, and approximate zones are not official port boundaries.</p><a href={`${report.repository}/tree/main/docs`} target="_blank" rel="noreferrer">Explore the engineering documentation</a></section>
     </>}
