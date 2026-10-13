@@ -1,0 +1,132 @@
+{
+  "checked_at_utc": "2026-10-13T16:54:37.345607+00:00",
+  "period": "2024-01-01/2024-01-08 UTC exclusive end",
+  "port_id": "los_angeles",
+  "days": 7,
+  "hours": 168,
+  "canonical_positions": 443296,
+  "reference_differences": 0,
+  "dbt_business_sha256": "24efbb918da302d845611f38b8f1f83c1caaaec8b32895e09b4d97ab0a1f2b25",
+  "daily": [
+    {
+      "day": "2024-01-01",
+      "observations": 62157
+    },
+    {
+      "day": "2024-01-02",
+      "observations": 63037
+    },
+    {
+      "day": "2024-01-03",
+      "observations": 64867
+    },
+    {
+      "day": "2024-01-04",
+      "observations": 60278
+    },
+    {
+      "day": "2024-01-05",
+      "observations": 61915
+    },
+    {
+      "day": "2024-01-06",
+      "observations": 63403
+    },
+    {
+      "day": "2024-01-07",
+      "observations": 67639
+    }
+  ],
+  "baseline": {
+    "rows": 168,
+    "min_prior_hours": 0,
+    "max_prior_hours": 167,
+    "max_prior_dates": 7,
+    "anomaly_labels": 0,
+    "eligible_rows": 0
+  },
+  "episode_projections_deduplicated": {
+    "episodes": 1572,
+    "completed": 211,
+    "crossing_utc_days": 404,
+    "slice_start_partial": 169,
+    "slice_end_partial": 107,
+    "near_interval_start_partial": 100,
+    "near_interval_end_partial": 107,
+    "invalid_partial_duration_bounds": 0
+  },
+  "database_bytes": 3039663795,
+  "limits": [
+    "not official port calls",
+    "daily contextual projections are deduplicated for this report",
+    "seven days cannot establish seasonality or total AIS coverage",
+    "local expansion is separate from the hosted one-day historical demo"
+  ],
+  "resume": {
+    "business_rows_unchanged": true,
+    "canonical_business_sha256": "75af17b591326a8c7ebb30ea7f362b3e46692d49f94983f9bc1222fb2dc8982b",
+    "clean_checkpoints_reused": true,
+    "elapsed_seconds_including_interruption": 11505.376096499996
+  },
+  "dbt": {
+    "core": "1.12.5",
+    "postgres_adapter": "1.11.0",
+    "models": 11,
+    "data_tests": 36,
+    "all_nodes_passed": true,
+    "typed_columns": 45,
+    "input_partitions": [
+      {
+        "partition_id": "4e7cc2501cb0b1d6416c89fec872c3d69ab2943b06d3d272866b6a725b220087",
+        "input_sha256": "27d0cefe97192efbdecdd680aa0a76c5ac9718eb83e5f848b2bf07a764d3043f",
+        "weather_batch_id": "0a5dd14b907ec067c4e16a4780ef17101bc4e61d78f4c95de03ee38db00287e2"
+      },
+      {
+        "partition_id": "9932a475da16716ac27f4f9c6db63a58fddcbb768067e08ae91b65d1031dc7b4",
+        "input_sha256": "2f722ada2763034b234311a8c942060209153371e1af9f1df77217285c308b66",
+        "weather_batch_id": "15cae43db527429410bc32879f7f7a21e22eed30a12578aae0bae8778d0edce5"
+      },
+      {
+        "partition_id": "7bc83fad476f92d0de0b386a411975e0fad76290c84b20e836ccc20a011999e9",
+        "input_sha256": "69f79ba2830fd38977c791fd06492052bbddc7a66efaf1b50ccf05bb3c1b1c86",
+        "weather_batch_id": "9ceef1231deb7d9a9e599a4d6693f039a0443f7896df562c9c614281fa70b685"
+      },
+      {
+        "partition_id": "dcf7e04ac70d58f5e1ee7b9d2e86bea2d2ef245d1d978fbff805ffcc37a97bb2",
+        "input_sha256": "3c549cc69f0845345f60974cedf11f80ee7b7634b6cd5251b470aab4760f19a2",
+        "weather_batch_id": "94c63f7e55b9ee9c28865d68c5e1631b32090d04d4e9a38ca3433067c9cdab65"
+      },
+      {
+        "partition_id": "460a6ffd6cf1dfedf85a6b2b1fc2e67f3a78840bced0b607075b6f1f419e9f11",
+        "input_sha256": "12e2b5f64db6c0b1bf3432c94c552b041508fcaa71df3e931fa840057f744fdc",
+        "weather_batch_id": "7df2c6c832ebcdf1e60f5a98a047c8fb7bc342c3e80df82e4ab411620684d6dc"
+      },
+      {
+        "partition_id": "71811542455cf2e68c22eb11ff144b5fdec5443cc17108fa40e41858b761023c",
+        "input_sha256": "41946e9185849a05458bcc3312d4673e9e7225145984cfc2da2a54a57a6f0afb",
+        "weather_batch_id": "f90dd17a3bf5838b51ddaa13a6483615b8d1222e9d2f47e63a44337714631cc7"
+      },
+      {
+        "partition_id": "55c645ebc7330265889a181b1b3919302aef7014e0713e3d5502c89951875069",
+        "input_sha256": "015ecd0b42219d8d59d8f961b249ba766eb12d7d411171f9373931d0c0e65fb5",
+        "weather_batch_id": "ec6143dc61f1d7258641526405178ee08fd9dda545dd31db10d056793513fbb0"
+      }
+    ]
+  },
+  "weather_hours": {
+    "available": 168,
+    "unavailable": 0
+  },
+  "dbt_repeated_output_differences": 0,
+  "validation": {
+    "unit_tests": 208,
+    "integration_tests": 68,
+    "total": 276
+  },
+  "checks": {
+    "prefect_flow": "completed",
+    "parity_guard": "one altered derivative detected; restored test passed",
+    "live_freshness": "stopped local AISStream receipt correctly rejected as stale; historical sources excluded",
+    "lineage_browser": "standalone docs and lineage graph rendered in Chrome"
+  }
+}

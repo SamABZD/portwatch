@@ -138,6 +138,82 @@ def test_context_provider_failure_remains_a_failure(isolated_pipeline, connectio
     assert connection.execute("SELECT status FROM pipeline_runs").fetchone() == ("failed",)
 
 
+def test_historical_weather_does_not_rehash_unrelated_ais_raw(
+    isolated_pipeline,
+    connection,
+    monkeypatch,
+):
+    import portwatch.pipeline as pipeline
+    from portwatch.context import ContextError
+
+    def refuse_raw_scan(self):
+        raise AssertionError("weather must not scan national AIS files")
+
+    def unavailable(*args, **kwargs):
+        raise ContextError("source_http_failure", http_status=502)
+
+    monkeypatch.setattr(RawStore, "inspect", refuse_raw_scan)
+    monkeypatch.setattr(pipeline, "ingest_context", unavailable)
+    parent = begin_workflow(connection, "synthetic_weather_parent", "pipeline_historical")
+    with pytest.raises(PipelineError, match="source_http_failure"):
+        execute_step("los_angeles", "2024-01-02", "weather", "synthetic_weather", str(parent))
+    assert connection.execute(
+        "SELECT status FROM pipeline_runs WHERE stage='pipeline_weather'"
+    ).fetchone() == ("failed",)
+
+
+def test_optional_weather_never_advances_a_failed_checkpoint_or_swallows_other_errors(
+    isolated_pipeline,
+    connection,
+):
+    def weather_unavailable(port, day, step, key, parent, **kwargs):
+        if step == "weather":
+            return checkpointed(
+                connection,
+                key,
+                step,
+                "a" * 64,
+                parent,
+                lambda: (_ for _ in ()).throw(PipelineError("source_http_failure")),
+            )
+        return dict(input_count=2, output_count=2)
+
+    with pytest.raises(PipelineError, match="source_http_failure"):
+        run_day("los_angeles", "2024-01-01", step_runner=weather_unavailable)
+    result = run_day(
+        "los_angeles",
+        "2024-01-01",
+        step_runner=weather_unavailable,
+        allow_missing_weather=True,
+    )
+    assert result["status"] == "succeeded"
+    assert result["steps"]["weather"] == dict(
+        status="unavailable",
+        reason="source_http_failure",
+        input_count=0,
+        output_count=0,
+    )
+    assert connection.execute(
+        "SELECT count(*) FROM pipeline_checkpoints WHERE step='weather'"
+    ).fetchone() == (0,)
+    assert connection.execute(
+        "SELECT count(*) FROM pipeline_runs WHERE stage='pipeline_weather' AND status='failed'"
+    ).fetchone() == (2,)
+
+    def programming_error(port, day, step, key, parent, **kwargs):
+        if step == "weather":
+            raise ValueError("synthetic_secret")
+        return dict(input_count=2, output_count=2)
+
+    with pytest.raises(PipelineError, match="ValueError"):
+        run_day(
+            "los_angeles",
+            "2024-01-02",
+            step_runner=programming_error,
+            allow_missing_weather=True,
+        )
+
+
 @pytest.mark.parametrize(
     "port,source_id,extension",
     [

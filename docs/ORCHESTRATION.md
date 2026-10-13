@@ -17,6 +17,7 @@ the changed behavior. Scheduling was verified again with the compatible version.
 | --- | --- | --- |
 | Historical demo | Raw verification/acquisition, regional extraction, cleaning, matching ERA5, zones/visits/marts, publication validation | Manual |
 | Backfill | Same functions per explicit UTC source day, resumable | Manual, 1–7 days |
+| dbt models | Historical SQL build, typed contract, data tests, reference parity, docs and preliminary baselines | Manual; same Prefect server, separate locked dbt environment |
 | Live processing | Completed raw discovery, idempotent cleaning, affected visits/marts, observation lag | Every60 seconds |
 | Current weather | Bounded forecast fetch/normalization | Hourly |
 | Recent news | Bounded article metadata, separate failure/empty/cooldown state | Hourly |
@@ -56,6 +57,13 @@ before publication; a failed day is isolated while other days publish. Successfu
 on resumption. HTTP404 creates an unresolved `pipeline_source_gaps` row, not a successful empty
 partition. Valid national input with no regional reports can publish a known empty interval.
 A subsequent successful source day resolves its gap.
+
+Step16 adds opt-in `--allow-missing-weather` for recognized historical provider/cooldown
+failures only. Failed connector audits and absent checkpoints remain; successful AIS outputs
+carry a saved matching revision or null/flagged weather. Strict mode remains default.
+`pipeline models` uses the same orchestration/audit path and owned output schemas, with a
+`--local` recovery option. It does not start collectors or register another scheduler.
+See [history/dbt operations](HISTORY_DBT.md) for frozen dates, tests and baseline requirements.
 
 Historical visits use at most seven contiguous processed neighboring days, preferring earlier
 context then later context. Missing days break continuity. Original positions retain canonical

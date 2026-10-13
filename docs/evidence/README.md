@@ -9,6 +9,7 @@ raw payloads, database dump, prepared snapshot or bulk dataset is included.
 
 | Evidence | Scope |
 | --- | --- |
+| [History/dbt](history-dbt.json), [validation](history-dbt-validation.txt), [lineage](dbt-lineage.json) | Seven real LA dates,443,296 observations,168 matching hours,36 dbt data tests,45 typed columns and276 Python tests; resume, boundary and preliminary-baseline evidence. |
 | [Fresh reproduction](reproducibility.json) | Both-port genuine saved inputs, repeated digests, API/prepared timings and owned-resource cleanup. |
 | [Validation transcript](validation.txt) | 185 unit + 57 integration tests, lint/format, actual package checks and migrations. |
 | [Health/hosting follow-up](health-hosting-validation.txt) | 194 unit +64 integration tests, lint/format, installed wheel/CLI and eight fresh migrations/repeat zero. Absolute prefixes redacted. |

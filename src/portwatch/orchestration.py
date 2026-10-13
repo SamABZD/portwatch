@@ -136,8 +136,40 @@ def historical_flow(port: str = "los_angeles", stop_after_raw: bool = False, for
 @flow(
     name="portwatch-backfill", persist_result=False, task_runner=ThreadPoolTaskRunner(max_workers=1)
 )
-def backfill_flow(port: str, start: str, end: str, force: bool = False):
-    return checked_historical(port=port, demo=False, start=start, end=end, force=force)
+def backfill_flow(
+    port: str,
+    start: str,
+    end: str,
+    force: bool = False,
+    allow_missing_weather: bool = False,
+):
+    return checked_historical(
+        port=port,
+        demo=False,
+        start=start,
+        end=end,
+        force=force,
+        allow_missing_weather=allow_missing_weather,
+    )
+
+
+@task(name="dbt-build-and-test", persist_result=False, cache_policy=NO_CACHE)
+def models_task(port, start, end, check_live=False):
+    from portwatch.models import run_models
+    from portwatch.settings import Settings
+
+    result = run_models(Settings(), port, start, end, check_live=check_live)
+    get_run_logger().info(
+        "dbt %s: hours=%s nodes=%s", port, result["hourly_rows"], len(result["nodes"])
+    )
+    return result
+
+
+@flow(
+    name="portwatch-models", persist_result=False, task_runner=ThreadPoolTaskRunner(max_workers=1)
+)
+def models_flow(port: str, start: str, end: str, check_live: bool = False):
+    return models_task(port, start, end, check_live)
 
 
 @flow(name="portwatch-live", persist_result=False, task_runner=ThreadPoolTaskRunner(max_workers=1))

@@ -1,0 +1,222 @@
+version: 2
+models:
+- name: stg_partitions
+  description: Unchanged, explicitly scoped Python ingestion or publication contract.
+  columns:
+  - name: partition_id
+    data_tests:
+    - not_null
+    - unique
+- name: stg_positions
+  description: Unchanged, explicitly scoped Python ingestion or publication contract.
+  columns:
+  - name: id
+    data_tests:
+    - not_null
+    - unique
+- name: stg_batches
+  description: Unchanged, explicitly scoped Python ingestion or publication contract.
+  columns:
+  - name: batch_id
+    data_tests:
+    - not_null
+    - unique
+- name: int_visits
+  description: Python inference retained; SQL prepares its scoped dependencies for
+    hourly metrics.
+  data_tests:
+  - unique_grain:
+      arguments:
+        columns:
+        - mart_partition_id
+        - visit_id
+  columns:
+  - name: visit_id
+    data_tests:
+    - not_null
+  - name: mart_partition_id
+    data_tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('stg_partitions')
+          field: partition_id
+- name: int_waits
+  description: Python inference retained; SQL prepares its scoped dependencies for
+    hourly metrics.
+  data_tests:
+  - unique_grain:
+      arguments:
+        columns:
+        - mart_partition_id
+        - episode_id
+  columns:
+  - name: episode_id
+    data_tests:
+    - not_null
+  - name: mart_partition_id
+    data_tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('stg_partitions')
+          field: partition_id
+- name: port_activity_hourly
+  description: Versioned historical hourly metrics; experimental zones, observed-report
+    coverage and retrospective inference.
+  data_tests:
+  - unique_grain:
+      arguments:
+        columns:
+        - partition_id
+        - hour_utc
+  columns:
+  - name: partition_id
+    data_tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('stg_partitions')
+          field: partition_id
+    data_type: text
+  - name: port_id
+    data_type: text
+  - name: source_id
+    data_type: text
+  - name: dataset_id
+    data_type: text
+  - name: analytical_version
+    data_type: text
+  - name: hour_utc
+    data_tests:
+    - not_null
+    data_type: timestamp with time zone
+  - name: hour_end_utc
+    data_type: timestamp with time zone
+  - name: complete_hour
+    data_type: boolean
+  - name: metric_as_of_utc
+    data_type: timestamp with time zone
+  - name: source_interval_available
+    data_type: boolean
+  - name: snapshot_interval_available
+    data_type: boolean
+  - name: observation_count
+    data_type: bigint
+  - name: distinct_vessels_observed
+    data_type: bigint
+  - name: snapshot_vessel_count
+    data_type: bigint
+  - name: snapshot_port_vessel_count
+    data_type: bigint
+  - name: snapshot_stale_vessel_count
+    data_type: bigint
+  - name: snapshot_conflicting_vessel_count
+    data_type: bigint
+  - name: snapshot_zone_counts
+    data_type: jsonb
+  - name: confirmed_arrival_count
+    data_type: bigint
+  - name: confirmed_departure_count
+    data_type: bigint
+  - name: waiting_candidate_count
+    data_type: bigint
+  - name: waiting_episode_count
+    data_type: bigint
+  - name: port_associated_waiting_count
+    data_type: bigint
+  - name: regional_waiting_count
+    data_type: bigint
+  - name: waiting_duration_sample_count
+    data_type: bigint
+  - name: waiting_partial_sample_count
+    data_type: bigint
+  - name: waiting_duration_median_seconds
+    data_type: double precision
+  - name: completed_dwell_sample_count
+    data_type: bigint
+  - name: completed_dwell_median_seconds
+    data_type: double precision
+  - name: completed_dwell_lower_median_seconds
+    data_type: double precision
+  - name: completed_dwell_upper_median_seconds
+    data_type: double precision
+  - name: incomplete_visit_count
+    data_type: bigint
+  - name: rejected_record_count
+    data_type: bigint
+  - name: receipt_fallback_observation_count
+    data_type: bigint
+  - name: flagged_observation_count
+    data_type: bigint
+  - name: latest_observation_utc
+    data_type: timestamp with time zone
+  - name: observation_age_seconds
+    data_type: double precision
+  - name: collector_state
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - not_applicable_historical
+    data_type: text
+  - name: weather_product
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - historical_reanalysis
+    data_type: text
+  - name: weather_status
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - available
+          - unavailable
+    data_type: text
+  - name: weather_wind_speed_mps
+    data_type: double precision
+  - name: weather_gusts_mps
+    data_type: double precision
+  - name: weather_preceding_hour_precipitation_mm
+    data_type: double precision
+  - name: weather_quality_flags
+    data_type: text[]
+  - name: quality_flags
+    data_type: text[]
+- name: activity_baselines
+  description: Versioned historical hourly metrics; experimental zones, observed-report
+    coverage and retrospective inference.
+  data_tests:
+  - unique_grain:
+      arguments:
+        columns:
+        - partition_id
+        - hour_utc
+  columns:
+  - name: partition_id
+    data_tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('stg_partitions')
+          field: partition_id
+  - name: hour_utc
+    data_tests:
+    - not_null
+  - name: anomaly_label
+    description: NULL until at least168 prior hours across7 UTC dates; tails are preliminary
+      activity screens.
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - above_preliminary_p95
+          - below_preliminary_p05
+  - name: baseline_hours
+    data_tests:
+    - not_null
+  - name: baseline_eligible
+    data_tests:
+    - not_null

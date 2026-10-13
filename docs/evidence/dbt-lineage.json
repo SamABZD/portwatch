@@ -1,0 +1,417 @@
+[
+  {
+    "id": "source.portwatch_analytics.portwatch.mart_partitions",
+    "kind": "source",
+    "parents": []
+  },
+  {
+    "id": "source.portwatch_analytics.portwatch.mart_rule_sets",
+    "kind": "source",
+    "parents": []
+  },
+  {
+    "id": "source.portwatch_analytics.portwatch.vessel_positions",
+    "kind": "source",
+    "parents": []
+  },
+  {
+    "id": "source.portwatch_analytics.portwatch.position_zone_assignments",
+    "kind": "source",
+    "parents": []
+  },
+  {
+    "id": "source.portwatch_analytics.portwatch.port_zones",
+    "kind": "source",
+    "parents": []
+  },
+  {
+    "id": "source.portwatch_analytics.portwatch.visit_inference_partitions",
+    "kind": "source",
+    "parents": []
+  },
+  {
+    "id": "source.portwatch_analytics.portwatch.vessel_visits",
+    "kind": "source",
+    "parents": []
+  },
+  {
+    "id": "source.portwatch_analytics.portwatch.waiting_episodes",
+    "kind": "source",
+    "parents": []
+  },
+  {
+    "id": "source.portwatch_analytics.portwatch.ingestion_batches",
+    "kind": "source",
+    "parents": []
+  },
+  {
+    "id": "source.portwatch_analytics.portwatch.clean_batches",
+    "kind": "source",
+    "parents": []
+  },
+  {
+    "id": "source.portwatch_analytics.portwatch.weather_values",
+    "kind": "source",
+    "parents": []
+  },
+  {
+    "id": "source.portwatch_analytics.portwatch.port_activity_hourly",
+    "kind": "source",
+    "parents": []
+  },
+  {
+    "id": "model.portwatch_analytics.int_visits",
+    "kind": "model",
+    "parents": [
+      "source.portwatch_analytics.portwatch.vessel_visits",
+      "source.portwatch_analytics.portwatch.visit_inference_partitions",
+      "model.portwatch_analytics.stg_partitions"
+    ]
+  },
+  {
+    "id": "model.portwatch_analytics.int_waits",
+    "kind": "model",
+    "parents": [
+      "source.portwatch_analytics.portwatch.visit_inference_partitions",
+      "source.portwatch_analytics.portwatch.waiting_episodes",
+      "model.portwatch_analytics.stg_partitions"
+    ]
+  },
+  {
+    "id": "model.portwatch_analytics.activity_baselines",
+    "kind": "model",
+    "parents": [
+      "model.portwatch_analytics.port_activity_hourly",
+      "model.portwatch_analytics.stg_partitions"
+    ]
+  },
+  {
+    "id": "model.portwatch_analytics.port_activity_hourly",
+    "kind": "model",
+    "parents": [
+      "model.portwatch_analytics.stg_partitions",
+      "model.portwatch_analytics.stg_positions",
+      "model.portwatch_analytics.stg_assignments",
+      "model.portwatch_analytics.stg_zones",
+      "model.portwatch_analytics.stg_batches",
+      "model.portwatch_analytics.stg_clean_batches",
+      "model.portwatch_analytics.int_visits",
+      "model.portwatch_analytics.int_waits",
+      "model.portwatch_analytics.stg_weather"
+    ]
+  },
+  {
+    "id": "model.portwatch_analytics.stg_assignments",
+    "kind": "model",
+    "parents": [
+      "source.portwatch_analytics.portwatch.position_zone_assignments"
+    ]
+  },
+  {
+    "id": "model.portwatch_analytics.stg_batches",
+    "kind": "model",
+    "parents": [
+      "source.portwatch_analytics.portwatch.ingestion_batches"
+    ]
+  },
+  {
+    "id": "model.portwatch_analytics.stg_clean_batches",
+    "kind": "model",
+    "parents": [
+      "source.portwatch_analytics.portwatch.clean_batches"
+    ]
+  },
+  {
+    "id": "model.portwatch_analytics.stg_partitions",
+    "kind": "model",
+    "parents": [
+      "source.portwatch_analytics.portwatch.mart_partitions",
+      "source.portwatch_analytics.portwatch.mart_rule_sets"
+    ]
+  },
+  {
+    "id": "model.portwatch_analytics.stg_positions",
+    "kind": "model",
+    "parents": [
+      "source.portwatch_analytics.portwatch.vessel_positions"
+    ]
+  },
+  {
+    "id": "model.portwatch_analytics.stg_weather",
+    "kind": "model",
+    "parents": [
+      "source.portwatch_analytics.portwatch.weather_values"
+    ]
+  },
+  {
+    "id": "model.portwatch_analytics.stg_zones",
+    "kind": "model",
+    "parents": [
+      "source.portwatch_analytics.portwatch.port_zones"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.assignments_complete",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.stg_partitions",
+      "model.portwatch_analytics.stg_positions",
+      "model.portwatch_analytics.stg_assignments"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.baseline_no_leakage",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.activity_baselines"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.historical_inputs_ready",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.stg_partitions",
+      "model.portwatch_analytics.stg_batches",
+      "model.portwatch_analytics.stg_clean_batches"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.hour_grid",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.stg_partitions",
+      "model.portwatch_analytics.port_activity_hourly"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.metric_invariants",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.port_activity_hourly"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.reference_equivalence",
+    "kind": "test",
+    "parents": [
+      "source.portwatch_analytics.portwatch.port_activity_hourly",
+      "model.portwatch_analytics.stg_partitions",
+      "model.portwatch_analytics.port_activity_hourly"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.required_partitions",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.stg_partitions"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.wait_relationship",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.int_waits",
+      "model.portwatch_analytics.int_visits"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.not_null_stg_partitions_partition_id.5b876c8e2f",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.stg_partitions"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.unique_stg_partitions_partition_id.b17e3b5b8a",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.stg_partitions"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.not_null_stg_positions_id.f6ec6cc036",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.stg_positions"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.unique_stg_positions_id.e02ec998bf",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.stg_positions"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.not_null_stg_batches_batch_id.e034d4a1a0",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.stg_batches"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.unique_stg_batches_batch_id.783b2a0ca4",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.stg_batches"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.not_null_int_visits_visit_id.e1435546e8",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.int_visits"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.not_null_int_visits_mart_partition_id.6ab6a1105e",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.int_visits"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.relationships_int_visits_mart_partition_id__partition_id__ref_stg_partitions_.992ac3c1f5",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.stg_partitions",
+      "model.portwatch_analytics.int_visits"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.unique_grain_int_visits_mart_partition_id__visit_id.eb5a126aec",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.int_visits"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.not_null_int_waits_episode_id.d70c592b91",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.int_waits"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.not_null_int_waits_mart_partition_id.d8224b1a7b",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.int_waits"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.relationships_int_waits_mart_partition_id__partition_id__ref_stg_partitions_.a59a9f39a4",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.stg_partitions",
+      "model.portwatch_analytics.int_waits"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.unique_grain_int_waits_mart_partition_id__episode_id.3818cfe22a",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.int_waits"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.not_null_port_activity_hourly_partition_id.b5e1a08a31",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.port_activity_hourly"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.relationships_port_activity_hourly_partition_id__partition_id__ref_stg_partitions_.0445e44dd1",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.stg_partitions",
+      "model.portwatch_analytics.port_activity_hourly"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.not_null_port_activity_hourly_hour_utc.8182a80421",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.port_activity_hourly"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.accepted_values_port_activity_hourly_collector_state__not_applicable_historical.023edf4722",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.port_activity_hourly"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.accepted_values_port_activity_hourly_weather_product__historical_reanalysis.23fb9388a4",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.port_activity_hourly"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.accepted_values_port_activity_hourly_weather_status__available__unavailable.578900ea6e",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.port_activity_hourly"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.unique_grain_port_activity_hourly_partition_id__hour_utc.e5a285f28b",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.port_activity_hourly"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.not_null_activity_baselines_partition_id.b3593cf9ab",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.activity_baselines"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.relationships_activity_baselines_partition_id__partition_id__ref_stg_partitions_.264f6155e1",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.stg_partitions",
+      "model.portwatch_analytics.activity_baselines"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.not_null_activity_baselines_hour_utc.befc12f86e",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.activity_baselines"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.accepted_values_activity_baselines_anomaly_label__above_preliminary_p95__below_preliminary_p05.afa9480efe",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.activity_baselines"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.not_null_activity_baselines_baseline_hours.3b3475cbfb",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.activity_baselines"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.not_null_activity_baselines_baseline_eligible.f88eec1f86",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.activity_baselines"
+    ]
+  },
+  {
+    "id": "test.portwatch_analytics.unique_grain_activity_baselines_partition_id__hour_utc.c7afa22d30",
+    "kind": "test",
+    "parents": [
+      "model.portwatch_analytics.activity_baselines"
+    ]
+  }
+]

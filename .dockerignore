@@ -5,6 +5,10 @@
 **/.env.*
 .venv
 .bootstrap-venv
+**/.venv
+analytics/target
+analytics/logs
+analytics/dbt_packages
 **/__pycache__
 .pytest_cache
 .ruff_cache
