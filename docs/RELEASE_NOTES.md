@@ -1,4 +1,4 @@
-# PortWatch v0.1.0 — release candidate
+# PortWatch v0.1.0
 
 Prepared October 13, 2026 (Asia/Beirut). These notes describe the candidate; publication
 status is recorded in GITHUB_SETUP. GitHub Actions are disabled at the owner's request.
@@ -19,6 +19,9 @@ status is recorded in GITHUB_SETUP. GitHub Actions are disabled at the owner's r
   appears as an unmanifested file during inspection.
 - Container backend entry point with migrations, genuine historical bootstrap, safe readiness
   and optional continuous runtime; Next.js standalone container support and Vercel deployment.
+- Hosted frontend at [PortWatch](https://portwatch-iota.vercel.app), with continuous collectors,
+  Prefect processing and private PostGIS on the owner's existing paid Railway workspace.
+  Both ports' live reports, source health and genuine historical catalogs were verified.
 
 ## Dataset and measured results
 

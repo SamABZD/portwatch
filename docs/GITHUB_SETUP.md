@@ -12,6 +12,10 @@ Ruff/format, package/wheel/CLI and eight fresh migrations with zero repeat. The 
 production build passed locally and on Vercel. PR#3 includes the fixes and hosting source.
 Private repository visibility is preserved. Publication SHA/release evidence is recorded
 after actual merge/tag operations, not inferred from the absence of Actions checks.
+Source checkpoint `2197e72` deployed successfully: Vercel production frontend, Railway
+backend/PostGIS with persistent volumes, both real collectors, successful minute processing
+and fresh context. See [deployment evidence](../deploy/README.md). This is separate from
+GitHub Actions, which remain disabled.
 
 ## Step 14A preparation (2026-10-13 Asia/Beirut)
 

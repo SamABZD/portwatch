@@ -6,6 +6,9 @@ Vessel reports arrive with duplicates, gaps and incomplete context. PortWatch tu
 
 **Works locally at $0:** Python/PostGIS processing, Prefect schedules, a read-only FastAPI service and a Next.js website. Historical replay needs no live API key; exported snapshots also work without a database. The owner disabled GitHub Actions; release validation runs locally. The repository remains private. Cloud deployment uses Vercel for the frontend and the owner's paid Railway Hobby workspace for the backend and database; see the [deployment record](deploy/README.md) for verified status and operating requirements.
 
+**[Open the hosted PortWatch app](https://portwatch-iota.vercel.app)** — live observations and
+historical replay for both ports. Source freshness and incomplete coverage stay explicit.
+
 ## Product tour
 
 ![Los Angeles historical map, replay controls, observed activity and weather](docs/assets/historical-los-angeles.png)

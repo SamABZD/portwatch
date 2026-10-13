@@ -5,9 +5,10 @@ The historical reproducibility and critical correctness gates pass. This is a lo
 assessment, not evidence of a hosted release or passing GitHub Actions. Step14A publication
 and public24/7 deployment remain pending. Step14 and17 are skipped; Step16 remains optional.
 
-Step14A follow-up: code/presentation are now pushed for review in
-[PR#3](https://github.com/SamABZD/portwatch/pull/3); hosted runs fail before job creation and
-no release is tagged. [GITHUB_SETUP.md](GITHUB_SETUP.md) records the current evidence.
+Step14A follow-up: the owner disabled Actions and authorized proceeding with local validation.
+Health/hosting source passed258 tests and deployed to Vercel/Railway; this supersedes the
+earlier hosted-check gate. [PR#3](https://github.com/SamABZD/portwatch/pull/3) contains the
+project; [GITHUB_SETUP.md](GITHUB_SETUP.md) records actual publication evidence.
 The audit-time remote/process statements below are historical snapshots.
 
 ## Corrections made

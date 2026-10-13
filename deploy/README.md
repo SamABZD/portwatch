@@ -14,9 +14,19 @@ available at $0; cloud resource consumption is billed by Railway under that exis
 
 ## Verification status
 
-The frontend production build is ready. Backend image build passed and genuine historical
-bootstrap is running; end-to-end API/live verification is still in progress. An initial
-frontend-only deployment had no backend URL and is not proof of a working data connection.
+Verified October13,2026 around11:30UTC: frontend and backend HTTPS endpoints return200;
+Vercel's server-side proxy loads both ports. Both collectors report `healthy_connected` and
+recent observations, and finite minute jobs succeed. Forecasts are available; LA GDELT and
+Oakland official RSS are valid empty results, with Oakland's primary failure still audited.
+Cloud historical catalogs contain62,157 LA and52,783 Oakland canonical NOAA observations.
+The browser renders live observations and operational health; missing basemap tiles use the
+existing local geographic fallback. These checks establish operation at that time, not an
+uptime or source-coverage guarantee. An initial frontend-only deployment was superseded.
+
+Backend live deployment: `c7394e40-070e-4cd2-bde5-5df1820b9fa5`; database deployment:
+`57033f2a-b959-4c82-8860-a4205d4115f9`, both SUCCESS. The Next.js production deployment
+`portwatch-fhxc3doq2-abzd.vercel.app` was built from reviewed source checkpoint `2197e72`.
+The local runtime stopped cleanly at11:25:00.742834UTC before cloud live was enabled.
 Release/publication evidence is maintained in [GITHUB_SETUP](../docs/GITHUB_SETUP.md).
 
 ## Runtime configuration
@@ -42,7 +52,7 @@ PORTWATCH_DB_USER=portwatch
 PORTWATCH_DB_PASSWORD=${{database.POSTGRES_PASSWORD}}
 PORTWATCH_DB_SSLMODE=disable
 PORTWATCH_CLOUD_BOOTSTRAP=1
-PORTWATCH_CLOUD_LIVE=0
+PORTWATCH_CLOUD_LIVE=1
 PORTWATCH_LIVE_STATUS_DIR=data/status
 ```
 
@@ -50,7 +60,8 @@ Database transport uses the project's private network; only the read-only API ha
 domain. `POSTGRES_PASSWORD` is generated privately and referenced across services. Live
 mode also needs the owner's private `PORTWATCH_AIS_API_KEY`, set through secret stdin.
 
-Use one replica per service and disable sleeping. Configured limits: backend1vCPU/2GB,
+Use one replica per service and disable sleeping. Both services run in Railway's US East
+region (`us-east4-eqdc4a`), matching Vercel's `iad1` vicinity. Configured limits: backend1vCPU/2GB,
 database0.5vCPU/1GB; these are ceilings, not measured usage or a quoted monthly price.
 Both volumes are5000MB. The collector preserves the default1GB free-space reserve and
 stops explicitly before exhausting disk. Retention, volume growth and off-device backups

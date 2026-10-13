@@ -47,6 +47,14 @@
   No existing portfolio or other project was changed, and no plan/payment was changed.
 - Publication PR#3 remains the current review vehicle. Earlier preparation evidence and
   hosted gates below describe their historical state; D-069 records the owner's override.
+- Deployment completed: both public API and Vercel proxy return200, both cloud collectors
+  report healthy_connected/recent observations, and minute workflows succeed. NOAA catalogs
+  retain62,157 LA/52,783 Oakland canonical observations. Forecasts are fresh; LA GDELT and
+  Oakland official RSS are valid empty, with limited coverage explicitly labelled.
+- Local runtime stopped cleanly at11:25:00.742834UTC before cloud collection was enabled.
+  Keep it stopped while cloud live runs; do not start a second pair of collectors. Local
+  stored history/raw data are preserved. Endpoints and operator settings are in the
+  [deployment record](../deploy/README.md). No off-device backup/uptime guarantee is claimed.
 
 ### Step14A preparation (2026-10-13 Asia/Beirut)
 
