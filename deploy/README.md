@@ -14,6 +14,12 @@ available at $0; cloud resource consumption is billed by Railway under that exis
 
 ## Verification status
 
+The final recheck later caught a genuine Los Angeles GDELT429 during its hourly refresh.
+The follow-up adds [LA's official release archive](https://portoflosangeles.org/news/news-release-archive)
+as a separately attributed fallback, analogous to Oakland's RSS. Publication dates retain
+day precision and an explicit Pacific date-overlap assumption; no exact UTC publication
+instant or first-seen time is invented. The original v0.1.0 tag remains unchanged.
+
 Verified October13,2026 around11:30UTC: frontend and backend HTTPS endpoints return200;
 Vercel's server-side proxy loads both ports. Both collectors report `healthy_connected` and
 recent observations, and finite minute jobs succeed. Forecasts are available; LA GDELT and

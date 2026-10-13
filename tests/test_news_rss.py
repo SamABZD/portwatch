@@ -59,7 +59,7 @@ def test_unsafe_or_malformed_feed_is_not_empty_success(payload):
 
 def test_fallback_is_only_the_explicit_reviewed_official_source():
     request = plan_context(Settings(), "los_angeles", "news", now=NOW)
-    assert news_fallback(Settings(), request) is None
+    assert news_fallback(Settings(), request).source_id == "port_los_angeles_releases"
     official = fallback_request()
     assert official.source_id == "port_oakland_rss"
     assert official.endpoint == "https://www.portofoakland.com/feed/"

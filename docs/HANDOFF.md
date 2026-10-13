@@ -26,6 +26,21 @@
 
 ## Verified commands and observed outcomes
 
+### Post-release Los Angeles context resilience (2026-10-13 UTC)
+
+- A final deployment recheck caught a genuine LA GDELT429 after the hourly refresh.
+  Collection and minute jobs remained healthy; the mandatory context warning was accurate.
+- Added LA's reviewed official HTML release archive fallback, with provider failures retained,
+  bounded original-byte storage, strict official links and date-only publication uncertainty.
+  Actual local fallback ingestion returned200/valid_empty at12:27:10.413063UTC.
+- Current source labels now come from health metadata, so each port credits its own fallback.
+  This follow-up is after the immutable v0.1.0 release; its tag/recorded validation stay unchanged.
+- Full locked validator passed201 unit +65 integration =266 tests, lint/format, wheel/CLI and
+  eight fresh migrations/repeat zero. Next.js production build passed. Synthetic tests cover
+  missing/oversized archives, external-link refusal, date-only uncertainty and both providers'
+  failure-preserving original-byte ingestion. Initial oversized test IDs hit Windows' environment
+  length limit; explicit short test IDs corrected the harness before the full passing run.
+
 ### Completed publication (2026-10-13 UTC)
 
 - PR#3 merged at11:38:08UTC; CI PR#2 was automatically marked merged as its ancestor code

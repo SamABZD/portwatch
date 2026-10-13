@@ -149,6 +149,16 @@ Initial waiting heuristics remain 1.0 knot, 30 continuous minutes, maximum 15-mi
 
 ### Current-context recovery (2026-10-13 UTC)
 
+Follow-up: Los Angeles GDELT again returned429 at the cloud hourly refresh. The reviewed
+[official LA release archive](https://portoflosangeles.org/news/news-release-archive)
+returned200 with312,946 original HTML bytes; actual fallback ingestion succeeded at
+12:27:10.413063UTC. Its636 dated release rows were outside the current request window,
+so the normalized result was valid empty; one undated/header row was counted separately.
+Only official-host title/link metadata is eligible. The archive has publication dates, not
+verified publication instants: retain the date and explicit Pacific calendar-day overlap
+assumption; keep publication_time_utc/first_seen null. This is not broad news coverage.
+Malformed/unrecognized archives and entirely unknown dates fail instead of becoming empty.
+
 Open-Meteo forecasts returned200 and48 rows for each port. LA GDELT returned200 with a
 valid empty response at10:33:10.508915UTC; Oakland GDELT remained429/rate limited.
 The reviewed [official Port of Oakland RSS](https://www.portofoakland.com/feed/) returned200

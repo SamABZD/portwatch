@@ -83,6 +83,7 @@ class PortConfig(BaseModel):
     news_lookback_hours: int = Field(default=24, ge=1, le=168)
     news_max_records: int = Field(default=100, ge=1, le=250)
     news_rss_url: str | None = None
+    news_archive_url: str | None = None
     news_keywords: list[str] = Field(
         default_factory=lambda: ["disruption", "closure", "strike", "congestion", "storm"]
     )

@@ -138,8 +138,15 @@ def test_context_provider_failure_remains_a_failure(isolated_pipeline, connectio
     assert connection.execute("SELECT status FROM pipeline_runs").fetchone() == ("failed",)
 
 
-def test_official_news_fallback_preserves_primary_failure_and_raw_xml(
-    isolated_pipeline, connection, monkeypatch
+@pytest.mark.parametrize(
+    "port,source_id,extension",
+    [
+        ("oakland", "port_oakland_rss", ".xml"),
+        ("los_angeles", "port_los_angeles_releases", ".html"),
+    ],
+)
+def test_official_news_fallback_preserves_primary_failure_and_original_bytes(
+    isolated_pipeline, connection, monkeypatch, port, source_id, extension
 ):
     from datetime import UTC, datetime, timedelta
 
@@ -148,6 +155,7 @@ def test_official_news_fallback_preserves_primary_failure_and_raw_xml(
     from portwatch.context_http import HttpResponse
     from portwatch.context_storage import ingest_context
     from portwatch.health import context_health
+    from tests.test_news_archive import archive_payload
     from tests.test_news_rss import rss_payload
 
     now = datetime.now(UTC)
@@ -156,13 +164,18 @@ def test_official_news_fallback_preserves_primary_failure_and_raw_xml(
         def fetch(url):
             if request.source_id == "gdelt_doc_v2":
                 raise ContextError("source_rate_limited", http_status=429)
-            return HttpResponse(rss_payload(request.end_utc - timedelta(hours=1)), now, 200)
+            payload = (
+                rss_payload(request.end_utc - timedelta(hours=1))
+                if port == "oakland"
+                else archive_payload(request.end_utc.strftime("%m/%d/%Y"))
+            )
+            return HttpResponse(payload, now, 200)
 
         return ingest_context(settings, connection, request, fetch=fetch, now=now, **kwargs)
 
     monkeypatch.setattr(pipeline, "ingest_context", ingest)
-    report = pipeline.run_context("news", "oakland")
-    assert report["rows"] == 1 and report["source_id"] == "port_oakland_rss"
+    report = pipeline.run_context("news", port)
+    assert report["rows"] == 1 and report["source_id"] == source_id
     assert report["fallback_reason"] == "source_rate_limited"
     attempts = connection.execute(
         "SELECT r.source_id,a.status,a.http_status FROM context_attempts a "
@@ -170,15 +183,16 @@ def test_official_news_fallback_preserves_primary_failure_and_raw_xml(
     ).fetchall()
     assert attempts == [
         ("gdelt_doc_v2", "failed", 429),
-        ("port_oakland_rss", "valid_nonempty", 200),
+        (source_id, "valid_nonempty", 200),
     ]
     settings = isolated_pipeline[0]
-    health = context_health(connection, "oakland", "recent_news", now, settings)
+    health = context_health(connection, port, "recent_news", now, settings)
     assert health["status"] == "available" and health["using_fallback"]
+    assert "official releases" in health["fallback_label"]
     assert (
         connection.execute("SELECT local_path FROM ingestion_batches")
         .fetchone()[0]
-        .endswith(".xml")
+        .endswith(extension)
     )
 
 

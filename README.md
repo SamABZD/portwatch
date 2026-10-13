@@ -131,7 +131,7 @@ npm run typecheck
 npm run build
 ```
 
-Step 13 passed **242 tests: 185 unit and 57 integration**. The health/deployment follow-up passed **258 tests: 194 unit and 64 integration**, lint/format, package/installed-wheel checks and eight fresh migrations with zero on repeat. The Next.js production build passed locally and on Vercel. Browser checks covered replay, both ports, prepared sessions, keyboard/mobile behavior and the drawing. Integration tests need PostgreSQL 17/PostGIS 3.6 and create owned temporary schemas. Deterministic tests reject provider connections.
+Step 13 passed **242 tests: 185 unit and 57 integration**. The current health/hosting implementation, including LA news resilience, passed **266 tests: 201 unit and 65 integration**, lint/format, package/installed-wheel checks and eight fresh migrations with zero on repeat. The Next.js production build passed locally and on Vercel. Browser checks covered replay, both ports, prepared sessions, keyboard/mobile behavior and the drawing. Integration tests need PostgreSQL 17/PostGIS 3.6 and create owned temporary schemas. Deterministic tests reject provider connections.
 
 The [Validate workflow source](.github/workflows/ci.yml) defines shared Python `quality` and `integration` gates, but repository Actions are disabled by the owner. Local passes do not establish a GitHub-hosted pass. Next.js production builds also passed on Vercel. [GitHub setup](docs/GITHUB_SETUP.md) records the owner's override and actual publication evidence.
 

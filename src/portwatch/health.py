@@ -346,7 +346,17 @@ def context_health(connection, port, product, now, settings):
     return dict(
         product=product,
         source_id=success["source_id"] if success else attempt["source_id"] if attempt else None,
-        using_fallback=bool(success and success["source_id"] == "port_oakland_rss"),
+        using_fallback=bool(
+            success and success["source_id"] in {"port_oakland_rss", "port_los_angeles_releases"}
+        ),
+        fallback_label={
+            "port_oakland_rss": (
+                "Port of Oakland official releases (RSS fallback; limited coverage)"
+            ),
+            "port_los_angeles_releases": (
+                "Port of Los Angeles official releases (archive fallback; limited coverage)"
+            ),
+        }.get(success["source_id"] if success else None),
         status=status,
         last_successful_fetch_utc=success["selected_retrieved_at"] if success else None,
         success_age_seconds=age(now, success["selected_retrieved_at"]) if success else None,
