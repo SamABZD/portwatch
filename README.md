@@ -38,7 +38,7 @@ This genuine NOAA snapshot at **2024-01-01 12:30 UTC** includes 99 fresh reporti
 flowchart LR
     NOAA[NOAA historical AIS] --> RAW[Immutable files and SHA-256 manifests]
     AIS[AISStream live collectors] --> RAW
-    CONTEXT[Open-Meteo weather and GDELT metadata] --> RAW
+    CONTEXT[Open-Meteo weather and attributed news metadata] --> RAW
     RAW --> PY[Python validation and normalization]
     PY --> PG[(PostgreSQL 17 and PostGIS 3.6)]
     PG --> ANALYTICS[Versioned zones, visits and hourly marts]
@@ -133,7 +133,7 @@ npm run build
 
 Step 13 passed **242 tests: 185 unit and 57 integration**. The health/deployment follow-up passed **258 tests: 194 unit and 64 integration**, lint/format, package/installed-wheel checks and eight fresh migrations with zero on repeat. The Next.js production build passed locally and on Vercel. Browser checks covered replay, both ports, prepared sessions, keyboard/mobile behavior and the drawing. Integration tests need PostgreSQL 17/PostGIS 3.6 and create owned temporary schemas. Deterministic tests reject provider connections.
 
-The [Validate workflow](.github/workflows/ci.yml) runs shared Python `quality` and `integration` gates. Hosted jobs were blocked before execution by GitHub account billing; local passes do not establish a remote pass. Next.js/browser verification is local. [GitHub setup](docs/GITHUB_SETUP.md) records pending gates.
+The [Validate workflow source](.github/workflows/ci.yml) defines shared Python `quality` and `integration` gates, but repository Actions are disabled by the owner. Local passes do not establish a GitHub-hosted pass. Next.js production builds also passed on Vercel. [GitHub setup](docs/GITHUB_SETUP.md) records the owner's override and actual publication evidence.
 
 From the project root:
 
@@ -148,15 +148,15 @@ Backup verification restores into a new owned database and requires PostgreSQL c
 
 Set `PORTWATCH_AIS_API_KEY` privately in the ignored root `.env`, then run `uv run --locked python -m portwatch.runtime` from the project root. Stop with `uv run --locked python -m portwatch.runtime --stop`. See [multiport operation](docs/LIVE_MULTIPORT.md) for process ownership, gaps, cooldowns and storage growth.
 
-- The computer must stay awake and connected. Public hosting, HTTPS, boot supervision and off-device backup remain pending.
+- Local collection needs an awake, connected computer. The deployed Railway runtime runs independently; off-device backup and continuing storage management remain operator requirements.
 - NOAA is provider-preprocessed; live coverage is incomplete. Live analysis uses receipt-time fallback with provider timestamp text preserved separately.
 - Zones are approximate. Inferred visits, waiting and dwell are experimental, not official calls, confirmed queues or causality.
-- Weather is coarse model context. GDELT returned HTTP 429 during the audit; successful real article coverage remains unverified. Recent news is excluded from replay.
-- A repository alone does not run collectors, processing, the database or website. No paid hosting or account changes have been made.
+- Weather is coarse model context. GDELT can return HTTP429; Oakland's official RSS fallback covers releases only. Verified empty responses do not establish absence of disruption. Recent news is excluded from replay.
+- Cloud services consume the owner's existing paid Railway plan. No billing plan, payment method or unrelated project was changed; no permanently free24/7 hosting is promised.
 
 ## Sources and attribution
 
-Historical AIS: **NOAA Office for Coastal Management / MarineCadastre.gov, 2024 AIS vessel traffic**, [CC0 data and suggested citation](https://github.com/ocm-marinecadastre/ais-vessel-traffic/blob/main/data/ais-broadcast-points-2024-readme.md). Weather: [Open-Meteo](https://open-meteo.com/) and [Copernicus Climate Change Service / ERA5](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=overview), transformed UTC selections with [CC BY 4.0 attribution](https://open-meteo.com/en/licence) and applicable noncommercial API terms. Live: [AISStream](https://aisstream.io/). News metadata: [GDELT](https://www.gdeltproject.org/) and original publishers. Optional basemap: OpenStreetMap contributors.
+Historical AIS: **NOAA Office for Coastal Management / MarineCadastre.gov, 2024 AIS vessel traffic**, [CC0 data and suggested citation](https://github.com/ocm-marinecadastre/ais-vessel-traffic/blob/main/data/ais-broadcast-points-2024-readme.md). Weather: [Open-Meteo](https://open-meteo.com/) and [Copernicus Climate Change Service / ERA5](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=overview), transformed UTC selections with [CC BY 4.0 attribution](https://open-meteo.com/en/licence) and applicable noncommercial API terms. Live: [AISStream](https://aisstream.io/). News metadata: [GDELT](https://www.gdeltproject.org/), [Port of Oakland official RSS](https://www.portofoakland.com/feed/) and original publishers. Optional basemap: OpenStreetMap contributors.
 
 Included artifacts are reviewed historical screenshots and aggregate reports. Raw files, live payloads, databases, snapshots and credentials stay excluded. The [source audit](docs/SOURCE_AUDIT.md) records redistribution and timestamp limits. PortWatch polygons are independently authored approximations; official port maps are contextual references.
 

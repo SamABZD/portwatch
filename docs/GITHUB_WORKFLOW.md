@@ -1,5 +1,17 @@
 # GitHub workflow
 
+## Current owner override (2026-10-13)
+
+The owner explicitly disabled GitHub Actions and requested continuing with health fixes and
+publication. Keep repository permissions `enabled:false` and Validate `disabled_manually`.
+Local full validation is the release gate, superseding the hosted PR/main gates in the
+historical preparation record below. Final implementation passed258 tests and package/
+migration checks; Next.js built locally and on Vercel. No GitHub-hosted pass is claimed.
+The owner separately authorized deployment on their existing paid Railway workspace with
+a Vercel frontend; see [deployment operations](../deploy/README.md).
+
+## Historical preparation record
+
 Step 14A packages the locally verified Step 13 code and presentation on
 `release/portfolio-v0.1.0`. Current remote visibility is private, superseding earlier public
 records. Keep privacy and account settings unchanged. A current-head hosted validation pass

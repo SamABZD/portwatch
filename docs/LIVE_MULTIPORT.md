@@ -1,5 +1,12 @@
 # Live vessels, multiple ports and pipeline evidence
 
+Current hosting follow-up (2026-10-13): [PortWatch](https://portwatch-iota.vercel.app) runs
+with a Vercel frontend and continuous Railway backend/private PostGIS in the owner's paid
+workspace. Both ports were verified receiving reports and processing minute jobs. The local
+runtime is stopped; leave it stopped while cloud collection runs. See [deployment operations](../deploy/README.md)
+for actual endpoints, storage and safe handover. The local implementation record below
+describes its earlier stage, before that deployment. Actions are disabled by the owner.
+
 Implemented locally on2026-10-12 before final audit and portfolio publication. User priorities
 skip Step14 academy submission and Step17 scale study, and move Step15 port generalization
 and these additions before Step14A. Step13 final audit is complete locally; see
