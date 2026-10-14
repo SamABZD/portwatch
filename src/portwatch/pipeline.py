@@ -574,6 +574,17 @@ def run_context(kind, port="los_angeles"):
                         "source_timeout",
                         "source_connection_failure",
                         "source_http_failure",
+                        "source_deadline",
+                        "invalid_json_response",
+                        "provider_error_or_invalid_object",
+                        "news_articles_missing_or_invalid",
+                        "invalid_json_number",
+                        "malformed_article_metadata",
+                        "invalid_article_language",
+                        "invalid_article_url",
+                        "source_response_too_large",
+                        "source_invalid_content_length",
+                        "source_incomplete_response",
                     }:
                         raise
                     primary_error = error.code

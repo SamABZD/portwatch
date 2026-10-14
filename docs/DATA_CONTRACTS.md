@@ -71,7 +71,7 @@ reconstructs episodes from event times <= cutoff, returns source/version/weather
 and labels the current hour partial. It writes temporary objects only and preserves persistent
 rows/audits. Historical weather remains retrospective reanalysis, not2024 issue/receipt chronology.
 
-## Step08 weather/news (`context-v1`)
+## Step08 weather/news (weather `context-v1`, news `news-v2`)
 
 See [CONTEXT.md](CONTEXT.md) for acquisition, field semantics, revisions and attribution.
 Migration005 appends five tables without changing migrations001–004 or AIS data.

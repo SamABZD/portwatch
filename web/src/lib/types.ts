@@ -98,8 +98,38 @@ export type Frame = {
     domain: string;
     publication_time_utc: string | null;
     first_seen_time_utc: string | null;
+    publication_date?: string | null;
+    publication_timezone?: string | null;
+    publication_precision?: "instant" | "date" | "unknown";
+    relevance_tags?: string[];
+    quality_flags?: string[];
   }[];
   news_status: string;
+  news_context?: NewsContext | null;
+};
+export type NewsContext = {
+  status: "available" | "valid_empty" | "fallback" | "stale" | "deferred" | "unavailable";
+  data_status: "available" | "valid_empty" | "unavailable";
+  freshness: "fresh" | "stale" | "unavailable";
+  provider: string;
+  source_id: string | null;
+  source_url: string | null;
+  using_fallback: boolean;
+  coverage: string;
+  valid_start_utc: string | null;
+  valid_end_utc: string | null;
+  window_hours: number | null;
+  configured_window_hours: number;
+  last_successful_fetch_utc: string | null;
+  success_age_seconds: number | null;
+  saved_batch_id: string | null;
+  saved_row_count: number | null;
+  quality: { unknown_date_count?: number; stored_item_count?: number };
+  primary_attempt: {
+    status: string; http_status: number | null; error_code: string | null;
+    next_allowed_at: string | null;
+  } | null;
+  schedule: { status: string; next_allowed_utc: string | null } | null;
 };
 export type Health = {
   overall: string;

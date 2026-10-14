@@ -16,6 +16,7 @@ from portwatch.db import connect_db
 from portwatch.events import emit
 from portwatch.ingest import plan
 from portwatch.live import live_spec
+from portwatch.news import read_news_context
 from portwatch.positions import PROCESSING_VERSION
 from portwatch.settings import Settings, for_port, load_port_config
 from portwatch.storage import RawStore
@@ -354,6 +355,8 @@ def series_health(connection, spec, complete, now, settings):
 
 
 def context_health(connection, port, product, now, settings):
+    if product == "recent_news":
+        return read_news_context(connection, port, now, settings)
     with connection.cursor(row_factory=dict_row) as cursor:
         cursor.execute(
             """SELECT a.status,a.started_at,a.retrieved_at,a.http_status,

@@ -17,6 +17,7 @@ ARCHIVE_ENDPOINT = "https://archive-api.open-meteo.com/v1/archive"
 FORECAST_ENDPOINT = "https://api.open-meteo.com/v1/forecast"
 NEWS_ENDPOINT = "https://api.gdeltproject.org/api/v2/doc/doc"
 PARSER_VERSION = "context-v1"
+NEWS_PARSER_VERSION = "news-v2"
 TRACKING_PARAMETERS = {"fbclid", "gclid", "dclid", "msclkid", "mc_cid", "mc_eid"}
 
 
@@ -51,6 +52,11 @@ class ContextRequest:
     keywords: tuple[str, ...] = ()
 
     @property
+    def parser_version(self) -> str:
+        # News revisions must not invalidate the frozen historical weather lineage.
+        return NEWS_PARSER_VERSION if self.kind == "news" else PARSER_VERSION
+
+    @property
     def request_key(self) -> str:
         body = dict(
             kind=self.kind,
@@ -62,7 +68,7 @@ class ContextRequest:
             start=utc(self.start_utc).isoformat(),
             end=utc(self.end_utc).isoformat(),
             keywords=self.keywords,
-            parser=PARSER_VERSION,
+            parser=self.parser_version,
         )
         return hashlib.sha256(json.dumps(body, sort_keys=True).encode()).hexdigest()
 
@@ -231,17 +237,31 @@ def normalize_news_rss(payload: bytes, request: ContextRequest) -> "NormalizedCo
         )
     if items and unknown == len(items):
         raise ContextError("rss_publication_dates_unavailable")
-    cap = int(request.parameters["maxrecords"])
-    result = normalize_news(json.dumps(dict(articles=articles[:cap])).encode(), request)
+    result = normalize_news(json.dumps(dict(articles=articles)).encode(), request)
     result.quality.update(
         label="official Port of Oakland releases",
         exhaustive=False,
         feed_item_count=len(items),
+        provider_article_count=len(items),
+        parsed_item_count=len(items),
+        eligible_item_count=len(articles),
+        excluded_by_date=outside,
+        unknown_date_count=unknown,
+        unknown_count=unknown,
         outside_window=outside,
         unknown_publication_items=unknown,
+        date_coverage_complete=unknown == 0,
+        response_bytes=len(payload),
+        format="RSS 2.0",
         coverage="official authority feed only; not a broad disruption-news search",
     )
-    result.metadata.update(provider="Port of Oakland", format="RSS 2.0", first_seen_field="unknown")
+    result.metadata.update(
+        provider="Port of Oakland",
+        format="RSS 2.0",
+        response_bytes=len(payload),
+        first_seen_field="unknown",
+        window_semantics="publication time in the requested UTC window; unknown dates excluded",
+    )
     return result
 
 
@@ -377,12 +397,14 @@ def optional_news_time(value, field: str, flags: list[str]) -> datetime | None:
 
 
 def normalize_news(payload: bytes, request: ContextRequest) -> NormalizedContext:
+    if len(payload) > 2 * 1024 * 1024:
+        raise ContextError("source_response_too_large")
     body = decode_response(payload)
     # The prior audited provider returned {} for a successful empty search.
     articles = [] if body == {} else body.get("articles")
     if not isinstance(articles, list):
         raise ContextError("news_articles_missing_or_invalid")
-    rows = {}
+    rows, outside, unknown = {}, 0, 0
     for article in articles:
         if (
             not isinstance(article, dict)
@@ -395,6 +417,16 @@ def normalize_news(payload: bytes, request: ContextRequest) -> NormalizedContext
         flags = []
         published = optional_news_time(article.get("published_at"), "publication", flags)
         first_seen = optional_news_time(article.get("seendate"), "first_seen", flags)
+        # Publication is more precise editorial evidence than first discovery.
+        # An absent publication time can use first discovery only for window selection.
+        window_time = published if published is not None else first_seen
+        if window_time is not None and not request.start_utc <= window_time < request.end_utc:
+            outside += 1
+            continue
+        if window_time is None:
+            unknown += 1
+            if request.source_id == "gdelt_doc_v2":
+                flags.append("dates_unknown_query_scoped")
         tags = [word for word in request.keywords if word in article["title"].casefold()]
         if not tags:
             flags.append("query_match_without_title_keyword")
@@ -420,18 +452,38 @@ def normalize_news(payload: bytes, request: ContextRequest) -> NormalizedContext
             ),
         )
     cap = int(request.parameters["maxrecords"])
+    eligible = len(articles) - outside
+    stored = list(rows.values())[:cap]
+    provider_cap_reached = request.source_id == "gdelt_doc_v2" and len(articles) >= cap
     return NormalizedContext(
-        list(rows.values()),
+        stored,
         dict(
             provider_article_count=len(articles),
-            duplicate_urls=len(articles) - len(rows),
-            truncated=len(articles) >= cap,
-            label="potential disruption mention",
+            parsed_item_count=len(articles),
+            eligible_item_count=eligible,
+            excluded_by_date=outside,
+            unknown_date_count=unknown,
+            unknown_count=unknown,
+            deduplicated_count=len(rows),
+            stored_item_count=len(stored),
+            duplicate_urls=eligible - len(rows),
+            truncated=provider_cap_reached or len(rows) > cap,
+            provider_cap_reached=provider_cap_reached,
+            response_bytes=len(payload),
+            format="JSON",
+            date_coverage_complete=unknown == 0,
+            label="port news and context",
             exhaustive=False,
         ),
         dict(
+            format="JSON",
+            response_bytes=len(payload),
             publication_field="published_at if supplied; otherwise unknown",
             first_seen_field="seendate",
-            relevance_scope="title keyword substring",
+            relevance_scope="optional disruption keyword tags from title substrings",
+            window_semantics=(
+                "publication time, otherwise first-seen, in the requested UTC window; "
+                "unknown timestamps remain provider-query scoped"
+            ),
         ),
     )

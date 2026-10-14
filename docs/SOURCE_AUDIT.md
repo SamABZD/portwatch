@@ -1,5 +1,54 @@
 # Step 01 source audit
 
+## Completion phase 2: news diagnosis (2026-10-13 UTC; local validation 2026-10-14)
+
+The pre-change path requested 24 hours with named-port **and disruption-word** matching.
+At approximately 20:31 UTC, saved backend and same-origin frontend health/frame responses
+agreed: LA selected an official archive HTTP200 valid-empty batch for October 12 20:00 through
+October 13 20:00 UTC; Oakland selected a GDELT HTTP200 valid-empty batch for October 12 20:15
+through October 13 20:15 UTC. The panel displayed zero rows for both. Oakland's earlier
+nonempty official fallback had been superseded by this successful primary empty result.
+The deployed health contract omitted the failed primary detail behind LA's fallback; bounded
+logs did not recover that exact attempt, and direct cloud SQL/SSH was unavailable. Earlier
+local LA429 observations are separate receipts, not proof of that cloud attempt.
+
+After inspecting saved receipts and the shared cooldown, one bounded GDELT request at
+20:47:04 UTC used the proposed LA named-port query and the seven-day half-open window
+`2026-10-06T20:45:00Z` through `2026-10-13T20:45:00Z`. It returned HTTP429. No retry,
+second-port primary probe, or successful GDELT article result is claimed; no Retry-After value
+was available. The exact failed-response body/receipt time was not captured. The official
+sources each received one bounded GET, with original bodies saved before normalization.
+
+| Official source | Receipt UTC | Format / bytes | Parsed | Outside date window | Unknown date | Deduplicated / stored / selected / rendered |
+| --- | --- | --- | --- | --- | --- | --- |
+| [LA archive](https://portoflosangeles.org/news/news-release-archive) | 2026-10-13 20:47:21.031006 | HTML / 312,946 | 637 | 635 | 1 | 1 / 1 / 1 / 1 |
+| [Oakland RSS](https://www.portofoakland.com/feed/) | 2026-10-13 20:47:24.260159 | RSS 2.0 / 100,729 | 10 | 9 | 0 | 1 / 1 / 1 / 1 |
+
+Both official parses used the same seven-day window and the unchanged 100-record limit;
+neither was capped. LA's retained release has calendar date `2026-10-09`, Pacific day-overlap
+semantics and null publication/first-seen instants. Oakland retains its supplied publication
+instant. Official coverage remains limited and incomplete. The seven-day window fixes the
+observed exclusion of recent releases; it cannot create articles or overcome a primary outage.
+
+Stored/selected counts above come from replaying **these exact recorded bodies and receipts**
+through actual ingestion and the shared SQL/health resolver in a temporary owned schema.
+Saved, stored and selected batch IDs matched; raw checksums and receipts stayed unchanged.
+Rendered counts come from a local browser fixture composed with recorded genuine AIS frames,
+whose analytical values/cutoffs were preserved. These are test compositions, not updated cloud
+frames. LA's observed429 was explicitly replayed as failure evidence; Oakland has no
+contemporaneous primary probe. Temporary run/attempt metadata is test controlled. SQL/API
+integration independently verifies the actual fingerprint, dataset, frame and health path with
+synthetic fixture-owned AIS/news; browser controls cover failure states and historical exclusion.
+The real Next.js proxy forwards both ports' composed frame/health JSON unchanged in four
+bounded loopback checks. No provider calls occur during storage replay or browser verification.
+
+Raw bodies, complete source receipts, live API fixtures and screenshots remain outside Git
+or in ignored `artifacts/phase2`; sanitized verification is in
+[phase2-news.json](evidence/phase2-news.json). No production schema/data, collection cadence,
+paid resource or deployment was changed. Current official parsing and primary availability
+must still be checked through normal scheduled evidence after a separately authorized release.
+
+
 ## Live multiport extension review (2026-10-12)
 
 Los Angeles and Oakland now have separate genuine AISStream subscriptions, raw identities,

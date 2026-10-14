@@ -1,5 +1,6 @@
 """Actual PostgreSQL context revisions and replay isolation; synthetic loopback-free bytes."""
 
+from dataclasses import replace
 from datetime import timedelta
 
 import pytest
@@ -11,13 +12,30 @@ from portwatch.settings import Settings
 from portwatch.storage import BatchSpec, RawStore
 from tests.test_bookkeeping import connection as pg_connection
 from tests.test_context import NOW, news_payload, request, weather_payload
+from tests.test_context import http_server as loopback_http_server
 
 connection = pg_connection
+http_server = loopback_http_server
 pytestmark = pytest.mark.integration
 
 
 def setup(tmp_path):
     return Settings(raw_dir=tmp_path)
+
+
+def test_default_news_fetch_never_hot_retries_a_transient_http_error(
+    connection, tmp_path, http_server
+):
+    url, state = http_server
+    state["statuses"] = [503, 200]
+    req = replace(request("news", False), endpoint=url)
+    with pytest.raises(ContextError, match="source_http_failure"):
+        ingest_context(setup(tmp_path), connection, req, now=NOW)
+    assert state["count"] == 1
+    assert connection.execute("SELECT status,http_status FROM context_attempts").fetchone() == (
+        "failed",
+        503,
+    )
 
 
 def fetcher(payload, at=NOW):

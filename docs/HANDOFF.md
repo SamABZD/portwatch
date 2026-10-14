@@ -2,6 +2,59 @@
 
 ## Current stage state
 
+- **October 14, 2026 release checkpoint:** the owner explicitly requested that all completed
+  Phases 1–3 be pushed and merged into `main`, followed by new work. The release is tracked
+  in [PR #8](https://github.com/SamABZD/portwatch/pull/8). The existing Railway backend was
+  deployed first from tested code checkpoint `d39d9bd`; readiness, both ports' health,
+  live/historical frames and catalogs, and pipeline returned HTTP 200. Both cloud collectors
+  reported `healthy_connected` with live processes; one backend deployment/replica and zero
+  overlap remain. Historical frames exclude current news. LA selected one official article
+  in a 168-hour saved window; Oakland retained one article in its explicitly labeled 24-hour
+  saved window while scheduled acquisition was deferred. Both configure 168 hours; no manual
+  source probe, local collector, resource resize, account limit or CI change was added.
+- Full local validation at `d39d9bd`: `.\.bootstrap-venv\Scripts\uv.exe run --locked --extra dev
+  python scripts/validate.py` **passed**: Ruff lint/format, **236 unit tests**, wheel/source
+  distribution and packaged SQL checks, eight fresh migrations with an idempotent repeat,
+  and **93 integration tests**, with zero skips. PostgreSQL 17 / PostGIS 3.6.2; AIS credential
+  disabled, temporary storage and owned schemas. Existing frontend code still has Phase 3's
+  14 Node tests, typecheck/build and 27 browser checks; those fixture-based checks are not
+  represented as a new hosted browser pass.
+- Vercel CLI refreshed the expired access token successfully. Account metadata now confirms
+  an active Hobby plan, `web` project root and production branch `main`; the frontend publishes
+  through that existing integration. Billing-cost data for October 1–14 was unavailable,
+  which does not establish zero usage. Railway hosted monetary delta remains unverified;
+  the owner's merge request does not turn that uncertainty into proof of cost neutrality.
+  Rollback references and detailed operational evidence remain private outside Git.
+- **Next: Phase 4**, then Phase 5 and remaining Phase 6 checks/publication. Initial validation
+  and rollout do not complete the full Phase 6 acceptance matrix. Repository remains private;
+  GitHub Actions remain disabled; the owner retains the public-visibility decision.
+- The phase completion records below describe their original local checkpoints. Their
+  no-push/no-deployment statements predate this later owner-requested release checkpoint.
+- PortWatch completion **Phase 3 is complete locally** at `f179020`: shared responsive header,
+  visible active route links, labeled port scope, independent data mode, validated URL state
+  and explicit data-engineering purpose/metadata. Port, mode and replay minute survive route
+  return, reload and browser history; prepared sessions normalize to historical. Selected-port
+  pipeline evidence is distinct from the fixed LA history artifact. **14 Node tests**,
+  typecheck/build and **27 browser checks** passed at four widths and native 200% zoom. See
+  [phase3-navigation.json](evidence/phase3-navigation.json). No push/deploy; Phase 1 cost gates
+  remain. Repository still private; source CTA waits for public visibility. Phase 4 untouched.
+- PortWatch completion **Phase 2 is complete locally** at code commit `9e6c6bf`, on
+  `feat/phase1-cost-controls`: seven-day port context, bounded format/transport fallback,
+  one news selection/provenance contract for SQL/frame/health, preserved date precision and
+  explicit news panel states. **146 targeted tests**, **29 browser checks**, frontend
+  typecheck/build and four actual Next.js proxy fixture forwards passed. See
+  [CONTEXT](CONTEXT.md), [SOURCE_AUDIT](SOURCE_AUDIT.md) and
+  [phase2-news.json](evidence/phase2-news.json). No push/deployment occurred; Phase 1 cost
+  gates remain. GDELT verification returned429; official saved
+  responses each contain one eligible article in seven days, with isolated storage/rendering
+  evidence rather than a claim that the cloud now serves this revision.
+- PortWatch completion **Phase 1 is complete locally**: current Railway billing/resource
+  baseline inspected, hidden polling and request overlap corrected, genuine prepared replay
+  checked, and cost/stop/rollback evidence recorded in [COST_CONTROL](COST_CONTROL.md).
+  Tested code commit: `01ac067`, local branch `feat/phase1-cost-controls`.
+  No provider setting, deployment, paid resource or account limit changed. Vercel billing
+  access and a comparable hosted monetary delta remain explicit release gates; no verified
+  hosted cost reduction is claimed. Its release gates still apply to Phase 2.
 - Project: this repository; default branch `main`. Publication PR#3 merged at
   `8fcaa933971f5ce98816d97761a5979e7e2c2560`; first release
   [v0.1.0](https://github.com/SamABZD/portwatch/releases/tag/v0.1.0) points to that exact
@@ -26,6 +79,221 @@
   superseded by the live runtime. No source observations were invented for this extension.
 
 ## Verified commands and observed outcomes
+
+### Completion phase 3: navigation and purpose (2026-10-14 Asia/Beirut)
+
+- Began with clean `5e6f683` on `feat/phase1-cost-controls`; read the phase brief, working
+  agreement, PRODUCT/DESIGN, current handoff/decisions and applicable web instructions.
+  Installed Next.js 16.4 documentation confirms native history integration with search params,
+  disabled Link prefetch and required Suspense for static pages. Impeccable refinement keeps
+  incumbent palette/type/layout; cavecrew handled pipeline integration, browser checks and review.
+- Added `app-header.tsx` on both routes: identical circle/arrow, type, alignment and spacing;
+  one labeled real-link nav; current-page aria/weight/underline; port label and native 44px
+  selector; visible links on mobile. Removed the competing compact/desktop navigation.
+  Data mode stays separately labeled on the map. Same-port/mode actions preserve loaded state
+  and issue no extra API reads. Loading a new port is distinct from unavailable saved data.
+- Added `view-state.ts` and `view-scope.ts`: only LA/Oakland, live/historical and integer
+  replay minutes 0–1440 are accepted. Defaults are LA/live/750; invalid URL fields are safely
+  replaced. Native history changes control scope without server navigation; real Next links
+  preserve it across routes. Replay playback replaces URL minutes rather than filling history.
+  Existing staleness, prefix inference, hidden polling/cancellation and cache identities remain.
+- Pipeline selection filters current operational sections to the selected port without an extra
+  acquisition or pipeline request. The seven-day LA artifact keeps its own scope label; map mode
+  does not turn current operational measurements into historical evidence. Prepared dashboard
+  and pipeline normalize to historical links/URL, disable unavailable live and respect available
+  ports. Review found pipeline prepared links initially retained live; fixed before browser checks;
+  follow-up reviewer: **No issues**. Architecture/map/data transformations are Phase 4 scope.
+- Added compact first-viewport data-engineering purpose, a prominent pipeline link and accurate
+  Python/PostGIS/Prefect/historical-dbt scope. Updated title/description/OpenGraph/Twitter metadata
+  without a separate marketing route or new assets/dependencies. `gh repo view SamABZD/portwatch
+  --json isPrivate,url` returned **isPrivate:true**; no source CTA or visibility change. Add and
+  verify that secondary CTA after the owner's public-visibility step.
+- From `web/`: `node --test scripts/view-state.test.mjs scripts/visible-polling.test.mjs`:
+  **14 passed, zero failed** (three URL/bounds/route checks and eleven existing lifecycle tests).
+  Node reports implicit ESM reparsing for TS imports; no package/config change. `npm run typecheck`
+  and final `npm run build`: **passed**; both pages remain static, API proxy stays dynamic/read-only.
+  No backend source/schema changes; the Phase 2 backend total was not rerun or claimed here.
+- `python -m scripts.verify_navigation_browser --help`, then final production-browser command:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m scripts.verify_navigation_browser --url http://127.0.0.1:3160 --fixtures C:\Users\samab\.codex\portwatch-phase3-private\browser-fixtures --output artifacts/phase3
+  ```
+
+  Existing `webapp-testing/scripts/with_server.py` supplied the temporary frontend, with its
+  upstream URL pointed at loopback port 9. All API responses were intercepted from saved genuine
+  fixtures; all external requests/tiles blocked. **27 browser checks passed**, zero page/fixture
+  errors or external requests: real keyboard links/focus, active state beyond color, current
+  selector/API scope, same-value no-op, route/back/forward/reload, unknown parameters,
+  390/768/1024/1440 widths, measured shared-header parity and no page overflow.
+- Native Chrome 200% zoom used an isolated Temp extension/profile and `tabs.setZoom(2)`:
+  content width 1440 to 720 CSS pixels, DPR 1 to 2, outer width unchanged, CSS zoom/visual viewport scale 1;
+  media query changed and controls/purpose remained visible on both routes. Initial Playwright
+  screenshots cropped the physical viewport despite valid layout measurements. One confirmation
+  after raw CDP capture produced complete 1440x804 pixels without resizing; all 27 checks passed again.
+  Six first-viewport screenshots (map/pipeline desktop/mobile/nativezoom) were visually checked.
+  No interface polishing loop. Temporary browser profiles closed/removed; temporary Node child
+  explicitly stopped after port/process ownership verification, because Windows helper shutdown
+  alone leaves its child. No local collectors started.
+- Bounded actual prepared `TestClient` queries used existing checksummed LA/Oakland exports,
+  DB port 9 and unset AIS key: both historical 10:00 UTC frames returned 200, with 26,093/22,864 genuine
+  prefix observations. Browser roundtrips/reloads retain minute 600 and those exact frames;
+  no timestamp/coordinate/count substitution. Actual prepared catalog/pipeline/12:30 frames
+  validate capability fallback and disabled live. Private captures retain receipts and analytics;
+  they are not a new hosted response or deployment claim. Existing Starlette TestClient warning
+  remains. Raw/live fixture bodies stay outside Git; screenshots stay in ignored `artifacts/phase3`.
+- Ruff `check`/`format --check` on the new verifier and `git diff --check`: **passed**.
+  Changed-file configured-long-secret scan found zero matches without printing values.
+  PRODUCT/DESIGN and D088–D090 record the shared navigation contract. Sanitized evidence is
+  committed; detailed fixture capture remains at `C:\Users\samab\.codex\portwatch-phase3-private`.
+- No push, preview/deployment, paid resource, dependency, CI, account, source cadence, data,
+  license, visibility or profile change. New route links disable prefetch; hosted monetary/query
+  delta remains unmeasured, so Phase 1 release gates still apply. Full release validation is
+  assigned to Phase 6. Next work is Phase 4 when requested.
+
+### Completion phase 2: news end to end (2026-10-14 Asia/Beirut)
+
+- Chose completing Phase 2 locally before pushing because deployment/preview cost and billing
+  gates remain unresolved. Continued on the existing branch after `d458c74`; preserved original
+  data and kept local collectors stopped. No new dependency, service, schema migration or
+  provider setting. Changed port news configuration; connector/parser/storage code; pipeline
+  fallback; shared `news.py`; replay/health; `NewsPanel`/dashboard/types; relevant tests and
+  `verify_news_browser.py`. The full config/flow/raw/SQL/API/proxy/panel trace is in
+  [CONTEXT](CONTEXT.md).
+- Saved deployed frame/health snapshots for both ports and both same-origin/backend endpoints,
+  inspected prior attempts and bounded logs, then performed one primary and two official
+  source checks. Exact windows, queries, HTTP/format/byte/count evidence and access limits are
+  in [SOURCE_AUDIT](SOURCE_AUDIT.md). Old 24-hour keyword-filtered LA official/Oakland primary
+  results were valid empty; a successful primary empty response still completes without an
+  extra official request. Broadened named-port context to 168 hours, retained optional title
+  tags and maximum 100 records, and left hourly schedules unchanged. News uses one HTTP attempt
+  per provider, maximum two per eligible invocation; no hot 429 retry. GDELT availability remains
+  limited.
+- Raw HTML/XML remained private and unchanged. Replayed the actual recorded bodies/receipts
+  through `ingest_context`, SQL row selection and the shared health resolver in a temporary
+  owned UUID schema: one article per port; saved/stored/selected batches matched. LA retains
+  Pacific date `2026-10-09` with null publication/first-seen instants; Oakland retains its
+  supplied publication timestamp. Local fixture attempts/cooldowns are explicitly test
+  metadata; Oakland received no contemporaneous GDELT probe. The temporary schema/raw directory
+  was removed. An initial concurrent-test advisory lock prevented capture; retry after tests
+  completed succeeded without bypassing ownership or adding source calls.
+- Added deterministic parser/date/DST/dedup/cap/unknown tests and real isolated PostgreSQL
+  integration for ordering before limit, primary429/fallback/empty, retained receipts,
+  identical-byte refetch revision, saved-raw recovery, scheduler deferral and SQL/API lineage.
+  The actual ingest/fingerprint/load_dataset/FastAPI frame/health path uses fixture-owned
+  synthetic AIS/news; historical frames exclude current news. Review caught two defects:
+  selected-primary failure hidden by later failed fallback, and an incomplete-response error
+  code absent from the allowlist. Both fixed with regressions; follow-up reviewer: **No issues**.
+  Frame dataset metadata also recomputes the same age/state as its top-level news contract.
+- Final targeted command from repository root:
+
+  ```powershell
+  $env:PORTWATCH_TEST_DB='1'
+  $env:PORTWATCH_AIS_API_KEY=''
+  .\.venv\Scripts\python.exe -m pytest -q tests/test_context.py tests/test_news_rss.py tests/test_news_archive.py tests/test_news_contract.py tests/test_news_storage.py tests/test_context_storage.py tests/test_replay.py tests/test_replay_storage.py tests/test_health.py tests/test_health_storage.py tests/test_pipeline.py tests/test_pipeline_storage.py
+  ```
+
+  **146 passed, zero failed, 49.64s**. One existing Starlette/httpx TestClient deprecation warning;
+  no dependency change. A rerun across UTC midnight exposed synthetic LA fixtures using UTC
+  calendar dates; corrected them to Pacific dates. No external network/AIS collection in tests;
+  SQL tests used their own migrated UUID schemas, leaving original analytical data intact.
+- From `web/`, `npm run typecheck` and `npm run build`: **passed**. Build initially caught two
+  Windows text writes introducing non-UTF8 separator bytes; corrected the string encoding.
+  Existing stylesheet/design remains; no navigation/header/map/pipeline redesign in this phase.
+- `python -m scripts.verify_news_browser --help`, then final local production browser command:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m scripts.verify_news_browser --url http://127.0.0.1:3160 --fixtures C:\Users\samab\.codex\portwatch-phase2-private\browser-fixtures --output artifacts/phase2
+  ```
+
+  Existing `webapp-testing/scripts/with_server.py` supplied the temporary Next.js server. Final
+  result: **29 checks passed**, zero page/fixture-route errors, zero provider calls; both ports,
+  all six states, primary200 parse failure, date-only/first-seen/unknown precision, contradictory
+  health/frame attribution, historical exclusion/current-context button, prepared historical
+  mode, keyboard article links, 1365x900 and 390x844 with no page overflow. External links/tiles
+  were blocked. Initial harness attempts failed due to Windows server paths, dropping catalog
+  availability/geometry and artificial same-value select events; corrected harness and awaited
+  actual rendered readiness. No cosmetic iteration. Existing same-mode/same-value handler
+  behavior is a Phase 3 navigation consideration; these checks exercise changed-value selections.
+- Separately performed four bounded reads through the **actual Next.js proxy** against a
+  loopback fixture backend: frame/health for each port matched complete fixture JSON with200
+  and `Cache-Control: no-store`. Browser fixtures compose recorded genuine AIS values with
+  actual stored official news from a different capture time; they are rendering tests, never
+  deployed-frame proof. Synthetic edge-state headlines carry `TEST ONLY`. Genuine LA desktop/
+  mobile, Oakland desktop and historical exclusion screenshots are in ignored `artifacts/phase2`;
+  visually checked news date/source/state/layout. Old failure captures remain ignored evidence.
+- Ruff `check` and `format --check` on changed Python files: **passed**. `git diff --check`:
+  **passed**. Changed-file scan found zero configured long-secret matches without printing
+  secret values; full reachable-history/public-readiness audit remains assigned to Phase 5.
+  Verification servers on ports 3160/8713 were explicitly stopped after checking process ownership;
+  Windows helper termination alone left child processes. No local collectors started.
+- Private receipts/bodies/API fixtures and capture/proxy scripts remain at
+  `C:\Users\samab\.codex\portwatch-phase2-private`. Sanitized evidence is committed; bulk/raw/live
+  fixtures and screenshots are excluded. No push/deploy, account spending cap, Actions, license,
+  visibility or profile change. Query/monetary delta after rollout remains unresolved; run Phase 6
+  validation once before release, resolve cost gates, deploy backend before dependent frontend,
+  and verify normal scheduled progress. Next assigned work is Phase 3 only when requested.
+
+### Completion phase 1: cost controls (2026-10-13 Asia/Beirut)
+
+- Started with clean `main` at `7d34eed`. Inspected working agreement, product/design,
+  current operations/decisions, installed Next.js fetching/route documentation and provider
+  documentation. Detailed billing responses, service table and source/API fixtures remain
+  outside Git; sanitized results are in [phase1-cost-controls.json](evidence/phase1-cost-controls.json).
+- Read `railway usage --json`, `railway usage projects --project portwatch --json`,
+  `railway usage projects --json`, `railway usage limit status --json`, existing one-day
+  metric series and `railway status --json`. PortWatch still has two services, one active
+  deployment/running instance each, existing CPU/RAM limits and two 5000 MB volumes.
+  Actual compute spending limit was absent; the separate agent limit is not a compute cap.
+  Other projects and account settings were not changed. Neither earlier monthly estimate
+  was adopted as a budget. Provider disk metrics and volume inventory differ; an actual
+  filesystem/growth audit remains necessary before claiming a capacity deadline.
+- Both saved cloud health responses reported `healthy_connected`, one connection per port,
+  available logical backups and recent maintenance. No local collector was running or
+  started. SSH process/filesystem inspection failed because no registered key was available;
+  no new key/access was created. Browser account access failed and local Vercel authentication
+  was unavailable, so its plan, usage and spend controls are unresolved.
+- Added a visibility-aware request lifecycle for catalog/frame/health/pipeline: hidden idle,
+  abort on hide/cleanup, one active-resource refresh on return, no overlapping loads and no
+  stale delivery. Successful catalogs unsubscribe until a port/revision change or retry.
+  Historical frames/catalogs have no recurring timer. Hidden replay playback does not advance;
+  existing manual refresh/retry remains. Proxy requests combine client cancellation and the
+  existing 20-second deadline. Hosting platforms/backend handlers determine cancellation
+  after disconnect; only client cancellation was exercised end to end. Existing cache
+  keys, static lineage view/no-store fix and backend news/weather acquisition stay intact.
+- Cost investigation found retained live-byte audits, all-time publication fingerprints,
+  potentially whole-history visit recomputation, checksum-LRU thrashing and repeated frozen
+  history backup as growth risks. An isolated synthetic 8193-entry rescan reproduced zero
+  cache hits. Preserve audit/writer integrity and source bytes; no speculative SQL, larger
+  cache, source deletion or cadence change was applied.
+- From `web/`, `node --test scripts/visible-polling.test.mjs`: **11 passed**, zero failed;
+  `npm run typecheck` and `npm run build`: **passed**. Initial checks caught removal of the
+  existing explicit refresh trigger; restoring that state fixed the failure. No dependency
+  or lockfile changed.
+- From the root, `.\.venv\Scripts\python.exe -m scripts.verify_polling_browser --help`;
+  then the same module with `--fixtures <private-baseline-directory> --output artifacts/phase1`:
+  **seven browser scenarios passed**, zero page errors, both ports/modes/routes and
+  desktop/mobile captures. Fake clock/visibility and delayed/error responses remained test
+  controls; saved genuine API bodies stayed isolated. Timing assertions were corrected to
+  await dispatched requests before the final passing run. External source calls and tiles
+  were blocked; analytical storage was not accessed. The temporary frontend was stopped.
+- `.\.venv\Scripts\ruff.exe check scripts/verify_polling_browser.py` and
+  `ruff format --check` passed; Impeccable detector returned `[]`; cavecrew reviewer reported
+  **No issues** for code. A final evidence statement implying a known traffic delta was
+  corrected to unresolved, and the browser report refreshed after the catalog change.
+  `git diff --check` passed. Complete release validation is deferred to its
+  assigned phase, not claimed here.
+- Bounded `TestClient(create_app(..., prepared=...))` checks for both existing checksummed
+  historical exports used `db_port=9` and no AIS key: catalog/frame/health **200**, vessels
+  present, database **not_used**, live **422 / prepared_mode_has_no_live_connection**.
+  The initial probe expected 503; its assertion was corrected to the existing 422 contract,
+  with no API change. LA noon had 124 displayed vessels; Oakland 126. Hosted Python prepared
+  serving still consumes resources and is not advertised as free static hosting.
+- Production recurring change from this phase is zero because no rollout/configuration
+  occurred. Sustained-hidden sessions reduce requests; frequent short resume cycles can add
+  refreshes, so overall hosted query/money delta and rollout usage remain unresolved. Bounded
+  reads can incur existing metered usage. No news repair, design/navigation refactor, public
+  visibility change, profile publication, new collector, database, service or CI enablement
+  was included. Stop at Phase 1; Phase 2 requires the next assignment.
 
 ### Budgeted cloud history and operation (2026-10-13 Asia/Beirut)
 

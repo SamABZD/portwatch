@@ -1,0 +1,96 @@
+{
+  "phase": 1,
+  "status": "completed_locally_rollout_cost_gates_explicit",
+  "source_baseline": "7d34eed",
+  "checked_at_utc": "2026-10-13T20:23:22.239287+00:00",
+  "railway": {
+    "services": 2,
+    "active_deployments_per_service": 1,
+    "instances_per_service": 1,
+    "backend_limits": {
+      "cpu": 1,
+      "ram_gb": 2
+    },
+    "database_limits": {
+      "cpu": 0.5,
+      "ram_gb": 1
+    },
+    "volume_capacity_mb_each": 5000,
+    "compute_monetary_limit": "absent",
+    "private_account_evidence": "stored_outside_git",
+    "host_process_census": "unavailable_no_registered_ssh_key"
+  },
+  "vercel": {
+    "billing_and_plan": "unavailable",
+    "spend_control": "unverified"
+  },
+  "changes": {
+    "new_billable_resources": 0,
+    "provider_settings_changed": false,
+    "deployed": false,
+    "expected_query_delta": "unresolved_pending_comparable_traffic",
+    "verified_hosted_money_delta": null,
+    "production_recurring_delta_this_phase_usd": 0,
+    "audit_read_usage": "bounded_metered_not_claimed_free"
+  },
+  "validation": {
+    "node_polling_tests": {
+      "passed": 11,
+      "failed": 0
+    },
+    "typescript": "passed",
+    "next_production_build": "passed",
+    "browser": {
+      "checked_at_utc": "2026-10-13T20:23:22.239287+00:00",
+      "url": "http://127.0.0.1:3160",
+      "fixtures": "saved genuine API responses with isolated test controls",
+      "checks": [
+        "visible_live_cadence_preserved",
+        "hidden_dashboard_zero_requests_single_resume",
+        "manual_refresh_and_obsolete_port_request_cancelled",
+        "historical_no_periodic_frame_requests_hidden_playback_paused",
+        "route_cleanup_hidden_pipeline_zero_requests_single_resume",
+        "slow_pipeline_no_overlap_aborted_resume_recovery",
+        "pipeline_failure_manual_retry_recovers"
+      ],
+      "requests": {
+        "catalog": 2,
+        "health": 6,
+        "frame": 7,
+        "history": 1,
+        "pipeline": 7
+      },
+      "page_errors": []
+    },
+    "prepared_replay": [
+      {
+        "port": "los_angeles",
+        "snapshot": "replay-c40b37d4336d48bfa27d59702a53ff04.json",
+        "vessels": 124,
+        "historical_http": 200,
+        "database": "not_used",
+        "live_http": 422
+      },
+      {
+        "port": "oakland",
+        "snapshot": "prepared-oakland.json",
+        "vessels": 126,
+        "historical_http": 200,
+        "database": "not_used",
+        "live_http": 422
+      }
+    ],
+    "ruff_check": "passed",
+    "ruff_format": "passed",
+    "design_detector": [],
+    "cavecrew_review": "Code: No issues. Final evidence overclaim corrected."
+  },
+  "remaining_release_gates": [
+    "Vercel account billing/usage/control inspection",
+    "Comparable hosted delta and one-time rollout accounting",
+    "Filesystem capacity measurement before source-retention horizon claims"
+  ],
+  "phase2_started": false,
+  "tested_code_commit": "01ac067",
+  "working_branch": "feat/phase1-cost-controls"
+}

@@ -58,7 +58,7 @@ def fetch_context(
                 url,
                 headers={
                     "User-Agent": "PortWatch/0.1 educational local demo",
-                    "Accept": "application/json",
+                    "Accept": "application/json, application/rss+xml, text/html;q=0.8",
                 },
             )
             with urlopen(request, timeout=min(timeout, remaining)) as response:
