@@ -4,7 +4,9 @@
 
 - [Phase 6 release](phase6-release.json) and [validator transcript](phase6-validation.txt):
   329 current Python tests,14 Node tests,63 browser checks, actual hosted API contracts and
-  scoped cost/rollback evidence. Production/profile status is recorded only after verification.
+  scoped cost/rollback evidence. Production at `fb89c3c` separately passes12 HTTPS checks,
+  four API bounds cases and eight real-response browser checks. Public source/assets, profile
+  entry/image/links and the preserved Flux/Retro/PortWatch pin order are verified.
 
 - [Phase 4 workspace](phase4-workspace.json): current frontend build/typecheck,14 Node tests
   and37 recorded browser checks, including preserved unchanged-code checks and narrow follow-ups.
@@ -15,8 +17,9 @@
 
 The phases1–3 release at `d39d9bd` passed236 unit +93 integration =329 Python tests;
 [handoff](../HANDOFF.md) records the exact validator. Backend code is unchanged in phases4–5.
-Full release validation remains Phase6. GitHub now reports public; Actions remain disabled.
-New feature-branch presentation and UI are not a production rollout.
+Phase6 repeated full local validation, merged the presentation through PR#9 and verified
+the existing Vercel production rollout. Railway deployments remain unchanged; GitHub Actions
+remain disabled. Earlier evidence files retain their original point-in-time statuses.
 
 ## Earlier stage evidence
 

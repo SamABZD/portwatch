@@ -1,14 +1,21 @@
 # GitHub setup record
 
-## October 14, 2026 presentation checkpoint
+## October 14, 2026 completed release
 
-GitHub reports this repository public; visibility changed outside the Phase 4–5 task.
-Actions remain disabled. Phases 4–5 are on `feat/phase4-5-polish`, with current evidence in
-[workspace verification](evidence/phase4-workspace.json) and
-[public readiness](evidence/phase5-public-readiness.json). Production remains the prior release;
-Phase 6 release validation/deployment and the profile update remain. Older statuses below
-describe their recorded checkpoints and are superseded by this observation. No code license
-has been selected; non-secret operational context remains in older reachable commits.
+[PR #9](https://github.com/SamABZD/portwatch/pull/9) merged at `fb89c3c` and the existing
+Vercel integration deployed that revision to [production](https://portwatch-iota.vercel.app/).
+[Phase 6 evidence](evidence/phase6-release.json) records329 Python tests,14 Node tests,
+63 browser checks and separate real-response production verification. Anonymous repository,
+README, code and all four screenshot hashes are verified. About/homepage/topics are updated.
+[Profile commit99ba386](https://github.com/SamABZD/SamABZD/commit/99ba386936d39aa497b0c738c641b0cb9fbdad13)
+adds `03 / PortWatch`; rendered links/image and Flux/Retro/PortWatch pins are verified.
+
+Repository visibility changed externally; the agent did not change it. Actions remain
+disabled, Railway deployments/resources and the original v0.1.0 tag are unchanged.
+Expected recurring frontend cost delta0 assumes unchanged traffic/backend workload;
+actual billing delta remains unavailable. No code license has been selected; non-secret
+operational context remains in older reachable commits. Older statuses below describe
+their recorded checkpoints and are superseded by this completed release.
 
 
 ## Published v0.1.0 (2026-10-13 UTC)

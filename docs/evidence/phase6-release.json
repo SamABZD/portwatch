@@ -1,7 +1,7 @@
 {
   "phase": 6,
-  "status": "validated_production_profile_pending",
-  "observed_at_utc": "2026-10-14T12:44:43.916903+00:00",
+  "status": "complete",
+  "observed_at_utc": "2026-10-14T13:12:43.616272+00:00",
   "tested_app_commit": "84be4c6e3a9b416ed785f65429342ae9cbdf85e8",
   "verification": {
     "python": {
@@ -212,6 +212,394 @@
         ]
       },
       "mutation_routes_exposed": false
+    },
+    "production": {
+      "observed_at_utc": "2026-10-14T13:05:14.516234+00:00",
+      "origin": "https://portwatch-iota.vercel.app",
+      "deployed_commit": "fb89c3ccc895a4caafd7ac3e40efddfe7e069482",
+      "https_http_checks": [
+        {
+          "name": "home",
+          "status": 200,
+          "bytes": 8163,
+          "sha256": "31dc2ed5af567c78382805b33a78bbee60ad8d06183ffa59c872047b8e622304",
+          "first_post_deployment_capture_reused": true
+        },
+        {
+          "name": "pipeline-page",
+          "status": 200,
+          "bytes": 8416,
+          "sha256": "98c0ddec45741470820a0dd88fc8429c2d62f9b30ec2290532a30434495cb291",
+          "first_post_deployment_capture_reused": true
+        },
+        {
+          "name": "catalog",
+          "status": 200,
+          "bytes": 11246,
+          "sha256": "84224c6cfacba5e57e361a1959d58330b75bbc575b07f316e353fb8326eeca7d",
+          "first_post_deployment_capture_reused": true
+        },
+        {
+          "name": "pipeline",
+          "status": 200,
+          "bytes": 27382,
+          "sha256": "ff8bd1982e3f2a6bd6cd9f7da5f7bab54cb2836026e19b903f333fc1ffa40029",
+          "first_post_deployment_capture_reused": true
+        },
+        {
+          "name": "history",
+          "status": 200,
+          "bytes": 50294,
+          "sha256": "10c229b7cecebd0257b3764cf57973706a760b8a8ffc891ff7b354a7d1611181",
+          "first_post_deployment_capture_reused": true
+        },
+        {
+          "name": "lineage",
+          "status": 200,
+          "bytes": 2622440,
+          "sha256": "a0ed3aa4422d90d44934b960f30dd562e7b45159742f087d690d143e9e1bce97",
+          "first_post_deployment_capture_reused": true
+        },
+        {
+          "name": "health-los_angeles",
+          "status": 200,
+          "bytes": 13867,
+          "sha256": "a478dcc796b2a58311e10caf0fc22d0d53aeceaa38235ff030d971b7d34e9ab3",
+          "first_post_deployment_capture_reused": true
+        },
+        {
+          "name": "live-los_angeles",
+          "status": 200,
+          "bytes": 108616,
+          "sha256": "38f22eaf7db6d97d361a5b0f4d47b20f4893a8b9470005e0a88efa3f3e0a5fb3"
+        },
+        {
+          "name": "historical-los_angeles",
+          "status": 200,
+          "bytes": 115854,
+          "sha256": "ed84028f4349d0735c66f019ed957a393b967291b822d1a5ca847efca2b4f47b",
+          "first_post_deployment_capture_reused": true
+        },
+        {
+          "name": "health-oakland",
+          "status": 200,
+          "bytes": 13663,
+          "sha256": "c7967f7bd4b145c03b57f6b6b24d738b14ca93dbd60f9db29771ab193c2602b2",
+          "first_post_deployment_capture_reused": true
+        },
+        {
+          "name": "live-oakland",
+          "status": 200,
+          "bytes": 104414,
+          "sha256": "6da30b4be5f82350c36d689bd17a23e89618dd13e34a31e4568368229d819b96"
+        },
+        {
+          "name": "historical-oakland",
+          "status": 200,
+          "bytes": 107993,
+          "sha256": "b4918ee2944749538aa917a960e2392f2c9299d113bf13c555d494bdb4544792",
+          "first_post_deployment_capture_reused": true
+        }
+      ],
+      "ports": [
+        {
+          "port": "los_angeles",
+          "historical_positions": 62157,
+          "replay_fresh_vessels": 99,
+          "historical_news_excluded": true,
+          "collector_status": "healthy_connected",
+          "collector_connections": 1,
+          "news_provider": "Port of Los Angeles",
+          "news_status": "fallback",
+          "saved_news_rows": 1,
+          "request_window_hours": 168,
+          "last_successful_fetch_utc": "2026-10-14T13:00:36.051375+00:00",
+          "primary_status": "failed",
+          "primary_http": 429,
+          "primary_error": "source_rate_limited",
+          "fallback_http": 200,
+          "backup_status": "ok"
+        },
+        {
+          "port": "oakland",
+          "historical_positions": 52783,
+          "replay_fresh_vessels": 75,
+          "historical_news_excluded": true,
+          "collector_status": "healthy_connected",
+          "collector_connections": 1,
+          "news_provider": "Port of Oakland",
+          "news_status": "fallback",
+          "saved_news_rows": 1,
+          "request_window_hours": 168,
+          "last_successful_fetch_utc": "2026-10-14T12:20:12.876377+00:00",
+          "primary_status": "failed",
+          "primary_http": 429,
+          "primary_error": "source_rate_limited",
+          "fallback_http": 200,
+          "backup_status": "ok"
+        }
+      ],
+      "api_bounds": [
+        {
+          "case": "unknown_port",
+          "status": 404,
+          "expected": 404
+        },
+        {
+          "case": "invalid_mode",
+          "status": 422,
+          "expected": 422
+        },
+        {
+          "case": "trail_bounds",
+          "status": 422,
+          "expected": 422
+        },
+        {
+          "case": "live_cutoff",
+          "status": 422,
+          "expected": 422
+        }
+      ],
+      "frozen_history": {
+        "hours": 168,
+        "models": 11,
+        "tests": 36,
+        "positions": 443296,
+        "lineage_sha256": "a0ed3aa4422d90d44934b960f30dd562e7b45159742f087d690d143e9e1bce97"
+      },
+      "browser": {
+        "checks": [
+          {
+            "port": "los_angeles",
+            "mode": "historical",
+            "route": "map",
+            "real_api": true,
+            "news": "excluded",
+            "geometry_fallback": true
+          },
+          {
+            "port": "los_angeles",
+            "mode": "live",
+            "route": "map",
+            "real_api": true,
+            "news": "saved current articles",
+            "geometry_fallback": true
+          },
+          {
+            "port": "los_angeles",
+            "route": "pipeline",
+            "scope_navigation_reload": true,
+            "frozen_history": true,
+            "dbt_detail": true
+          },
+          {
+            "standalone_lineage": true,
+            "real_api": true
+          },
+          {
+            "port": "oakland",
+            "mode": "historical",
+            "route": "map",
+            "real_api": true,
+            "news": "excluded",
+            "geometry_fallback": true
+          },
+          {
+            "port": "oakland",
+            "mode": "live",
+            "route": "map",
+            "real_api": true,
+            "news": "saved current articles",
+            "geometry_fallback": true
+          },
+          {
+            "port": "oakland",
+            "route": "pipeline",
+            "scope_navigation_reload": true,
+            "frozen_history": true,
+            "dbt_detail": true
+          },
+          {
+            "mobile": 390,
+            "route": "map",
+            "port": "oakland",
+            "no_overflow": true
+          }
+        ],
+        "page_errors": [],
+        "failed_same_origin_responses": [],
+        "api_requests": 23,
+        "api_methods": [
+          "GET"
+        ],
+        "provider_requests_blocked": true,
+        "api_fixtures": false,
+        "source_revision": "fb89c3ccc895a4caafd7ac3e40efddfe7e069482"
+      },
+      "read_only_progress": [
+        {
+          "port": "los_angeles",
+          "news_attempt_batch_schedule_unchanged_during_browser": true,
+          "last_successful_fetch_utc": "2026-10-14T13:00:36.051375+00:00"
+        },
+        {
+          "port": "oakland",
+          "news_attempt_batch_schedule_unchanged_during_browser": true,
+          "last_successful_fetch_utc": "2026-10-14T12:20:12.876377+00:00"
+        }
+      ],
+      "all_passed": true,
+      "post_browser_collector_ownership": [
+        {
+          "port": "los_angeles",
+          "status": "healthy_connected",
+          "process_identity_unchanged_after_browser": true,
+          "connections": 1,
+          "process_alive": true
+        },
+        {
+          "port": "oakland",
+          "status": "healthy_connected",
+          "process_identity_unchanged_after_browser": true,
+          "connections": 1,
+          "process_alive": true
+        }
+      ],
+      "known_lineage_limit": "Standalone dbt briefly requests three missing decorative Angular template images before bootstrap; project/models render; these are not API contracts."
+    },
+    "post_rollout_runtime_resources": [
+      {
+        "service": "database",
+        "deployment_identity_unchanged": true,
+        "replicas": 1,
+        "active_deployments": 1,
+        "status": "SUCCESS",
+        "resource_limits_unchanged": true
+      },
+      {
+        "service": "backend",
+        "deployment_identity_unchanged": true,
+        "replicas": 1,
+        "active_deployments": 1,
+        "status": "SUCCESS",
+        "resource_limits_unchanged": true
+      }
+    ],
+    "final_document_asset_exposure_checks": {
+      "observed_at_utc": "2026-10-14T13:16:51.198432+00:00",
+      "docs_relative_links": 221,
+      "missing_relative_paths": [],
+      "asset_hashes_match": 4,
+      "source_tree_matches_tested_app": true,
+      "original_release_tag_unchanged": true,
+      "volume_capacities_unchanged_mb": [
+        5000,
+        5000
+      ],
+      "tracked_files": 239,
+      "reachable_commits": 57,
+      "unresolved_history_candidates": 0,
+      "current_private_path_provider_candidates": 0,
+      "forbidden_tracked_history_paths": 0,
+      "oversized_reachable_blobs": 0,
+      "actual_known_ais_oidc_matches": 0,
+      "png_embedded_text_exif": 0,
+      "public_api_saved_response_checks": [
+        {
+          "name": "catalog.response",
+          "sha256": "84224c6cfacba5e57e361a1959d58330b75bbc575b07f316e353fb8326eeca7d",
+          "critical_secret_private_path_matches": 0,
+          "known_private_token_matches": 0
+        },
+        {
+          "name": "health-los_angeles.response",
+          "sha256": "a478dcc796b2a58311e10caf0fc22d0d53aeceaa38235ff030d971b7d34e9ab3",
+          "critical_secret_private_path_matches": 0,
+          "known_private_token_matches": 0
+        },
+        {
+          "name": "health-oakland.response",
+          "sha256": "c7967f7bd4b145c03b57f6b6b24d738b14ca93dbd60f9db29771ab193c2602b2",
+          "critical_secret_private_path_matches": 0,
+          "known_private_token_matches": 0
+        },
+        {
+          "name": "health-post-browser-los_angeles.response",
+          "sha256": "570c085efb50950e5862c8ad2216a28a690ba99251cbab6605d06736646bcff2",
+          "critical_secret_private_path_matches": 0,
+          "known_private_token_matches": 0
+        },
+        {
+          "name": "health-post-browser-oakland.response",
+          "sha256": "c1d3bc358c28b518eb2fd6093287288a03ac6e46e23c373e15d8929468baeefb",
+          "critical_secret_private_path_matches": 0,
+          "known_private_token_matches": 0
+        },
+        {
+          "name": "historical-los_angeles.response",
+          "sha256": "ed84028f4349d0735c66f019ed957a393b967291b822d1a5ca847efca2b4f47b",
+          "critical_secret_private_path_matches": 0,
+          "known_private_token_matches": 0
+        },
+        {
+          "name": "historical-oakland.response",
+          "sha256": "b4918ee2944749538aa917a960e2392f2c9299d113bf13c555d494bdb4544792",
+          "critical_secret_private_path_matches": 0,
+          "known_private_token_matches": 0
+        },
+        {
+          "name": "history.response",
+          "sha256": "10c229b7cecebd0257b3764cf57973706a760b8a8ffc891ff7b354a7d1611181",
+          "critical_secret_private_path_matches": 0,
+          "known_private_token_matches": 0
+        },
+        {
+          "name": "lineage.response",
+          "sha256": "a0ed3aa4422d90d44934b960f30dd562e7b45159742f087d690d143e9e1bce97",
+          "critical_secret_private_path_matches": 0,
+          "known_private_token_matches": 0
+        },
+        {
+          "name": "live-los_angeles.response",
+          "sha256": "38f22eaf7db6d97d361a5b0f4d47b20f4893a8b9470005e0a88efa3f3e0a5fb3",
+          "critical_secret_private_path_matches": 0,
+          "known_private_token_matches": 0
+        },
+        {
+          "name": "live-oakland.response",
+          "sha256": "6da30b4be5f82350c36d689bd17a23e89618dd13e34a31e4568368229d819b96",
+          "critical_secret_private_path_matches": 0,
+          "known_private_token_matches": 0
+        },
+        {
+          "name": "live-post-browser-los_angeles.response",
+          "sha256": "6fe41d8f2946710aa0011ca9b86bb9c871f8d073ad9ec3d2e3837a6ef2c372d6",
+          "critical_secret_private_path_matches": 0,
+          "known_private_token_matches": 0
+        },
+        {
+          "name": "live-post-browser-oakland.response",
+          "sha256": "e173ad295ac0474eb8f7c3a5f07b82e6b484a8b097cc77cba2eb9da81d7c1895",
+          "critical_secret_private_path_matches": 0,
+          "known_private_token_matches": 0
+        },
+        {
+          "name": "pipeline.response",
+          "sha256": "ff8bd1982e3f2a6bd6cd9f7da5f7bab54cb2836026e19b903f333fc1ffa40029",
+          "critical_secret_private_path_matches": 0,
+          "known_private_token_matches": 0
+        }
+      ],
+      "api_response_scope": "Saved actual production responses; no new upstream or backend requests",
+      "scanner_limitations": [
+        "Pattern and entropy scan; no guarantee of detecting every secret.",
+        "No credential authentication requests made.",
+        "History scope is --all reachable local refs; remote refs previously fetched, not newly fetched.",
+        "Image bytes scanned for textual patterns; screenshots require visual review."
+      ],
+      "historical_nonsecret_context": "57 older blobs retain already-reviewed non-secret operational/workstation context; no rewrite",
+      "all_passed": true
     }
   },
   "cost": {
@@ -256,7 +644,7 @@
     "forecast_basis": "No backend/runtime/schema/provider schedule change, same visible30s polling and hidden cancellation, no new fetch endpoint or subscriber. Styling/geometry/architecture/source links change only rendering. Same traffic/backend workload assumption.",
     "verified_hosted_money_delta_usd": null,
     "one_time_audit_compute_cost_usd": null,
-    "one_time_audit_scope": "Bounded existing provider/account reads and11 read-only backend requests; metered transport not claimed zero. Vercel previews use existing active Hobby project; local tests use no provider connections.",
+    "one_time_audit_scope": "Bounded provider/account reads, pre-release and production GETs/browser acceptance, harness corrections and ownership followups; metered compute/transport not claimed zero. Initial11-request backend sample is not the whole release request total. Vercel previews use existing active Hobby project; deterministic local tests use no provider connections.",
     "vercel": {
       "plan": "hobby",
       "status": "active",
@@ -271,12 +659,14 @@
       "volume_capacity_mb_each": 5000,
       "compute_spend_limit": null,
       "backend_rollout_in_this_release": false,
-      "source_growth": "continues independently; preserve originals; no deletion/retention-horizon guarantee"
+      "source_growth": "continues independently; preserve originals; no deletion/retention-horizon guarantee",
+      "post_rollout_resources_verified": true
     },
     "references": [
       "https://docs.railway.com/pricing/plans",
       "https://vercel.com/docs/plans/hobby"
-    ]
+    ],
+    "normal_scheduled_progress": "LA official news receipt advanced from12:00 to13:00 UTC through existing hourly work; no manual source probe/backfill/restart. Saved news attempts/batches/schedules remain identical before/after browser visits."
   },
   "rollback": {
     "frontend_commit": "b6e4009e32ad5bf78f1e791b64b10a585f679f9f",
@@ -286,16 +676,186 @@
   },
   "publication": {
     "repository_public": true,
+    "visibility_change": "Observed external owner change; agent did not change visibility",
     "actions_enabled": false,
     "release_tag_changed": false,
-    "profile_update": "Ready; latest SHA must be fetched immediately before write",
-    "pins": "PortWatch added without removing existing Flux/Retro pins; final proof pending"
+    "merge_pr": "https://github.com/SamABZD/portwatch/pull/9",
+    "merged_at_utc": "2026-10-14T12:53:09Z",
+    "main_release_commit": "fb89c3ccc895a4caafd7ac3e40efddfe7e069482",
+    "frontend": {
+      "deployed_commit": "fb89c3ccc895a4caafd7ac3e40efddfe7e069482",
+      "state": "READY",
+      "url": "https://portwatch-iota.vercel.app/",
+      "immutable_url": "https://portwatch-lbb88hpus-abzd.vercel.app",
+      "tested_app_commit": "84be4c6e3a9b416ed785f65429342ae9cbdf85e8",
+      "app_tree_matches_tested_revision": true
+    },
+    "backend": {
+      "tested_code_commit": "d39d9bd",
+      "rollout_in_this_phase": false,
+      "deployment_identity_unchanged": true
+    },
+    "repository_about": {
+      "description": "Maritime data engineering demo: AIS ingestion, validation, PostGIS analytics, historical replay, and dbt lineage for Los Angeles and Oakland.",
+      "homepage": "https://portwatch-iota.vercel.app/",
+      "topics": [
+        "ais",
+        "data-engineering",
+        "dbt",
+        "fastapi",
+        "geospatial",
+        "nextjs",
+        "portfolio",
+        "postgis",
+        "postgresql",
+        "prefect",
+        "python"
+      ],
+      "tool": "gh CLI fallback; connected GitHub tools unavailable"
+    },
+    "anonymous_access": {
+      "observed_at_utc": "2026-10-14T13:01:17.934007+00:00",
+      "commit": "fb89c3ccc895a4caafd7ac3e40efddfe7e069482",
+      "checks": [
+        {
+          "name": "repository",
+          "url": "https://github.com/SamABZD/portwatch",
+          "status": 200,
+          "bytes": 372177,
+          "sha256": "eb7d301f18c80de0f104e2b0e7c99cde82bcacd988d559c53172dd4864f109ba",
+          "anonymous": true
+        },
+        {
+          "name": "readme-rendered",
+          "url": "https://github.com/SamABZD/portwatch/blob/main/README.md",
+          "status": 200,
+          "bytes": 331344,
+          "sha256": "c26d41684c5b1a1cb433ed92cbc77a3cc13a2c668dde8ba41c2b1d9ac11d1476",
+          "anonymous": true
+        },
+        {
+          "name": "code",
+          "url": "https://github.com/SamABZD/portwatch/blob/main/src/portwatch/context.py",
+          "status": 200,
+          "bytes": 530931,
+          "sha256": "99088ce8c8a3706b3f7a4a464fc95e188fe30987b44231e0d925a7566c26adf2",
+          "anonymous": true
+        },
+        {
+          "name": "historical-los-angeles.png",
+          "url": "https://raw.githubusercontent.com/SamABZD/portwatch/main/docs/assets/historical-los-angeles.png",
+          "status": 200,
+          "bytes": 140631,
+          "sha256": "cddec45af603310ccd007489e84d7ebc062961d5ca5267ed34abe3fe7edd15e5",
+          "anonymous": true,
+          "manifest_match": true
+        },
+        {
+          "name": "historical-oakland.png",
+          "url": "https://raw.githubusercontent.com/SamABZD/portwatch/main/docs/assets/historical-oakland.png",
+          "status": 200,
+          "bytes": 142450,
+          "sha256": "6249409e6ef88dab85a9324bb60389fa3d45956582c8f5ef52ecc3989611a62b",
+          "anonymous": true,
+          "manifest_match": true
+        },
+        {
+          "name": "historical-mobile.png",
+          "url": "https://raw.githubusercontent.com/SamABZD/portwatch/main/docs/assets/historical-mobile.png",
+          "status": 200,
+          "bytes": 124992,
+          "sha256": "ad7b1d8cf5839ca735d63a2cfabf22c0ccf58ecef2f7a18209b9b01edff2e23b",
+          "anonymous": true,
+          "manifest_match": true
+        },
+        {
+          "name": "pipeline.png",
+          "url": "https://raw.githubusercontent.com/SamABZD/portwatch/main/docs/assets/pipeline.png",
+          "status": 200,
+          "bytes": 87341,
+          "sha256": "bae55574e70ec1b520654f5bf7bb2f602a2fdc77523c0243b0c73ebb5fc62482",
+          "anonymous": true,
+          "manifest_match": true
+        }
+      ],
+      "all_passed": true
+    },
+    "profile": {
+      "commit": "99ba386936d39aa497b0c738c641b0cb9fbdad13",
+      "url": "https://github.com/SamABZD/SamABZD/commit/99ba386936d39aa497b0c738c641b0cb9fbdad13",
+      "latest_sha_used": "18654fc5f1384fc4ce3a4e23fadf327540c8394d",
+      "published_blob_sha": "a6aa24c7b5e002a18fd3ab932ba6ba00be4e21c7",
+      "flux_retro_prefix_preserved": true,
+      "readback_matches": true,
+      "observed_at_utc": "2026-10-14T13:07:15.311643+00:00",
+      "prior_note_only_commit": "2e2e6ef9f17be208af40528e76ac9084715c809d"
+    },
+    "profile_rendering": {
+      "rendered_profile": "https://github.com/SamABZD",
+      "anonymous": true,
+      "http_status": 200,
+      "project_heading_order": [
+        "01 / Flux",
+        "02 / Retro",
+        "03 / PortWatch"
+      ],
+      "portwatch_links": [
+        {
+          "text": "Explore the demo",
+          "href": "https://portwatch-iota.vercel.app/"
+        },
+        {
+          "text": "Inspect the pipelines",
+          "href": "https://portwatch-iota.vercel.app/pipeline"
+        },
+        {
+          "text": "View the code",
+          "href": "https://github.com/SamABZD/portwatch"
+        }
+      ],
+      "pipeline_image": {
+        "url": "https://raw.githubusercontent.com/SamABZD/portwatch/main/docs/assets/pipeline.png",
+        "decoded": true
+      },
+      "fictional_genuine_scope_note": true,
+      "proof_screenshot": "artifacts/release/profile/portwatch-profile.png",
+      "proof_pin_screenshot": "artifacts/release/profile/portwatch-profile-pins.png",
+      "pins": [
+        "SamABZD/flux",
+        "SamABZD/retro",
+        "SamABZD/portwatch"
+      ],
+      "observed_at_utc": "2026-10-14T13:09:20.692775+00:00",
+      "all_passed": true
+    },
+    "original_release_tag": {
+      "name": "v0.1.0",
+      "annotated_tag_object": "31dc38c3499cf48ae60cdb8274db47f54ab5be4a",
+      "peeled_commit": "8fcaa933971f5ce98816d97761a5979e7e2c2560",
+      "remote_match": true,
+      "changed": false
+    },
+    "revision_scope": "fb89c3c is the verified app deployment; later main changes record documentation only and keep the tested app tree identical."
   },
   "limitations": [
     "Existing Railway workload/resource usage grows independently; raw hour extrapolation increased and cannot establish frontend causal delta or savings. Modeled release recurring delta0 assumes same traffic/query/backend workload; measured hosted dollar delta unavailable.",
     "Vercel usage cost data unavailable; Hobby active verified, not inferred zero usage. No plan, limit, paidresource, replica or volume change.",
     "Local socket/Docker startup not exercised due earlier limitations; clean-clone historical API verified inprocess inPhase5.",
     "Older reachable history retains non-secret operational/workstation context; no code license selected.",
-    "Previously denied scratch-clone cleanup remains outside Git; no alternate deletion."
-  ]
+    "Previously denied scratch-clone cleanup remains outside Git; no alternate deletion.",
+    "Three missing decorative dbt template images occur before bootstrap; standalone project/models render correctly."
+  ],
+  "scope": "Owner clarified Phase7 means release/deployment/profile work from Phase6 of the supplied completion plan.",
+  "completion_matrix": {
+    "positioning": "First viewport/source CTA/metadata and README verified",
+    "header": "Shared routes, both ports/modes, history/reload, four widths and native200% zoom verified",
+    "map": "Both-port bounds/resize/camera/touch/selection/fallback/freshness verified; genuine saved segment boundaries preserved",
+    "pipelines": "Actual source/finite/continuous/historical paths, responsive details and real standalone lineage verified",
+    "news": "Saved provider-to-storage/frame/UI path and real current official fallback rendering verified; both final GDELT primaries429, historical current-news exclusion preserved",
+    "cost": "Verified resources/usage baseline; expected recurring delta0 under unchanged traffic/backend workload; unmatched usage increase and actual billing uncertainty disclosed",
+    "reproduction": "Phase5 clean clone20 commands, genuine saved-source two-port repeat/API parity; Docker/local socket/fresh upstream acquisition limits disclosed",
+    "public_readiness": "Public anonymous source/assets, current and reachable-history exposure audit, license status and disabled-CI wording verified",
+    "publication": "PR9/main production, saved rollback, latest-SHA profile write, anonymous rendered profile/image/links and preserved pins verified"
+  },
+  "remaining_user_action": []
 }

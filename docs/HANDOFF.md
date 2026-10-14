@@ -2,6 +2,38 @@
 
 ## Current stage state
 
+- **Completion Phase6 complete, October14,2026 UTC:** owner clarified the active "Phase7"
+  goal means Phase6 release/deployment/profile. PR#9 merged at `fb89c3c`; Vercel production
+  serves that tested app tree. Railway remains on the earlier `d39d9bd` code checkpoint,
+  with unchanged deployment identities, one replica/active deployment per service and
+  unchanged resource/volume limits. Both collectors connected/processalive with one connection;
+  their process identities remain unchanged after route/reload checks. Local collectors stopped.
+- Full local validator329 tests,14 Node tests, frontend typecheck/build and63 fixture-based
+  browser checks pass. Real production separately passes12 HTTPS checks/four API bounds
+  cases/eight browser checks, actual dbt rendering and news/collector ownership checks.
+  Whole-day datasets contain62157/52783 positions; replay has99/75 fresh vessels atJan1
+  12:30UTC. Frozen history has443296 positions/168hours/11models/
+  36tests and unchanged lineage hash. Both final GDELT primaries429; official fallbacks each
+  expose one saved article in168h windows. Normal LA hourly progress observed without probing.
+- Public anonymous repository/README/code/assets verified. About/homepage/real-stack topics
+  updated. Profile commit `99ba386` publishes03/PortWatch; image/allthree links render, Flux/
+  Retro prefix remains intact, and pins stayFlux/Retro/PortWatch. Actions disabled, repository
+  visibility changed externally, originalv0.1.0 tag unchanged. No further publication step.
+- Expected recurring frontend delta0 assumes same traffic/backend workload; actual billdelta
+  unavailable. Current existing-service CPU/RAM extrapolation32.98185/month versus old29.07087
+  is unmatched and increased, not savings. No paidresource/replica/volume/sourcecadence added,
+  no hard compute cap or retention horizon claimed. Private rollback/configuration saved.
+- [Final release evidence](evidence/phase6-release.json), [release notes](RELEASE_NOTES.md)
+  and [validator transcript](evidence/phase6-validation.txt) give exact scope. No code license
+  selected;57 old historical blobs retain reviewed non-secret operational/workstation context.
+  Docker/local socket/fresh upstream acquisition remain unverified reproduction limits.
+  Automatic review denied owned scratch clone deletion; private residue remains outside Git,
+  with no alternate deletion. Owned reproduction DB removed; original data hashes preserved.
+
+## Earlier stage snapshots
+
+The statements below describe earlier checkpoints, superseded by the current release above.
+
 - **October 14, 2026 release checkpoint:** the owner explicitly requested that all completed
   Phases 1–3 be pushed and merged into `main`, followed by new work. The release is tracked
   in [PR #8](https://github.com/SamABZD/portwatch/pull/8). The existing Railway backend was
@@ -80,7 +112,7 @@
 
 ## Verified commands and observed outcomes
 
-### Completion phase 6: validated release candidate (2026-10-14 UTC)
+### Completion phase 6: final release (2026-10-14 UTC)
 
 - Owner clarified the active "Phase7" goal means the remaining Phase6 release/deployment/profile
   scope from the completion plan. `84be4c6` is the tested app checkpoint on `feat/phase4-5-polish`.
@@ -99,10 +131,12 @@
   both modes/routes, widths390/768/1024/1440, native200% zoom, selection/camera/touch/fallbacks
   and standalone dbt. Fixtures/raster failures are isolated; no provider request from browserQA.
 - Eleven real existing backend GETs return200: readiness, catalog, two-port health/live/replay,
-  pipeline/history/lineage. Replay62157/52783 positions and99/75 fresh, current news excluded;
+  pipeline/history/lineage. Whole-day datasets contain62157/52783 positions; replay has99/75
+  fresh vessels atJan1 12:30UTC, with current news excluded;
   frozen443296 positions/168hours/11models/36tests, unchanged standalone HTML checksum.
   Both collectors healthy_connected/processalive; one deployment/replica per service; backupsok.
-  Current LA primary timed out; Oakland primary429. Official fallbacks each save one eligible
+  At the pre-release12:33UTC sample, LA primary timed out and Oakland primary returned429.
+  The final production sample reports429 for both. Official fallbacks each save one eligible
   article in actual168h windows. These are limited authority releases, not broad coverage.
 - Existing-hour Railway CPU/RAM extrapolation32.98185/month versus old29.07087 is an unmatched
   traffic/retained-data/sampling comparison, not frontend causal delta or savings. Frontend-only
@@ -113,7 +147,7 @@
   No backend deployment or live restart required for UI changes. Actions stay disabled; original
   release tag stays unchanged. Final screenshots are genuine historical/tilesoff, copied unchanged
   with exact source SHA/hash manifest. Current [release evidence](evidence/phase6-release.json)
-  records validation/limits. Production merge/rollout and profile publication still pending.
+  records validation/limits and verified production/profile publication at `fb89c3c`/`99ba386`.
 
 ### Completion phase 4: map and pipeline refinement (2026-10-14 UTC)
 

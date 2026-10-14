@@ -1,6 +1,6 @@
 # PortWatch documentation
 
-Start with the [project overview and local setup](../README.md), [hosted vessel map](https://portwatch-iota.vercel.app/) or [pipeline workspace](https://portwatch-iota.vercel.app/pipeline). GitHub now reports the repository public; Actions remain disabled. Phase 6 will validate and release the phases 4–5 feature branch; production currently serves the previous release.
+Start with the [project overview and local setup](../README.md), [hosted vessel map](https://portwatch-iota.vercel.app/) or [pipeline workspace](https://portwatch-iota.vercel.app/pipeline). Phase 6 is merged and verified on production, with a published and pinned [profile entry](https://github.com/SamABZD). The repository is public; Actions remain disabled. [Release evidence](evidence/phase6-release.json) records exact revisions and verification scope.
 
 ## Understand and reproduce
 
@@ -25,6 +25,8 @@ Start with the [project overview and local setup](../README.md), [hosted vessel 
 | [Source audit](SOURCE_AUDIT.md) | Provenance, redistribution, timestamps and attribution limits. |
 | [Phase 4 workspace evidence](evidence/phase4-workspace.json) | Map/pipeline browser checks and limits. |
 | [Phase 5 public readiness](evidence/phase5-public-readiness.json) | Clean-clone reproduction, exposure audit and remaining release steps. |
+| [Phase 6 release evidence](evidence/phase6-release.json) | Validation, production checks, cost limits and GitHub/profile publication. |
+| [Release notes](RELEASE_NOTES.md) | Final presentation behavior and dated release scope. |
 | [Evidence archive](evidence/README.md) | Earlier dated verification; this is not current hosted CI. |
 | [Screenshots](assets/README.md) | Genuine capture scope, credits and checksums. |
 

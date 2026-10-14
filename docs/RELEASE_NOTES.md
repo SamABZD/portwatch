@@ -1,4 +1,48 @@
-# PortWatch v0.1.0
+# PortWatch release notes
+
+## October 14, 2026 — completion phases 4–6
+
+[PR #9](https://github.com/SamABZD/portwatch/pull/9) merged at `fb89c3c` and deployed to
+the existing [Vercel production site](https://portwatch-iota.vercel.app/). The original
+v0.1.0 tag is unchanged. Backend code remains at the earlier tested `d39d9bd` checkpoint;
+this frontend release did not redeploy Railway or restart collectors.
+
+The shared map/pipeline header preserves port, mode and cutoff. Maps fit both ports,
+keep camera position across polls, distinguish loading and fallback states, and balance
+the inspector on desktop and mobile. The architecture uses actual component bounds,
+separates continuous collectors from finite Prefect work, and connects dbt only to its
+frozen historical branch. Public source links and documentation explain the real stack,
+reproduction commands, genuine data, analytical limits and current license status.
+
+Validation: **329 Python tests**, lint/format/package/migrations, frontend install/typecheck/
+build and **14 Node tests**; a batched browser run and one complete confirmation passed
+**63 checks**, including four widths and native200% zoom. Separate production verification
+passed **12 HTTPS responses, four API bounds cases and eight browser checks** with real API
+data, plus post-navigation news/collector ownership checks. Actions remain disabled;
+these are local tests and observed deployment checks.
+
+Both ports currently render one official fallback article in a seven-day saved window.
+GDELT returned HTTP429 in the final sample; Los Angeles also had an earlier timeout.
+Normal hourly LA progress was observed without manual source acquisition. Replay excludes
+current news. Frozen history remains443,296 positions/168hours/11models/36tests, with
+unchanged standalone lineage HTML checksum. Coverage and visit/waiting inferences remain
+incomplete and experimental.
+
+[Sam's profile](https://github.com/SamABZD) now lists `03 / PortWatch` at
+[profile commit99ba386](https://github.com/SamABZD/SamABZD/commit/99ba386936d39aa497b0c738c641b0cb9fbdad13).
+Anonymous rendering, all three links and the pipeline image were checked. Flux and Retro
+content/order are preserved; PortWatch was pinned without removing either.
+
+No paid resource, replica, volume or source cadence was added. Expected recurring frontend
+delta is $0 under unchanged traffic/backend workload; actual billing delta is unavailable.
+Existing unmatched compute samples increased and establish no release savings. No hard
+compute spending cap or raw-data retention horizon is claimed. Code has no selected license;
+older reachable history retains disclosed non-secret operational context.
+
+[Complete release evidence](evidence/phase6-release.json) ·
+[Validator transcript](evidence/phase6-validation.txt) · [Handoff](HANDOFF.md)
+
+## Original v0.1.0 notes
 
 Prepared October 13, 2026 (Asia/Beirut). These notes describe the candidate; publication
 status is recorded in GITHUB_SETUP. GitHub Actions are disabled at the owner's request.

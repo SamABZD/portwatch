@@ -4,7 +4,7 @@
 
 **[Explore the demo](https://portwatch-iota.vercel.app/)** · **[Inspect the pipelines](https://portwatch-iota.vercel.app/pipeline)** · [SQL lineage](https://portwatch-iota.vercel.app/api/history-lineage?view=static) · [Documentation](docs/README.md)
 
-The repository is public as observed on October 14, 2026. GitHub Actions remain disabled; verification below is local evidence, not hosted CI. Phases 4–5 are prepared on a feature branch for the Phase 6 release; production currently serves the previous release.
+The October 14, 2026 release is merged through [PR #9](https://github.com/SamABZD/portwatch/pull/9) and verified on the public HTTPS demo. PortWatch is also published and pinned on [Sam's GitHub profile](https://github.com/SamABZD). GitHub Actions remain disabled; verification below is local and observed deployment evidence, not hosted CI.
 
 ## What this demonstrates
 
@@ -176,7 +176,7 @@ The separately frozen **seven-day Los Angeles** result contains **443,296 positi
 
 Current frontend validation passes `npm run typecheck`, `npm run build`, and **14 Node tests** for URL state and visible polling. [Phase 4 workspace evidence](docs/evidence/phase4-workspace.json) records current browser checks and limits; [Phase 5 readiness](docs/evidence/phase5-public-readiness.json) records reproduction and exposure review. The earlier full Python validator passed **329 tests** in Phase 3; backend code is unchanged in phases 4–5. [Dated evidence archive](docs/evidence/README.md) keeps previous counts separate.
 
-The current Phase 6 candidate passes the full validator (**236 unit + 93 integration = 329 tests**), frontend checks and **63 browser checks**, including native 200% zoom. [Release evidence](docs/evidence/phase6-release.json) records genuine hosted API checks and fixture scope; [validator transcript](docs/evidence/phase6-validation.txt) records exact outcomes. Production/profile publication is pending until recorded below.
+The Phase 6 release passes the full validator (**236 unit + 93 integration = 329 tests**), frontend checks and **63 browser checks**, including native 200% zoom. Production at `fb89c3c` separately passes 12 HTTPS response checks, four API bounds checks and eight browser checks with real API responses. [Release evidence](docs/evidence/phase6-release.json) records tested/deployed revisions, profile publication and fixture scope; [validator transcript](docs/evidence/phase6-validation.txt) records exact outcomes. [Release notes](docs/RELEASE_NOTES.md) describe the final behavior and limits.
 
 To repeat release validation:
 
@@ -192,7 +192,7 @@ Integration tests need PostgreSQL/PostGIS and owned temporary schemas. Determini
 
 ## Demo costs and operation
 
-Historical replay uses **$0 local services**; it still needs your computer, storage and internet. Hosted operation uses the existing Vercel frontend and Railway backend/database. Railway is paid usage; no permanently free 24/7 hosting or verified zero cloud cost is claimed. Phases 4–5 added no paid service, replica, volume or collector schedule. Preview verification used the existing Vercel Hobby project. Measured incremental cloud cost remains a Phase 6 check.
+Historical replay uses **$0 local services**; it still needs your computer, storage and internet. Hosted operation uses the existing Vercel Hobby frontend and paid Railway backend/database. Phases 4–6 added no paid service, replica, volume or collector schedule. The frontend release has an expected $0 recurring delta under the same traffic and backend workload; actual billing delta is unavailable. Unmatched existing-service compute samples increased, so no cloud savings or hard spending cap is claimed. [Cost evidence and limits](docs/evidence/phase6-release.json) separate that growth from the release forecast.
 
 The deployed runtime owns both live subscriptions. Keep local live collectors stopped while it runs. For an independent local setup, configure `PORTWATCH_AIS_API_KEY` privately and follow [LIVE_MULTIPORT.md](docs/LIVE_MULTIPORT.md). A sleeping local computer cannot collect missed evidence.
 

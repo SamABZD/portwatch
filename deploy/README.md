@@ -4,6 +4,17 @@ The owner selected Vercel for the Next.js frontend and their existing paid Railw
 workspace for the continuous Python backend and PostgreSQL/PostGIS. Local operation remains
 available at $0; cloud resource consumption is billed by Railway under that existing plan.
 
+**October14,2026 Phase6 release:** [PR#9](https://github.com/SamABZD/portwatch/pull/9)
+merged at `fb89c3c`; the existing Vercel integration deployed that revision to
+[production](https://portwatch-iota.vercel.app/). Twelve HTTPS checks, four API bounds
+checks and eight real-response browser checks passed for both ports/modes and pipeline/
+history/lineage. Railway deployment identities, one replica per service and resource
+limits remain unchanged; both collectors are connected and local collectors remain stopped.
+The previous frontend at `b6e4009` is saved as rollback, with detailed configuration private.
+Expected recurring frontend delta0 assumes unchanged traffic/backend workload; actual
+billing delta is unavailable. See [release evidence](../docs/evidence/phase6-release.json).
+Older observations below retain their original scope.
+
 | Component | Endpoint / storage |
 | --- | --- |
 | Frontend | [PortWatch](https://portwatch-iota.vercel.app), Vercel project `portwatch` |
