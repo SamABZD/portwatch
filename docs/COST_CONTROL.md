@@ -1,5 +1,17 @@
 # Cost controls and release gate
 
+## October 14, 2026 release update
+
+The owner subsequently requested merging all completed Phases 1–3 into `main` and updating
+the live site. The tested backend/news contract was deployed first to the existing Railway
+service, with one replica, zero overlap and unchanged resource/volume limits. Local collectors
+remain stopped. Vercel CLI renewed its expired token; account metadata confirms the existing
+active Hobby plan and `main` production branch. Its billing usage command returned cost data
+unavailable for October 1–14; this is not evidence of zero usage. No provider billing control,
+plan, paid add-on, service size or account setting was changed. Hosted Railway monetary delta
+remains unverified and is still a limitation to resolve in the remaining cost/release work.
+The earlier audit and no-rollout statements below describe the original phase checkpoints.
+
 Phase 1 completed locally on October 13, 2026 (Asia/Beirut). The completion work must add
 no recurring running cost. Existing Railway operation is metered and is not free hosting.
 Detailed billing evidence and the service cost table are held outside the Git checkout;

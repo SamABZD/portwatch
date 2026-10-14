@@ -2,6 +2,34 @@
 
 ## Current stage state
 
+- **October 14, 2026 release checkpoint:** the owner explicitly requested that all completed
+  Phases 1–3 be pushed and merged into `main`, followed by new work. The release is tracked
+  in [PR #8](https://github.com/SamABZD/portwatch/pull/8). The existing Railway backend was
+  deployed first from tested code checkpoint `d39d9bd`; readiness, both ports' health,
+  live/historical frames and catalogs, and pipeline returned HTTP 200. Both cloud collectors
+  reported `healthy_connected` with live processes; one backend deployment/replica and zero
+  overlap remain. Historical frames exclude current news. LA selected one official article
+  in a 168-hour saved window; Oakland retained one article in its explicitly labeled 24-hour
+  saved window while scheduled acquisition was deferred. Both configure 168 hours; no manual
+  source probe, local collector, resource resize, account limit or CI change was added.
+- Full local validation at `d39d9bd`: `.\.bootstrap-venv\Scripts\uv.exe run --locked --extra dev
+  python scripts/validate.py` **passed**: Ruff lint/format, **236 unit tests**, wheel/source
+  distribution and packaged SQL checks, eight fresh migrations with an idempotent repeat,
+  and **93 integration tests**, with zero skips. PostgreSQL 17 / PostGIS 3.6.2; AIS credential
+  disabled, temporary storage and owned schemas. Existing frontend code still has Phase 3's
+  14 Node tests, typecheck/build and 27 browser checks; those fixture-based checks are not
+  represented as a new hosted browser pass.
+- Vercel CLI refreshed the expired access token successfully. Account metadata now confirms
+  an active Hobby plan, `web` project root and production branch `main`; the frontend publishes
+  through that existing integration. Billing-cost data for October 1–14 was unavailable,
+  which does not establish zero usage. Railway hosted monetary delta remains unverified;
+  the owner's merge request does not turn that uncertainty into proof of cost neutrality.
+  Rollback references and detailed operational evidence remain private outside Git.
+- **Next: Phase 4**, then Phase 5 and remaining Phase 6 checks/publication. Initial validation
+  and rollout do not complete the full Phase 6 acceptance matrix. Repository remains private;
+  GitHub Actions remain disabled; the owner retains the public-visibility decision.
+- The phase completion records below describe their original local checkpoints. Their
+  no-push/no-deployment statements predate this later owner-requested release checkpoint.
 - PortWatch completion **Phase 3 is complete locally** at `f179020`: shared responsive header,
   visible active route links, labeled port scope, independent data mode, validated URL state
   and explicit data-engineering purpose/metadata. Port, mode and replay minute survive route
