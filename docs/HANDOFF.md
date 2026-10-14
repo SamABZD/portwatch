@@ -2,6 +2,9 @@
 
 ## Current stage state
 
+- **October14,2026 title follow-up:** browser tabs use only `PortWatch`. Root metadata now
+  supplies that plain title and the pipeline inherits it. `npm run typecheck` passed;
+  this small metadata update supersedes the earlier release's longer browser titles.
 - **Completion Phase6 complete, October14,2026 UTC:** owner clarified the active "Phase7"
   goal means Phase6 release/deployment/profile. PR#9 merged at `fb89c3c`; Vercel production
   serves that tested app tree. Railway remains on the earlier `d39d9bd` code checkpoint,

@@ -3,7 +3,6 @@ import { Suspense } from "react";
 import PipelineView from "@/components/pipeline-view";
 
 export const metadata: Metadata = {
-  title: "Data engineering pipeline",
   description:
     "Inspect maritime data engineering: Python, PostGIS and Prefect pipelines behind vessel observations, plus the frozen Los Angeles dbt history.",
 };

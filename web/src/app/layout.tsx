@@ -3,7 +3,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "PortWatch — Maritime data engineering demo", template: "%s | PortWatch" },
+  title: "PortWatch",
   description:
     "A maritime data engineering demo. Trace vessel reports through Python ingestion, validation, PostGIS analytics, Prefect workflows and historical dbt models. Explore Los Angeles and Oakland on the vessel map.",
   openGraph: {
