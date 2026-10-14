@@ -1,5 +1,16 @@
 # Step13 release-readiness assessment
 
+## October 14, 2026 presentation checkpoint
+
+GitHub reports this repository public; visibility changed outside the Phase 4–5 task.
+Actions remain disabled. Phases 4–5 are on `feat/phase4-5-polish`, with current evidence in
+[workspace verification](evidence/phase4-workspace.json) and
+[public readiness](evidence/phase5-public-readiness.json). Production remains the prior release;
+Phase 6 release validation/deployment and the profile update remain. Older statuses below
+describe their recorded checkpoints and are superseded by this observation. No code license
+has been selected; non-secret operational context remains in older reachable commits.
+
+
 Completed locally on2026-10-13 (Asia/Beirut; evidence timestamps are2026-10-12 UTC).
 The historical reproducibility and critical correctness gates pass. This is a local engineering
 assessment, not evidence of a hosted release or passing GitHub Actions. Step14A publication
@@ -109,7 +120,7 @@ No unresolved critical local correctness/reproducibility failure remains. Initia
 attempts exposed Windows launcher pipe inheritance and a cleanup assertion that mistook its
 parent database for leaked test resources; both were corrected before the successful run.
 
-- GitHub CI remains blocked by account billing; the owner authorized $0 local continuation.
+- GitHub CI had not executed at this checkpoint; the owner authorized $0 local continuation.
   No new push or current-commit Actions run exists. Remote main was observed at
   `f784a9374942c704630bd412704a67c4896ead24`; old failed runs do not validate this code.
 - Docker is unavailable here: the Compose image/configuration matches CI, but fresh Docker

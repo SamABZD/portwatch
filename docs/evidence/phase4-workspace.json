@@ -1,0 +1,466 @@
+{
+  "phase": 4,
+  "status": "complete_feature_branch_release_pending",
+  "verified_at_utc": "2026-10-14T11:54:39.372672+00:00",
+  "tested_code_commit": "000f37cd644fcd7e6e2b4b3c30bf41ee2ec39b90",
+  "preview": "https://portwatch-nh9k68r3s-abzd.vercel.app/",
+  "initial_code_commit": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc",
+  "browser": {
+    "verified": true,
+    "recorded_checks": 37,
+    "checks": [
+      {
+        "case": "selected_port_vector_bounds_resize_layout",
+        "port": "los_angeles",
+        "width": 390,
+        "bounds": [
+          -118.34,
+          33.66,
+          -118.225,
+          33.8
+        ],
+        "evidence_reused": true,
+        "source_url": "https://portwatch-as49uzjpe-abzd.vercel.app/",
+        "source_revision": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc",
+        "layout": {
+          "scroll_width": 390,
+          "viewport_width": 390,
+          "map_width": 356,
+          "map_height": 370,
+          "finite_paths": true
+        }
+      },
+      {
+        "case": "selected_port_vector_bounds_resize_layout",
+        "port": "los_angeles",
+        "width": 768,
+        "bounds": [
+          -118.34,
+          33.66,
+          -118.225,
+          33.8
+        ],
+        "evidence_reused": true,
+        "source_url": "https://portwatch-as49uzjpe-abzd.vercel.app/",
+        "source_revision": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc",
+        "layout": {
+          "scroll_width": 768,
+          "viewport_width": 768,
+          "map_width": 472,
+          "map_height": 380,
+          "finite_paths": true
+        }
+      },
+      {
+        "case": "selected_port_vector_bounds_resize_layout",
+        "port": "los_angeles",
+        "width": 1024,
+        "bounds": [
+          -118.34,
+          33.66,
+          -118.225,
+          33.8
+        ],
+        "evidence_reused": true,
+        "source_url": "https://portwatch-as49uzjpe-abzd.vercel.app/",
+        "source_revision": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc",
+        "layout": {
+          "scroll_width": 1024,
+          "viewport_width": 1024,
+          "map_width": 680,
+          "map_height": 380,
+          "finite_paths": true
+        }
+      },
+      {
+        "case": "selected_port_vector_bounds_resize_layout",
+        "port": "los_angeles",
+        "width": 1440,
+        "bounds": [
+          -118.34,
+          33.66,
+          -118.225,
+          33.8
+        ],
+        "evidence_reused": true,
+        "source_url": "https://portwatch-as49uzjpe-abzd.vercel.app/",
+        "source_revision": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc",
+        "layout": {
+          "scroll_width": 1440,
+          "viewport_width": 1440,
+          "map_width": 1096,
+          "map_height": 430,
+          "finite_paths": true
+        }
+      },
+      {
+        "case": "list_map_selection_name_mmsi_search_clear",
+        "port": "los_angeles",
+        "evidence_reused": true,
+        "source_url": "https://portwatch-as49uzjpe-abzd.vercel.app/",
+        "source_revision": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc"
+      },
+      {
+        "case": "overlays_saved_trail_segments_stale_toggle_timezone",
+        "port": "los_angeles",
+        "fresh_points": 99,
+        "saved_vessels": 124,
+        "saved_segments": 99,
+        "evidence_reused": true,
+        "source_url": "https://portwatch-as49uzjpe-abzd.vercel.app/",
+        "source_revision": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc"
+      },
+      {
+        "case": "selected_port_vector_bounds_resize_layout",
+        "port": "oakland",
+        "width": 390,
+        "bounds": [
+          -122.39,
+          37.73,
+          -122.255,
+          37.84
+        ],
+        "evidence_reused": true,
+        "source_url": "https://portwatch-as49uzjpe-abzd.vercel.app/",
+        "source_revision": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc",
+        "layout": {
+          "scroll_width": 390,
+          "viewport_width": 390,
+          "map_width": 356,
+          "map_height": 370,
+          "finite_paths": true
+        }
+      },
+      {
+        "case": "selected_port_vector_bounds_resize_layout",
+        "port": "oakland",
+        "width": 768,
+        "bounds": [
+          -122.39,
+          37.73,
+          -122.255,
+          37.84
+        ],
+        "evidence_reused": true,
+        "source_url": "https://portwatch-as49uzjpe-abzd.vercel.app/",
+        "source_revision": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc",
+        "layout": {
+          "scroll_width": 768,
+          "viewport_width": 768,
+          "map_width": 472,
+          "map_height": 380,
+          "finite_paths": true
+        }
+      },
+      {
+        "case": "selected_port_vector_bounds_resize_layout",
+        "port": "oakland",
+        "width": 1024,
+        "bounds": [
+          -122.39,
+          37.73,
+          -122.255,
+          37.84
+        ],
+        "evidence_reused": true,
+        "source_url": "https://portwatch-as49uzjpe-abzd.vercel.app/",
+        "source_revision": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc",
+        "layout": {
+          "scroll_width": 1024,
+          "viewport_width": 1024,
+          "map_width": 680,
+          "map_height": 380,
+          "finite_paths": true
+        }
+      },
+      {
+        "case": "selected_port_vector_bounds_resize_layout",
+        "port": "oakland",
+        "width": 1440,
+        "bounds": [
+          -122.39,
+          37.73,
+          -122.255,
+          37.84
+        ],
+        "evidence_reused": true,
+        "source_url": "https://portwatch-as49uzjpe-abzd.vercel.app/",
+        "source_revision": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc",
+        "layout": {
+          "scroll_width": 1440,
+          "viewport_width": 1440,
+          "map_width": 1096,
+          "map_height": 430,
+          "finite_paths": true
+        }
+      },
+      {
+        "case": "list_map_selection_name_mmsi_search_clear",
+        "port": "oakland",
+        "evidence_reused": true,
+        "source_url": "https://portwatch-as49uzjpe-abzd.vercel.app/",
+        "source_revision": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc"
+      },
+      {
+        "case": "overlays_saved_trail_segments_stale_toggle_timezone",
+        "port": "oakland",
+        "fresh_points": 75,
+        "saved_vessels": 126,
+        "saved_segments": 75,
+        "evidence_reused": true,
+        "source_url": "https://portwatch-as49uzjpe-abzd.vercel.app/",
+        "source_revision": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc"
+      },
+      {
+        "case": "genuine_prepared_freshness_control",
+        "port": "los_angeles",
+        "cutoff_utc": "2024-01-01T12:30:00+00:00",
+        "fresh_vessels_30": 99,
+        "evidence_reused": true,
+        "source_url": "https://portwatch-as49uzjpe-abzd.vercel.app/",
+        "source_revision": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc"
+      },
+      {
+        "case": "genuine_prepared_freshness_control",
+        "port": "oakland",
+        "cutoff_utc": "2024-01-01T12:30:00+00:00",
+        "fresh_vessels_30": 77,
+        "evidence_reused": true,
+        "source_url": "https://portwatch-as49uzjpe-abzd.vercel.app/",
+        "source_revision": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc"
+      },
+      {
+        "case": "catalog_loading_has_explicit_state",
+        "evidence_reused": true,
+        "source_url": "https://portwatch-as49uzjpe-abzd.vercel.app/",
+        "source_revision": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc"
+      },
+      {
+        "case": "successful_empty_catalog_recovers_without_permanent_loading",
+        "evidence_reused": true,
+        "source_url": "https://portwatch-as49uzjpe-abzd.vercel.app/",
+        "source_revision": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc"
+      },
+      {
+        "case": "frame_loading_is_distinct_from_empty",
+        "evidence_reused": true,
+        "source_url": "https://portwatch-as49uzjpe-abzd.vercel.app/",
+        "source_revision": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc"
+      },
+      {
+        "case": "api_failure_unknown_metrics_retry_separate_from_zero",
+        "evidence_reused": true,
+        "source_url": "https://portwatch-as49uzjpe-abzd.vercel.app/",
+        "source_revision": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc"
+      },
+      {
+        "case": "frame_empty_distinct_saved_state",
+        "evidence_reused": true,
+        "source_url": "https://portwatch-as49uzjpe-abzd.vercel.app/",
+        "source_revision": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc"
+      },
+      {
+        "case": "frame_stale_distinct_saved_state",
+        "evidence_reused": true,
+        "source_url": "https://portwatch-as49uzjpe-abzd.vercel.app/",
+        "source_revision": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc"
+      },
+      {
+        "case": "basemap_loading_local_geometry_until_tiles_ready",
+        "evidence_reused": true,
+        "source_url": "https://portwatch-as49uzjpe-abzd.vercel.app/",
+        "source_revision": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc"
+      },
+      {
+        "case": "tile_failure_local_geometry_actual_source_error",
+        "evidence_reused": true,
+        "source_url": "https://portwatch-as49uzjpe-abzd.vercel.app/",
+        "source_revision": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc"
+      },
+      {
+        "case": "denied_webgl_distinct_renderer_fallback",
+        "evidence_reused": true,
+        "source_url": "https://portwatch-as49uzjpe-abzd.vercel.app/",
+        "source_revision": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc"
+      },
+      {
+        "case": "historical_capture_weather_attribution_link",
+        "source_url": "https://portwatch-nh9k68r3s-abzd.vercel.app/",
+        "source_revision": "000f37cd644fcd7e6e2b4b3c30bf41ee2ec39b90",
+        "evidence_reused": true
+      },
+      {
+        "case": "basemap_loading_local_geometry_until_tiles_ready",
+        "source_url": "https://portwatch-nh9k68r3s-abzd.vercel.app/",
+        "source_revision": "000f37cd644fcd7e6e2b4b3c30bf41ee2ec39b90",
+        "evidence_reused": true
+      },
+      {
+        "case": "real_maplibre_bounds_pan_refresh_resize",
+        "source_url": "https://portwatch-nh9k68r3s-abzd.vercel.app/",
+        "source_revision": "000f37cd644fcd7e6e2b4b3c30bf41ee2ec39b90",
+        "port": "los_angeles",
+        "tile_coverage": {
+          "zoom": 11,
+          "requested_tiles": 8,
+          "port_corners": [
+            [
+              350,
+              820
+            ],
+            [
+              350,
+              819
+            ],
+            [
+              351,
+              820
+            ],
+            [
+              351,
+              819
+            ]
+          ]
+        },
+        "camera_error_pixels": 0.0,
+        "camera_proof": "Pan moved real rendered vessels; refresh retains landmark centroids within1px",
+        "evidence_reused": true
+      },
+      {
+        "case": "real_maplibre_bounds_pan_refresh_resize",
+        "source_url": "https://portwatch-nh9k68r3s-abzd.vercel.app/",
+        "source_revision": "000f37cd644fcd7e6e2b4b3c30bf41ee2ec39b90",
+        "port": "oakland",
+        "tile_coverage": {
+          "zoom": 11,
+          "requested_tiles": 12,
+          "port_corners": [
+            [
+              327,
+              791
+            ],
+            [
+              327,
+              791
+            ],
+            [
+              328,
+              791
+            ],
+            [
+              328,
+              791
+            ]
+          ]
+        },
+        "camera_error_pixels": 0.0,
+        "camera_proof": "Pan moved real rendered vessels; refresh retains landmark centroids within1px",
+        "evidence_reused": true
+      },
+      {
+        "case": "actual_mobile_one_finger_page_scroll_two_finger_map_pan",
+        "source_url": "https://portwatch-nh9k68r3s-abzd.vercel.app/",
+        "source_revision": "000f37cd644fcd7e6e2b4b3c30bf41ee2ec39b90",
+        "scroll_delta": 110,
+        "evidence_reused": true
+      },
+      {
+        "case": "genuine_standalone_dbt_lineage_document",
+        "source_url": "https://portwatch-nh9k68r3s-abzd.vercel.app/",
+        "source_revision": "000f37cd644fcd7e6e2b4b3c30bf41ee2ec39b90",
+        "sha256": "a0ed3aa4422d90d44934b960f30dd562e7b45159742f087d690d143e9e1bce97",
+        "evidence_reused": true
+      },
+      {
+        "case": "pipeline_ordered_flow_all_widths",
+        "source_url": "https://portwatch-nh9k68r3s-abzd.vercel.app/",
+        "source_revision": "000f37cd644fcd7e6e2b4b3c30bf41ee2ec39b90",
+        "width": 390,
+        "evidence_reused": true
+      },
+      {
+        "case": "pipeline_ordered_flow_all_widths",
+        "source_url": "https://portwatch-nh9k68r3s-abzd.vercel.app/",
+        "source_revision": "000f37cd644fcd7e6e2b4b3c30bf41ee2ec39b90",
+        "width": 768,
+        "evidence_reused": true
+      },
+      {
+        "case": "pipeline_ordered_flow_all_widths",
+        "source_url": "https://portwatch-nh9k68r3s-abzd.vercel.app/",
+        "source_revision": "000f37cd644fcd7e6e2b4b3c30bf41ee2ec39b90",
+        "width": 1024,
+        "evidence_reused": true
+      },
+      {
+        "case": "pipeline_ordered_flow_all_widths",
+        "source_url": "https://portwatch-nh9k68r3s-abzd.vercel.app/",
+        "source_revision": "000f37cd644fcd7e6e2b4b3c30bf41ee2ec39b90",
+        "width": 1440,
+        "evidence_reused": true
+      },
+      {
+        "case": "architecture_keyboard_details_source_links_historical_scope_tables_order",
+        "source_url": "https://portwatch-nh9k68r3s-abzd.vercel.app/",
+        "source_revision": "000f37cd644fcd7e6e2b4b3c30bf41ee2ec39b90",
+        "evidence_reused": true
+      },
+      {
+        "case": "pipeline_api_failure_retry",
+        "source_url": "https://portwatch-nh9k68r3s-abzd.vercel.app/",
+        "source_revision": "000f37cd644fcd7e6e2b4b3c30bf41ee2ec39b90",
+        "evidence_reused": true
+      },
+      {
+        "case": "pipeline_poll_failure_retains_saved_results_with_stale_label",
+        "source_url": "https://portwatch-nh9k68r3s-abzd.vercel.app/",
+        "source_revision": "000f37cd644fcd7e6e2b4b3c30bf41ee2ec39b90",
+        "evidence_reused": true
+      },
+      {
+        "case": "lineage_template_asset_requests_separate_from_api_contract",
+        "source_url": "https://portwatch-nh9k68r3s-abzd.vercel.app/",
+        "source_revision": "000f37cd644fcd7e6e2b4b3c30bf41ee2ec39b90",
+        "missing_decorative_assets": 3,
+        "genuine_document_sha256": "a0ed3aa4422d90d44934b960f30dd562e7b45159742f087d690d143e9e1bce97"
+      }
+    ],
+    "page_errors": [],
+    "fixture_errors": [],
+    "provider_requests_sent": 0,
+    "external_data_requests_sent": 0,
+    "scope": "Genuine saved frames and operational/history responses; explicit isolated failure projections. Real MapLibre uses intercepted in-memory test raster; public captures have basemap off. Prior unchanged-code checks retain original source SHA/URL; targeted follow-ups verify final candidate.",
+    "test_only_projections": [
+      "empty catalog",
+      "empty frame",
+      "all stale flags",
+      "HTTP503",
+      "gated loading",
+      "local raster PNG",
+      "denied WebGL context"
+    ],
+    "lineage": "Genuine standalone dbt HTML renders its project; three missing initial Angular decorative asset requests return404 and are separate from API contract checks."
+  },
+  "validation": {
+    "typecheck": "passed",
+    "production_build": "passed",
+    "node_tests": {
+      "passed": 14,
+      "failed": 0,
+      "command": "node --test scripts/view-state.test.mjs scripts/visible-polling.test.mjs"
+    },
+    "browser_command": "python -m scripts.verify_workspace_browser --url <verified-owned-immutable-HTTPS-preview> --source-revision <full-source-SHA> --fixtures <private-genuine-fixtures> --freshness-fixtures <private-genuine-freshness-frames> --lineage <private-saved-dbt-html> --output artifacts/phase4; targeted --only/--resume follow-ups preserve original evidence",
+    "lint": "ruff check and format passed on verifier"
+  },
+  "requirements": {
+    "map": "Finite coordinates, port-specific bounds, measured vector resize, native renderer resize, footer outside canvas, balanced inspector, distinct loading/empty/stale/API/tile/WebGL states, selection/search/toggles/freshness preserved",
+    "pipeline": "Four sources, five ordered stages, measured connectors, historical-only dbt branch, finite Prefect jobs separate collectors, quality/runs before frozen history/operations, keyboard details, labeled table scroll regions",
+    "analytical_changes": false
+  },
+  "limitations": [
+    "Saved historical frames have no same-MMSI multi-segment gap. Actual saved trail/point boundaries verified; no track invented to manufacture such a screenshot.",
+    "Browser fixture validation does not establish current provider availability, live coverage or production acceptance.",
+    "Local listener launch was rejected by automatic approval review. Existing Vercel Hobby HTTPS preview used; no new paid resource.",
+    "Phase6 full release validator/production rollout/cost/public/profile checks remain."
+  ]
+}

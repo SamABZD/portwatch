@@ -55,3 +55,22 @@ navigation and browser history. Prepared sessions show historical scope and disa
 Pipeline measurements follow the selected port; the fixed seven-day LA artifact remains
 separately identified. Use compact data-engineering purpose copy with a direct pipeline link,
 keeping the working map near the first viewport. Source CTA waits for public repository access.
+
+## Map and pipeline refinement
+
+The map stage owns only the canvas/vector surface; legend and attribution sit in a normal-flow
+footer. Both renderers use finite longitude/latitude guards and the selected port's bounds.
+Vector projection follows the measured container; native MapLibre resize remains authoritative.
+A data refresh preserves the user's camera. Cooperative gestures permit one-finger page scroll
+and two-finger map pan. Desktop inspector height follows the map column; mobile stacks naturally.
+The inspector explicitly distinguishes plotted fresh reports from all saved observations.
+
+Pipeline reading order is purpose, architecture/component detail, quality/runs, selected-port
+evidence, frozen history and operational limits. Four source branches feed five ordered stages.
+Only historical PostGIS data feeds dbt; Prefect finite jobs stay separate from continuous AIS
+collection. Connector coordinates follow actual node rectangles. Compact layouts show an ordered
+vertical flow and named historical branch; all scroll tables are labeled keyboard regions.
+
+Loading, successful empty results, stale evidence, API failure, missing tiles and unavailable
+WebGL have distinct text. Refinement preserves the existing palette, analytical meaning and
+reduced-motion behavior; no added paid map SDK, provider calls or animated traffic.

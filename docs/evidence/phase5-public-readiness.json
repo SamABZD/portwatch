@@ -1,0 +1,603 @@
+{
+  "phase": 5,
+  "status": "complete_feature_branch_release_pending",
+  "observed_at_utc": "2026-10-14T11:13:37.322836+00:00",
+  "reproduction": {
+    "tested_commit": "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc",
+    "scope": "Fresh clone; genuine saved one-day NOAA/ERA5 inputs copied and verified; owned UUID database on already-running native PostgreSQL 17.11/PostGIS 3.6.2",
+    "functional_verification_passed": true,
+    "recorded_commands_passed": 20,
+    "commands": [
+      {
+        "label": "git-clone",
+        "command": [
+          "git",
+          "clone",
+          "--no-local",
+          "--no-hardlinks",
+          "--no-checkout",
+          "<source-checkout>",
+          "<owned-clean-clone>"
+        ],
+        "working_directory": ".",
+        "exit_code": 0,
+        "elapsed_seconds": 1.368
+      },
+      {
+        "label": "git-checkout",
+        "command": [
+          "git",
+          "checkout",
+          "--detach",
+          "4b6a18594c11e0a6e90ed15da1006cc7a0c186cc"
+        ],
+        "working_directory": "portwatch",
+        "exit_code": 0,
+        "elapsed_seconds": 0.229
+      },
+      {
+        "label": "uv-sync-dev",
+        "command": [
+          "<uv>",
+          "sync",
+          "--locked",
+          "--extra",
+          "dev"
+        ],
+        "working_directory": "portwatch",
+        "exit_code": 0,
+        "elapsed_seconds": 6.882
+      },
+      {
+        "label": "analytics-uv-sync",
+        "command": [
+          "<uv>",
+          "sync",
+          "--locked"
+        ],
+        "working_directory": "portwatch/analytics",
+        "exit_code": 0,
+        "elapsed_seconds": 2.86
+      },
+      {
+        "label": "analytics-dbt-version",
+        "command": [
+          "<uv>",
+          "run",
+          "--locked",
+          "dbt",
+          "--version"
+        ],
+        "working_directory": "portwatch/analytics",
+        "exit_code": 0,
+        "elapsed_seconds": 24.484
+      },
+      {
+        "label": "npm-ci",
+        "command": [
+          "<node>",
+          "<npm-cli>",
+          "ci"
+        ],
+        "working_directory": "portwatch/web",
+        "exit_code": 0,
+        "elapsed_seconds": 52.331
+      },
+      {
+        "label": "frontend-typecheck",
+        "command": [
+          "<node>",
+          "<npm-cli>",
+          "run",
+          "typecheck"
+        ],
+        "working_directory": "portwatch/web",
+        "exit_code": 0,
+        "elapsed_seconds": 4.846
+      },
+      {
+        "label": "frontend-build",
+        "command": [
+          "<node>",
+          "<npm-cli>",
+          "run",
+          "build"
+        ],
+        "working_directory": "portwatch/web",
+        "exit_code": 0,
+        "elapsed_seconds": 15.606
+      },
+      {
+        "label": "migrate-first",
+        "command": [
+          "<uv>",
+          "run",
+          "--locked",
+          "python",
+          "-m",
+          "portwatch",
+          "db",
+          "migrate"
+        ],
+        "working_directory": "portwatch",
+        "exit_code": 0,
+        "elapsed_seconds": 12.413
+      },
+      {
+        "label": "migrate-repeat",
+        "command": [
+          "<uv>",
+          "run",
+          "--locked",
+          "python",
+          "-m",
+          "portwatch",
+          "db",
+          "migrate"
+        ],
+        "working_directory": "portwatch",
+        "exit_code": 0,
+        "elapsed_seconds": 1.551
+      },
+      {
+        "label": "doctor",
+        "command": [
+          "<uv>",
+          "run",
+          "--locked",
+          "python",
+          "-m",
+          "portwatch",
+          "doctor"
+        ],
+        "working_directory": "portwatch",
+        "exit_code": 0,
+        "elapsed_seconds": 3.223
+      },
+      {
+        "label": "fresh-los_angeles",
+        "command": [
+          "<uv>",
+          "run",
+          "--locked",
+          "python",
+          "-m",
+          "portwatch",
+          "pipeline",
+          "run",
+          "--port",
+          "los_angeles",
+          "--demo",
+          "--local"
+        ],
+        "working_directory": "portwatch",
+        "exit_code": 0,
+        "elapsed_seconds": 73.052
+      },
+      {
+        "label": "fresh-oakland",
+        "command": [
+          "<uv>",
+          "run",
+          "--locked",
+          "python",
+          "-m",
+          "portwatch",
+          "pipeline",
+          "run",
+          "--port",
+          "oakland",
+          "--demo",
+          "--local"
+        ],
+        "working_directory": "portwatch",
+        "exit_code": 0,
+        "elapsed_seconds": 55.277
+      },
+      {
+        "label": "digest-fresh",
+        "command": [
+          "<uv>",
+          "run",
+          "--locked",
+          "python",
+          "<private-evidence>/clone_snapshot.py",
+          "<private-evidence>/snapshot-fresh.json"
+        ],
+        "working_directory": "portwatch",
+        "exit_code": 0,
+        "elapsed_seconds": 18.151
+      },
+      {
+        "label": "repeat-los_angeles",
+        "command": [
+          "<uv>",
+          "run",
+          "--locked",
+          "python",
+          "-m",
+          "portwatch",
+          "pipeline",
+          "run",
+          "--port",
+          "los_angeles",
+          "--demo",
+          "--local",
+          "--rebuild"
+        ],
+        "working_directory": "portwatch",
+        "exit_code": 0,
+        "elapsed_seconds": 17.826
+      },
+      {
+        "label": "repeat-oakland",
+        "command": [
+          "<uv>",
+          "run",
+          "--locked",
+          "python",
+          "-m",
+          "portwatch",
+          "pipeline",
+          "run",
+          "--port",
+          "oakland",
+          "--demo",
+          "--local",
+          "--rebuild"
+        ],
+        "working_directory": "portwatch",
+        "exit_code": 0,
+        "elapsed_seconds": 14.911
+      },
+      {
+        "label": "digest-repeat",
+        "command": [
+          "<uv>",
+          "run",
+          "--locked",
+          "python",
+          "<private-evidence>/clone_snapshot.py",
+          "<private-evidence>/snapshot-repeat.json"
+        ],
+        "working_directory": "portwatch",
+        "exit_code": 0,
+        "elapsed_seconds": 17.109
+      },
+      {
+        "label": "export-los_angeles",
+        "command": [
+          "<uv>",
+          "run",
+          "--locked",
+          "python",
+          "-m",
+          "portwatch",
+          "demo",
+          "export",
+          "--output",
+          "<private-evidence>/los_angeles-prepared.json"
+        ],
+        "working_directory": "portwatch",
+        "exit_code": 0,
+        "elapsed_seconds": 9.447
+      },
+      {
+        "label": "export-oakland",
+        "command": [
+          "<uv>",
+          "run",
+          "--locked",
+          "python",
+          "-m",
+          "portwatch",
+          "demo",
+          "export",
+          "--output",
+          "<private-evidence>/oakland-prepared.json"
+        ],
+        "working_directory": "portwatch",
+        "exit_code": 0,
+        "elapsed_seconds": 7.919
+      },
+      {
+        "label": "in-process-api-verification",
+        "command": [
+          "<uv>",
+          "run",
+          "--locked",
+          "python",
+          "<private-evidence>/clone_api_verify.py",
+          "<private-evidence>/repro-logs-388d4db6bba64e4ca643d473f968279a"
+        ],
+        "working_directory": "portwatch",
+        "exit_code": 0,
+        "elapsed_seconds": 32.516
+      }
+    ],
+    "provider_requests": 0,
+    "live_key_absent": true,
+    "input_files": [
+      {
+        "source_id": "noaa_ocm_ais_2024_geoparquet",
+        "bytes": 227181435,
+        "sha256": "3124557f70bb216e3a4d5817cf019368a6ca47d86aec8d3d2aa8c8e6d1e92560",
+        "manifest_sha256": "03a2f3f856284abbace336f4568fd84067cf489032958913a94adb6744af27ce"
+      },
+      {
+        "source_id": "noaa_ocm_ais_2024_geoparquet",
+        "bytes": 227181435,
+        "sha256": "3124557f70bb216e3a4d5817cf019368a6ca47d86aec8d3d2aa8c8e6d1e92560",
+        "manifest_sha256": "43c4fdc8ecbd1e1a82069017190137293be265b4d43373a633a2ba5968a15bd0"
+      },
+      {
+        "source_id": "open_meteo_archive",
+        "bytes": 800,
+        "sha256": "75fdca58d032a5b618414bfc5c5d2f368a248c4d3d2355aedd63e92c52dd134a",
+        "manifest_sha256": "ade11b62f566204231de625137bc58f179024482946db68e9a2b6878865ad460"
+      },
+      {
+        "source_id": "open_meteo_archive",
+        "bytes": 802,
+        "sha256": "9ef1db8ea7cf99be3e2a3a452dbd0722d140c4bb796a13409557fcbe18c26305",
+        "manifest_sha256": "09b82c93085a500fdf3835f02f7152d91597674f40cbc78950537df42ff6bde7"
+      }
+    ],
+    "fresh_results": {
+      "business_sha256": "383592ed9041fa367971a750e3b127774575abe19e33ac38bd8cf1f92bee8f66",
+      "ports": {
+        "los_angeles": {
+          "positions": 62157,
+          "vessels": 141,
+          "first_utc": "2024-01-01T00:00:00+00:00",
+          "last_utc": "2024-01-01T23:59:58+00:00",
+          "national_input_rows": 7293408,
+          "extracted": 62159,
+          "duplicates": 2,
+          "quarantined": 0,
+          "mart_sha256": "6f6ca8ecaa8e3824040aa481cd85d88cd0b52990ba2a0307daf14001ad223112"
+        },
+        "oakland": {
+          "positions": 52783,
+          "vessels": 172,
+          "first_utc": "2024-01-01T00:00:00+00:00",
+          "last_utc": "2024-01-01T23:59:59+00:00",
+          "national_input_rows": 7293408,
+          "extracted": 52785,
+          "duplicates": 2,
+          "quarantined": 0,
+          "mart_sha256": "6f8475f8980b5257e8eec455f331ad1dbf1eaec64ce8d91196083fc31bf46963"
+        }
+      },
+      "profile_sha256": "f93092ee3bf3955307a7916b3a0b52397e0fb9eb374cd6fc4d734a24e88d8035",
+      "database_version": [
+        "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit",
+        "3.6.2"
+      ],
+      "migrations": 8,
+      "context_rows": 48
+    },
+    "repeat_results": {
+      "business_sha256": "383592ed9041fa367971a750e3b127774575abe19e33ac38bd8cf1f92bee8f66",
+      "ports": {
+        "los_angeles": {
+          "positions": 62157,
+          "vessels": 141,
+          "first_utc": "2024-01-01T00:00:00+00:00",
+          "last_utc": "2024-01-01T23:59:58+00:00",
+          "national_input_rows": 7293408,
+          "extracted": 62159,
+          "duplicates": 2,
+          "quarantined": 0,
+          "mart_sha256": "6f6ca8ecaa8e3824040aa481cd85d88cd0b52990ba2a0307daf14001ad223112"
+        },
+        "oakland": {
+          "positions": 52783,
+          "vessels": 172,
+          "first_utc": "2024-01-01T00:00:00+00:00",
+          "last_utc": "2024-01-01T23:59:59+00:00",
+          "national_input_rows": 7293408,
+          "extracted": 52785,
+          "duplicates": 2,
+          "quarantined": 0,
+          "mart_sha256": "6f8475f8980b5257e8eec455f331ad1dbf1eaec64ce8d91196083fc31bf46963"
+        }
+      },
+      "profile_sha256": "f93092ee3bf3955307a7916b3a0b52397e0fb9eb374cd6fc4d734a24e88d8035",
+      "database_version": [
+        "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit",
+        "3.6.2"
+      ],
+      "migrations": 8,
+      "context_rows": 48
+    },
+    "business_mart_profile_reruns_identical": true,
+    "migrations_applied_first_repeat": [
+      8,
+      0
+    ],
+    "analytics_pins_observed": {
+      "dbt_core": "1.12.5",
+      "dbt_postgres": "1.11.0"
+    },
+    "api_verification": {
+      "ordinary": [
+        {
+          "port": "los_angeles",
+          "fresh_vessels": 99,
+          "cold_seconds": 0.589554699981818,
+          "cached_seconds": 0.029340799985220656
+        },
+        {
+          "port": "oakland",
+          "fresh_vessels": 75,
+          "cold_seconds": 2.6012470000132453,
+          "cached_seconds": 0.0448278000112623
+        }
+      ],
+      "prepared": [
+        {
+          "port": "los_angeles",
+          "without_database": true,
+          "fresh_vessels": 99,
+          "frame_seconds": 0.48331109998980537,
+          "export_sha256": "b543464a3645f0db99f6129b25d6b023051831c85a2d1f72f899499067b667a6",
+          "export_bytes": 33136602
+        },
+        {
+          "port": "oakland",
+          "without_database": true,
+          "fresh_vessels": 75,
+          "frame_seconds": 0.3856952999776695,
+          "export_sha256": "e46b364d98bbefaed22c5168ca2058395944c4178f486b4a43dc5e0ae3ec748f",
+          "export_bytes": 27660907
+        }
+      ],
+      "transport": "in-process FastAPI TestClient, no sockets/listener",
+      "live_key_absent": true,
+      "business_mart_profile_hashes_unchanged_after_reads": true,
+      "verified": true
+    },
+    "docker_startup_exercised": false,
+    "socket_startup_exercised": false,
+    "upstream_acquisition_exercised": false,
+    "api_transport": "In-process FastAPI TestClient; no sockets/listener",
+    "cleanup": {
+      "owned_database_removed": true,
+      "original_source_checksums_unchanged": true,
+      "owned_clone_removed": false,
+      "automatic_review_result": "Scratch deletion rejected: blocked by policy. No alternate deletion attempted; scratch remains private outside Git."
+    },
+    "overall_runner_exit_code": 1,
+    "overall_runner_exit_reason": "Functional commands passed; private scratch cleanup incomplete after automatic review rejection"
+  },
+  "exposure_audit": {
+    "baseline_commit": "b6e4009e32ad5bf78f1e791b64b10a585f679f9f",
+    "baseline_scope": {
+      "reachable_commits": 48,
+      "tracked_files": 233,
+      "unique_reachable_blobs": 608,
+      "reachable_blob_bytes": 10316991
+    },
+    "method": "Local Python regex/high-entropy/known-value audit of every tracked file and every reachable blob; manual candidate/asset/API review. No gitleaks/trufflehog executable available. No credential authentication attempts.",
+    "detected_actual_secret_values": 0,
+    "known_ignored_secrets_found_in_tracked_history_or_api": false,
+    "credential_validity_probed": false,
+    "forbidden_tracked_paths": [],
+    "forbidden_history_paths": [],
+    "large_reachable_blobs_over_1mb": [],
+    "historical_nonsecret_privacy_blob_count": 57,
+    "historical_nonsecret_privacy_note": "Older now-public reachable commits retain non-secret workstation/service identifiers and account execution-limit context. Current document cleanup does not remove history. Owner review or explicitly authorized remediation remains; no silent history rewrite.",
+    "current_document_cleanup": "Generalized workstation/private-evidence paths, provider deployment IDs, unrelated-project and account execution-restriction details; preserved actual failed checks and engineering history.",
+    "sampled_public_api": {
+      "requests": 8,
+      "all_200": true,
+      "bytes": 2943649,
+      "credential_or_private_path_candidates": 0,
+      "scope": "catalog, two-port health/live frames, pipeline, frozen history, standalone dbt lineage; bounded existing read-only responses"
+    },
+    "dbt_metadata": "Environment metadata empty, user ID absent; project hash/invocation UUIDs are lineage metadata, not credentials",
+    "final_candidate_scan": {
+      "result": "passed_with_documented_nonsecret_history",
+      "head_before_presentation_commit": "000f37cd644fcd7e6e2b4b3c30bf41ee2ec39b90",
+      "tracked_files": 237,
+      "reachable_commits": 50,
+      "unique_reachable_blobs": 615,
+      "reachable_blob_bytes": 10461569,
+      "scope": "Current staged file contents plus all reachable local refs; evidence bookkeeping follows this point-in-time scan",
+      "forbidden_tracked_paths": [],
+      "large_reachable_blobs": [],
+      "unresolved_history_candidates": 0,
+      "known_private_ais_or_oidc_matches": 0,
+      "current_workstation_or_private_provider_id_candidates": 0,
+      "asset_embedded_text_or_exif": 0,
+      "current_assignment_review": "All19 candidates are environment/type/test references or documented public localhost/ephemeral-CI placeholders; no actual credential detected",
+      "entropy_review": "Distribution/content hashes, public source URL identifiers and environment symbols; no unresolved candidate"
+    },
+    "limitations": [
+      "Scanner is not proof of complete absence of secrets.",
+      "Local --all reachable refs audited; dangling/unreachable objects and external forks/caches not inspected.",
+      "Known local secret matches cannot detect unknown/rotated secret without recognizable pattern.",
+      "Only eight bounded current public API responses, not every past response."
+    ]
+  },
+  "presentation": {
+    "reference": "SamABZD/flux README hierarchy; PortWatch-specific claims and license status",
+    "code_license": "No root LICENSE; none selected by owner",
+    "packaged_assets": "Unchanged genuine historical NOAA/ERA5 screenshots, local geometry with basemap off; no raw/live screenshots, dumps or prepared exports",
+    "historical_ais": "NOAA OCM / MarineCadastre 2024 AIS, CC0",
+    "weather": "Open-Meteo and Copernicus C3S/ERA5 transformed UTC selections; CC BY 4.0 attribution",
+    "news": "GDELT plus official LA release archive and Oakland RSS; title/link/date metadata only",
+    "aisstream_redistribution_terms": "unverified; no raw/live payload packaged",
+    "validation": {
+      "local_markdown_links_checked": 110,
+      "missing_local_links": 0,
+      "github_gfm_render": "Root README and docs index rendered successfully; four images, three README tables, two index tables; GitHub Mermaid embedding emitted",
+      "unchanged_png_checksum_matches": 4,
+      "screenshot_visual_review": "Four packaged images plus pipeline mobile inspected; historical evidence and architecture only",
+      "mermaid_parser": {
+        "version": "11.12.0",
+        "parsed": "flowchart-v2",
+        "rendered_nodes": 14,
+        "svg_render": "passed; visually inspected",
+        "external_requests_sent": 0,
+        "scope": "Owned in-process browser routes fulfill module files; no listener or provider request"
+      },
+      "github_mermaid_embedding": true
+    }
+  },
+  "release_state": {
+    "branch": "feat/phase4-5-polish",
+    "production_release_in_this_phase": false,
+    "repository_private": false,
+    "actions_enabled": false,
+    "new_paid_resources": 0,
+    "verified_incremental_cloud_cost_usd": null,
+    "visibility_observation": "gh repo view reports isPrivate=false on October14; visibility changed externally during this work, not by this task",
+    "anonymous_main_access": [
+      {
+        "name": "repository",
+        "status": 200,
+        "bytes": 346390,
+        "sha256": "fa8830f7da4151db9ee0854d09e400e4c0bbfadec46d1ce7017fedc8323e1b79",
+        "authenticated": false,
+        "branch": "main",
+        "scope": "Existing previous-release main content"
+      },
+      {
+        "name": "readme",
+        "status": 200,
+        "bytes": 12523,
+        "sha256": "fa69e6ed58ad8296a063f82613a4829ec459f0ad766d3fd02ce58c9a33669874",
+        "authenticated": false,
+        "branch": "main",
+        "scope": "Existing previous-release main content"
+      },
+      {
+        "name": "code",
+        "status": 200,
+        "bytes": 13766,
+        "sha256": "3d43cd45ee3d3a7f266f35e54155e6623e623f64fe3281d6bec946b47731e318",
+        "authenticated": false,
+        "branch": "main",
+        "scope": "Existing previous-release main content"
+      },
+      {
+        "name": "screenshot",
+        "status": 200,
+        "bytes": 67161,
+        "sha256": "01dfdc9532ebe6dfd15958512eeb09ecb814b31a523afd5602b7fb52271696b7",
+        "authenticated": false,
+        "branch": "main",
+        "scope": "Existing previous-release main content"
+      }
+    ]
+  },
+  "remaining_phase6": [
+    "Full local release validator and final batched browser/API checks",
+    "Review cost/resource evidence and prepare rollback",
+    "Merge/release tested changes and verify production HTTPS",
+    "Owner history/license decisions; verify final main assets after merge (repository already public)",
+    "Repository About/topics and profile PortWatch entry after public visibility"
+  ]
+}

@@ -25,9 +25,9 @@
   which does not establish zero usage. Railway hosted monetary delta remains unverified;
   the owner's merge request does not turn that uncertainty into proof of cost neutrality.
   Rollback references and detailed operational evidence remain private outside Git.
-- **Next: Phase 4**, then Phase 5 and remaining Phase 6 checks/publication. Initial validation
-  and rollout do not complete the full Phase 6 acceptance matrix. Repository remains private;
-  GitHub Actions remain disabled; the owner retains the public-visibility decision.
+- **Next release gate: Phase 6.** Phases 4–5 refinement/preparation are recorded below. Initial
+  validation/rollout do not complete Phase 6. Repository now reports public (external change);
+  Actions remain disabled. New branch changes have not been merged or released to production.
 - The phase completion records below describe their original local checkpoints. Their
   no-push/no-deployment statements predate this later owner-requested release checkpoint.
 - PortWatch completion **Phase 3 is complete locally** at `f179020`: shared responsive header,
@@ -72,13 +72,85 @@
   Leave local collectors stopped while the cloud runtime is active.
 - Read [deployment operations](../deploy/README.md) for endpoints, persistence, update/handover,
   storage and backup requirements. Use `git log -1` for the latest documentation checkpoint.
-- CI05A was account-billing-blocked; repository Actions are now explicitly disabled by the owner.
-  Preserve private repository visibility. User authorized hosting on Sam's existing paid Railway
+- CI05A did not execute; repository Actions are now explicitly disabled by the owner.
+  Preserve private repository visibility. User authorized hosting on the owner's existing paid Railway
   Hobby workspace with a Vercel frontend. Account/payment/plan changes remain outside this work.
 - Earlier stage evidence below is historical. Its paused/stopped collector descriptions are
   superseded by the live runtime. No source observations were invented for this extension.
 
 ## Verified commands and observed outcomes
+
+### Completion phase 4: map and pipeline refinement (2026-10-14 UTC)
+
+- Source `4b6a185` refines both-port map sizing/fallbacks, plotted-versus-saved scope,
+  and architecture flow; final `000f37c` adds labeled/focusable history tables and linked
+  Open-Meteo/ERA5 attribution. Branch `feat/phase4-5-polish` is pushed. Existing light interface,
+  real analytical semantics, raw inputs and collector ownership are preserved.
+- Vector projection follows the measured map stage. MapLibre uses selected-port fit bounds,
+  native resize and cooperative touch gestures; initialization dependencies omit polling
+  revisions. Footer legend/credits stay outside the canvas; desktop inspector height follows
+  the map and mobile stacks. Loading, empty, stale, API failure, tile failure and WebGL fallback
+  remain distinct. Empty catalogs expose a retry instead of permanent loading.
+- Pipeline order is architecture/detail, quality/runs, selected-port evidence, frozen history
+  and operations. Four sources feed raw/Python/PostGIS/API/web; dbt branches from historical
+  PostGIS only. Finite Prefect jobs stay separate from continuous collectors. Wires follow
+  node rectangles; compact flow and keyboard details stay readable. Scroll tables are labeled.
+- `npm run typecheck`, `npm run build`, and `node --test scripts/view-state.test.mjs
+  scripts/visible-polling.test.mjs` pass; 14 Node tests. The new verifier passes Ruff lint/format.
+  Browser evidence records 37 checks across saved genuine fixtures, explicit failure projections,
+  real MapLibre rendering, both ports and widths 390/768/1024/1440. Prior unchanged-code checks
+  retain `4b6a185`; targeted camera/mobile/pipeline/lineage checks use `000f37c`. One-finger page
+  scroll measured110px; refreshed rendered vessel centroids remained unchanged after pan.
+- `python -m scripts.verify_workspace_browser --url <owned-immutable-HTTPS-preview>
+  --source-revision <full-SHA> --fixtures <private-phase3-fixtures>
+  --freshness-fixtures <private-genuine-freshness-frames> --lineage <private-saved-dbt-html>
+  --output artifacts/phase4`; narrow `--only`/`--resume` follow-ups archive prior results.
+  Final HTTPS preview: https://portwatch-nh9k68r3s-abzd.vercel.app/ . Existing automation bypass
+  remains private, scoped solely to static same-origin requests; no provider/API requests sent.
+- Automatic approval review rejected local preview launch: "blocked by policy." Used the
+  existing Vercel Hobby HTTPS preview; no alternate listener or denied localhost reload.
+  Three initial dbt template-image URLs are missing decorative assets, not API calls; genuine
+  standalone dbt project rendering succeeds. Captured trails have no multi-segment same-MMSI
+  gap; actual saved boundaries were checked without inventing a track.
+- Final genuine historical screenshots were visually inspected and copied unchanged with
+  SHA-256 provenance. Public assets have tiles off; test-only raster/live/failure fixtures stay
+  ignored. See [Phase4 evidence](evidence/phase4-workspace.json). No production rollout here.
+
+### Completion phase 5: presentation and public readiness (2026-10-14 UTC)
+
+- Reworked root README using Flux's reader hierarchy with PortWatch's own claims: discipline,
+  demo path, real tour, maintained architecture, accurate locked stack and separate dbt environment,
+  local setup/stop/rerun, pipeline boundaries, scoped measurements, costs, sources and license
+  status. Added [documentation index](README.md), refreshed DEMO and screenshot provenance.
+- Clean clone of `4b6a185`: 20 functional commands pass (locked root/analytics installs, npm ci,
+  typecheck/build, migrate/repeat/doctor, both real one-day pipelines and forced repeats, exports,
+  digest and in-process API checks). Native PostgreSQL17.11/PostGIS3.6.2 owned UUID database;
+  no upstream acquisition, live key, local collector, DB cluster restart or socket server.
+  Migrations8/0; LA62,157 positions/141 vessels, Oakland52,783/172; both retain2 duplicate
+  lineages/0 quarantines. Business/profile/mart digests match repeats; actual prepared/database
+  cutoff parity99/75 fresh vessels. Original provider bytes/checksums unchanged.
+- Docker/socket startup and current upstream availability were not exercised. Functional work
+  passes; runner overall exits1 because scratch cleanup is incomplete. Owned database removal
+  independently confirmed. Automatic approval review rejected deletion of the owned private
+  clone: "blocked by policy." No alternate deletion attempted; exact scratch location stays
+  in private evidence for later owner cleanup.
+- Tracked and reachable-history audit, genuine asset review and eight bounded existing API
+  responses found no actual credential. No secret authentication attempted. Generalized current
+  workstation/private-evidence paths, provider IDs and private account/other-project details;
+  preserved verification facts and historical logs. Older reachable commits retain non-secret
+  workstation/service/account context (57 baseline blobs). No history rewrite or secret rotation
+  is indicated by observed results; scanner/sample limitations remain explicit.
+- GitHub reports repository public during this work, changed externally. Anonymous previous-main
+  repository/README/code/screenshot access returns200; Actions still disabled. No visibility or
+  account setting changed here. License remains unselected; no LICENSE was invented. NOAA CC0,
+  Open-Meteo/C3S attribution and both official port news sources are documented. AISStream
+  redistribution terms remain unverified; no raw/live artifact is packaged.
+- [Public readiness](evidence/phase5-public-readiness.json) records exact reproduction scope,
+  hashes, cleanup limitation, history exposure and final candidate scan. Earlier release
+  `d39d9bd` passed236 unit +93 integration =329; Python code is unchanged by phases4–5.
+- Next Phase6: full local release validation, final API/browser/cost/resource checks, rollback,
+  merge/production rollout, then final public main asset verification, About/topics and profile
+  entry. Existing release tag remains unchanged. Detailed operational evidence stays private.
 
 ### Completion phase 3: navigation and purpose (2026-10-14 Asia/Beirut)
 
@@ -116,7 +188,7 @@
 - `python -m scripts.verify_navigation_browser --help`, then final production-browser command:
 
   ```powershell
-  .\.venv\Scripts\python.exe -m scripts.verify_navigation_browser --url http://127.0.0.1:3160 --fixtures C:\Users\samab\.codex\portwatch-phase3-private\browser-fixtures --output artifacts/phase3
+  .\.venv\Scripts\python.exe -m scripts.verify_navigation_browser --url http://127.0.0.1:3160 --fixtures <private-phase3-evidence>\browser-fixtures --output artifacts/phase3
   ```
 
   Existing `webapp-testing/scripts/with_server.py` supplied the temporary frontend, with its
@@ -144,7 +216,7 @@
 - Ruff `check`/`format --check` on the new verifier and `git diff --check`: **passed**.
   Changed-file configured-long-secret scan found zero matches without printing values.
   PRODUCT/DESIGN and D088–D090 record the shared navigation contract. Sanitized evidence is
-  committed; detailed fixture capture remains at `C:\Users\samab\.codex\portwatch-phase3-private`.
+  committed; detailed fixture capture remains at `<private-phase3-evidence>`.
 - No push, preview/deployment, paid resource, dependency, CI, account, source cadence, data,
   license, visibility or profile change. New route links disable prefetch; hosted monetary/query
   delta remains unmeasured, so Phase 1 release gates still apply. Full release validation is
@@ -202,7 +274,7 @@
 - `python -m scripts.verify_news_browser --help`, then final local production browser command:
 
   ```powershell
-  .\.venv\Scripts\python.exe -m scripts.verify_news_browser --url http://127.0.0.1:3160 --fixtures C:\Users\samab\.codex\portwatch-phase2-private\browser-fixtures --output artifacts/phase2
+  .\.venv\Scripts\python.exe -m scripts.verify_news_browser --url http://127.0.0.1:3160 --fixtures <private-phase2-evidence>\browser-fixtures --output artifacts/phase2
   ```
 
   Existing `webapp-testing/scripts/with_server.py` supplied the temporary Next.js server. Final
@@ -227,7 +299,7 @@
   Verification servers on ports 3160/8713 were explicitly stopped after checking process ownership;
   Windows helper termination alone left child processes. No local collectors started.
 - Private receipts/bodies/API fixtures and capture/proxy scripts remain at
-  `C:\Users\samab\.codex\portwatch-phase2-private`. Sanitized evidence is committed; bulk/raw/live
+  `<private-phase2-evidence>`. Sanitized evidence is committed; bulk/raw/live
   fixtures and screenshots are excluded. No push/deploy, account spending cap, Actions, license,
   visibility or profile change. Query/monetary delta after rollout remains unresolved; run Phase 6
   validation once before release, resolve cost gates, deploy backend before dependent frontend,
@@ -299,11 +371,11 @@
 
 - Owner approved merging/deploying history/dbt and strengthening continuous operation,
   with no additional spending and no30-day expansion. Separately stopped all three
-  `appealing-upliftment` deployments and disabled its two GitHub auto-deploy settings;
+  deployments of a separate owner-designated project and disabled its two GitHub auto-deploy settings;
   project/services/source connections/database volume remain. Retained storage still bills.
 - Kept existing PortWatch services,5000MB volumes, backend1CPU/2GB and database0.5CPU/1GB
   limits. Both restart policies are `ALWAYS`. No plan upgrade or new paid service.
-  Backend deployment `02446750-ef6e-4fb5-ae55-f173c5996e64` uses code
+  The backend deployment uses code
   `fa2abb78e9c3f69d434b2feed5da7f7acc77af7f`; backend code is unchanged afterward.
 - Restored a checksum-verified compact snapshot into the separate `portwatch_history_7d`
   database on the existing private PostGIS service. All443,296 positions, clean-record
@@ -438,8 +510,8 @@
   [portwatch-iota.vercel.app](https://portwatch-iota.vercel.app). Initial frontend-only
   build had no backend URL; full end-to-end deployment verification follows in the
   [deployment record](../deploy/README.md). Git root is configured as `web`.
-- Railway CLI was signed into Adam; that workspace reported UNPAID. Switched normal
-  login to Sam, confirmed Sam's workspace ACTIVE/HOBBY, and created only a new PortWatch
+- The initially selected Railway workspace could not provision the project. Selected
+  the owner's existing active Hobby workspace and created only a new PortWatch
   project. Backend/database use separate persistent volumes; cloud live starts disabled.
   No existing portfolio or other project was changed, and no plan/payment was changed.
 - Publication PR#3 remains the current review vehicle. Earlier preparation evidence and
@@ -484,8 +556,8 @@
   [PR#3](https://github.com/SamABZD/portwatch/pull/3), attached to this chat, initial head
   `0caf861a4e09cafd855b0f07861af4310251e7dc`. Its push38381488934 and PR38381515855
   runs both report `startup_failure`, zero jobs/checks and no detailed API annotation/logs.
-  Official action pins resolve and local YAML parses. Previous billing lock remains the last
-  diagnosed blocker; current API does not confirm a specific cause. No hosted pass is claimed.
+  Official action pins resolve and local YAML parses. Earlier hosted checks did not run;
+  the current API does not confirm a specific startup-failure cause. No hosted pass is claimed.
 - Main remains`f784a9374942c704630bd412704a67c4896ead24`, CI PR#2 remains open,
   repository remains private and v0.1.0 is unused. PR#3 stays unmerged; no tag/release was made.
   Step14A preparation is published for review, but completion is blocked on hosted validation.
@@ -526,7 +598,7 @@
   both news429. Main frontend3000/query8000/Prefect4200/PG55432/runtime remain running.
   Temporary8077/3002 and all owned audit clusters stopped. Check actual status before reuse.
 - GitHub remote main observed `f784a9374942c704630bd412704a67c4896ead24`; current code
-  remains local. Billing-blocked Actions/Compose Docker startup/public hosting are unverified.
+  remains local. Hosted Actions/Compose Docker startup/public hosting were unverified at this checkpoint.
   Local evidence must be deliberately reviewed/packaged at14A; generated bulk stays ignored.
 
 ### Live multiport extension / Step15 (2026-10-12)
@@ -614,12 +686,12 @@ No user action is needed to begin the authorized local next stage; hosted CI rem
   los_angeles`: real local API and runner. Minute live, separate hourly weather/news deployments,
   one run/deployment and three runner slots. The long-lived collector remains independent.
 - `.\.venv\Scripts\python.exe scripts/verify_pipeline.py`: complete genuine cached demo,
-  controlled raw-only interruption and successful resumption, same Jan1→Jan2 backfill twice,
+  controlled raw-only interruption and successful resumption, same Jan1Ã¢â€ ’Jan2 backfill twice,
   checkpoint reuse, actual competing request excluded, five reconciliation groups allzero.
  78.84s; source hash `355cc069362fd84e7aa27530647bae9f8dbbcbdb0156e9585dfea9b91a8122d4`,
   mart hash `6f6ca8ecaa8e3824040aa481cd85d88cd0b52990ba2a0307daf14001ad223112` unchanged.
 - `.\.venv\Scripts\python.exe scripts/verify_schedule.py`: API confirms `auto_scheduled=true`,
-  flow `01a130c2-3367-7c7d-9daa-9860b7ea2012` and its task completed, started15:49:32.882542Z
+  flow and its task completed, started15:49:32.882542Z
   on2026-10-12 (18:49:32 Asia/Beirut). Repeated minute runs also completed. Hourly deployments
   were paused before their next tick; their scheduled provider success is not claimed.
 - `.\.bootstrap-venv\Scripts\uv.exe run --locked --extra dev python scripts/validate.py`:
@@ -769,7 +841,7 @@ Step07 paths: new `src/portwatch/visits.py`, `visit_storage.py`, migration004, `
 
 ### Step 06 and resumed project recovery (2026-10-12)
 
-- Recovered the existing project and clean `ci/validate` checkout, original remote and current PR. `gh run rerun 38171408548 --repo SamABZD/portwatch` created attempt2 on head `35b230c6d40092d45fb9e7876f53b4fc9f9f649c`; it completed failure at `2026-10-12T10:26:37Z`. Both `quality` and `integration` again had empty step lists, with GitHub's account billing-lock annotation. No plan, payment, purchase, account changes, or support message was made. PR#2 is attached to this resumed chat. Main remains `f784a9374942c704630bd412704a67c4896ead24`, unprotected, with an empty ruleset list.
+- Recovered the existing project and clean `ci/validate` checkout, original remote and current PR. `gh run rerun 38171408548 --repo SamABZD/portwatch` created attempt2 on head `35b230c6d40092d45fb9e7876f53b4fc9f9f649c`; it completed failure at `2026-10-12T10:26:37Z`. Both `quality` and `integration` again had empty step lists, with the same pre-run execution restriction. No plan, payment, purchase, account changes, or support message was made. PR#2 is attached to this resumed chat. Main remains `f784a9374942c704630bd412704a67c4896ead24`, unprotected, with an empty ruleset list.
 - Before new work, `python -m portwatch doctor`: all PASS, including database/PostGIS3.6.2 and configured key. `storage inspect`: three genuine complete batches, zero issues. Saved original clean business SHA-256 in ignored `artifacts/step06/positions-before.sha256`: `355cc069362fd84e7aa27530647bae9f8dbbcbdb0156e9585dfea9b91a8122d4`.
 - Implemented GeoJSON `la-approx-v1` with six reviewed analytical approximations, canonical content SHA-256 `b3da0e3ea2ee07acf05b0285c775391c7b6e1c9bf0d5314a11d6f3922d0c8eaa`. Reviewed official 2023 Port of Los Angeles terminal PDF visually and overlaid actual saved tracks. Four terminal vicinity polygons, one harbor polygon and one region-scoped offshore candidate. Explicit uncertainty, reference points, review dates, null operational validity dates, 4326 longitude/latitude order, and Long Beach exclusion reference. These are not official boundaries, berth occupancy or waiting evidence; see [GEO_ZONES.md](GEO_ZONES.md).
 - Added immutable migration003 (`geofence_versions`, `port_zones`, `position_zone_assignments`, `position_zone_memberships`), GiST/FK indexes, geometry validation and catalog/zone immutability triggers. Earlier SQL migrations were unchanged. CLI `geo load` publishes/reuses a version; `transform zones --demo` selects the frozen source/dataset/cleaning version/UTC interval. Every position has all memberships or an explicit outside state. Primary priority is terminal, harbor, regional candidate, with lexical zone-ID tie breaking. `--version` reproduces older stored versions.
@@ -785,10 +857,10 @@ Step06 changes: `geo/los_angeles.geojson`, `src/portwatch/zones.py`, `src/portwa
 - Implemented `.github/workflows/ci.yml` (`Validate`, `quality`, `integration`), official full-SHA action pins, Ubuntu24.04, Python3.11/uv0.13.0, locked sync, read-only permissions, timeouts/concurrency, dependency-only caching, and a fresh PG17/PostGIS3.6 service with ephemeral credentials and readiness checks. No live provider secrets or failure artifact uploads.
 - `.\.venv\Scripts\python.exe scripts/validate.py --group all`: **PASS**. Ruff lint passed; **43 Python files formatted**; **87 unit tests passed** (23.38s), **12 integration tests passed** (6.30s), no skipped selected tests. Built sdist/wheel; isolated Python imported the actual wheel, checked both packaged SQL migrations, and ran CLI help. Fresh owned-schema migration applied two SQL files; repeat applied zero; local PG17/PostGIS3.6.2 verified. Temporary validation schemas are dropped and fixture data is synthetic.
 - Formatting initially failed for 12 existing files; formatted without changing SQL migration bodies. A Windows live-spool fixture exposed a 30ms wall-time race; replaced sleeps with a controlled clock. Periodic-status fixture now waits for its condition and always stops/joins its collector under a timeout. Production collector logic remains unchanged. Validator fails on empty/skipped/failed suites and has bounded subprocesses; test network guard rejects external Python sockets. Six new validation regression tests passed. Cavecrew review reported no issues, including both modified live fixtures.
-- Remote repository/admin access verified; main protection was absent and ruleset list empty. User approved separate prerequisite publication; PR#1 is merged as `f784a9374942c704630bd412704a67c4896ead24`, source checkpoint `434e5f71373fabcf849f3f659085ce5e363218db`. CI PR#2 code SHA `97b8af116948088bf6730866b77cdffc71f0e16b`: actual [PR run](https://github.com/SamABZD/portwatch/actions/runs/38171159125) and [push run](https://github.com/SamABZD/portwatch/actions/runs/38171158488) failed before any runner/step started. Both registered jobs (`quality`, `integration`, GitHub Actions app15368) show “The job was not started because your account is locked due to a billing issue.” Actions itself is enabled. No successful remote tests or PostGIS startup are claimed; setup PR is unmerged, main's run list empty, and protection unapplied. [GITHUB_SETUP.md](GITHUB_SETUP.md) records exact evidence, proposed protection JSON and owner action/resume instructions. Private `.env`, actual AIS key, downloaded data, runtime, and native database remain ignored.
+- Remote repository/admin access verified; main protection was absent and ruleset list empty. User approved separate prerequisite publication; PR#1 is merged as `f784a9374942c704630bd412704a67c4896ead24`, source checkpoint `434e5f71373fabcf849f3f659085ce5e363218db`. CI PR#2 code SHA `97b8af116948088bf6730866b77cdffc71f0e16b`: actual [PR run](https://github.com/SamABZD/portwatch/actions/runs/38171159125) and [push run](https://github.com/SamABZD/portwatch/actions/runs/38171158488) failed before any runner/step started. Both registered jobs (`quality`, `integration`, GitHub Actions app15368) reported a pre-run execution restriction. Actions itself was enabled at that historical checkpoint. No successful remote tests or PostGIS startup are claimed; setup PR is unmerged, main's run list empty, and protection unapplied. [GITHUB_SETUP.md](GITHUB_SETUP.md) records exact evidence, proposed protection JSON and owner action/resume instructions. Private `.env`, actual AIS key, downloaded data, runtime, and native database remain ignored.
 - Documented `uv run --locked --extra dev python scripts/validate.py` rerun: PASS, 87 unit tests in26.57s and12 integration tests in6.29s, all other checks passed. AST comparison verified all11 formatting-only files preserve code semantics; both SQL migrations are byte-identical to the pre-CI snapshot. Candidate/staged scans found no actual-key matches; CI commit included only21 intended CI-related paths.
 
-Step05A changed files: `.github/workflows/ci.yml`, `scripts/validate.py`, `tests/test_validation.py`, `tests/conftest.py`, `tests/test_live.py`, `CONTRIBUTING.md`, `docs/GITHUB_WORKFLOW.md`, `docs/GITHUB_SETUP.md`, `docs/RESULTS.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`; formatting only in `scripts/verify_historical.py`, `src/portwatch/bookkeeping.py`, `src/portwatch/cleaning.py`, `src/portwatch/download.py`, `src/portwatch/historical.py`, `src/portwatch/ingest.py`, `src/portwatch/storage.py`, `tests/test_bookkeeping.py`, `tests/test_historical.py`, `tests/test_live_bookkeeping.py`, `tests/test_storage.py`. Earlier-stage snapshot/manifest and CI path inventory are preserved in ignored `artifacts/step05a/` for separating prerequisite and CI commits. Both created PRs are attached to the current chat; the first is merged and the second remains open. Completion is blocked by external account state, not a local verification failure.
+Step05A changed files: `.github/workflows/ci.yml`, `scripts/validate.py`, `tests/test_validation.py`, `tests/conftest.py`, `tests/test_live.py`, `CONTRIBUTING.md`, `docs/GITHUB_WORKFLOW.md`, `docs/GITHUB_SETUP.md`, `docs/RESULTS.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`; formatting only in `scripts/verify_historical.py`, `src/portwatch/bookkeeping.py`, `src/portwatch/cleaning.py`, `src/portwatch/download.py`, `src/portwatch/historical.py`, `src/portwatch/ingest.py`, `src/portwatch/storage.py`, `tests/test_bookkeeping.py`, `tests/test_historical.py`, `tests/test_live_bookkeeping.py`, `tests/test_storage.py`. Earlier-stage snapshot/manifest and CI path inventory are preserved in ignored `artifacts/step05a/` for separating prerequisite and CI commits. Both created PRs are attached to the current chat; the first is merged and the second remains open. Hosted execution remained unverified at this historical checkpoint; local verification passed.
 
 ### Step 05 (2026-10-11)
 
@@ -826,7 +898,7 @@ Step 04 changed files: `.gitignore`, `.env.example`, `README.md`, `pyproject.tom
 - Initial v1 metadata incorrectly described literal minute quantization. Full regional timestamp inspection showed 61,496 rows with nonzero seconds, none with fractional seconds. Corrected the quality label to `provider_documented_utc` and advanced code to `noaa-la-subset-v2`; immutable v1 output remains a prior result. The v2 derivation is `2a135f61d7ceb1f2ccdf531b15fe4f4d342fe7399fe8c9adeb202ecb7dec543f`, checksum `e4667c5c339809b0614e1998537308a5102c9c5523eee84f5d9650025a71d9c0`. See [SOURCE_AUDIT.md](SOURCE_AUDIT.md) and [RESULTS.md](RESULTS.md); do not claim a fixed observation cadence.
 - Second run of the same CLI command: **Raw reused; extract reused**, command 2.36 seconds. No HTTP transfer or duplicate matching derivation. Direct PostgreSQL query confirms one real raw batch and three successful historical runs (initial v1, corrected v2, cached rerun), each with input/output counts 7,293,408/62,159. Raw status remains registered for later cleaning. Synthetic integration tests use isolated temporary schemas.
 - `.\.bootstrap-venv\Scripts\uv.exe run python scripts/verify_historical.py --rebuild`: exit 0. Verified all 62,159 regional coordinates against bounds and original WKB, UTC window, source/derivation lineage and increasing national source-row offsets; independently measured counts and time extent. Reconstruction from preserved raw into ignored artifacts produced the exact v2 checksum. Generated `artifacts/step03-verification.json` and `artifacts/step03-los-angeles.png` with 4,782 sampled points. The plot was visually inspected: plausible harbor/approach clusters, LA reference points within bounds and Long Beach Pier F outside the eastern edge. No official analytical boundary is claimed.
-- `$env:PORTWATCH_TEST_DB='1'` then `.\.bootstrap-venv\Scripts\uv.exe run pytest -q`: **35 passed**. Includes all Step 02 PostgreSQL/storage checks plus synthetic historical tests for bounded batches, coordinates and UTC, lineage, cached reuse, changed-parameter identities, raw reconstruction, corrupt derived refusal, unknown CRS rejection, partial-download retry/cleanup, size limits, HTTP failure, supported date validation, provider A→B→A rollback/current-source selection, and HTTP 412 identity-race retry.
+- `$env:PORTWATCH_TEST_DB='1'` then `.\.bootstrap-venv\Scripts\uv.exe run pytest -q`: **35 passed**. Includes all Step 02 PostgreSQL/storage checks plus synthetic historical tests for bounded batches, coordinates and UTC, lineage, cached reuse, changed-parameter identities, raw reconstruction, corrupt derived refusal, unknown CRS rejection, partial-download retry/cleanup, size limits, HTTP failure, supported date validation, provider AÃ¢â€ â€™BÃ¢â€ ’A rollback/current-source selection, and HTTP 412 identity-race retry.
 - Cavecrew review: download revision selection and bounded 412 retry issues were corrected and regression checks passed; final implementation review reported no remaining issues. The verifier also honors the current-source pointer when choosing its parent. Default cached use and explicit remote refresh are documented in [DATA_CONTRACTS.md](DATA_CONTRACTS.md).
 - Final `.\.bootstrap-venv\Scripts\uv.exe run ruff check .`: passed. `storage inspect`: **Verified complete: 1; issues: 0**, exit 0. `git diff --check`: passed. Provider artifacts, rebuild output, plot, secrets and cluster files remain ignored. No new database migration, deployment, account, or paid service was needed.
 

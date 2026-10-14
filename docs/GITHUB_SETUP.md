@@ -1,5 +1,16 @@
 # GitHub setup record
 
+## October 14, 2026 presentation checkpoint
+
+GitHub reports this repository public; visibility changed outside the Phase 4–5 task.
+Actions remain disabled. Phases 4–5 are on `feat/phase4-5-polish`, with current evidence in
+[workspace verification](evidence/phase4-workspace.json) and
+[public readiness](evidence/phase5-public-readiness.json). Production remains the prior release;
+Phase 6 release validation/deployment and the profile update remain. Older statuses below
+describe their recorded checkpoints and are superseded by this observation. No code license
+has been selected; non-secret operational context remains in older reachable commits.
+
+
 ## Published v0.1.0 (2026-10-13 UTC)
 
 [Publication PR#3](https://github.com/SamABZD/portwatch/pull/3) merged at11:38:08UTC into
@@ -50,7 +61,7 @@ origin remote. Current API inspection reports **private**, superseding the earli
 foundation record below. Visibility is preserved. Main remains
 `f784a9374942c704630bd412704a67c4896ead24`; CI PR #2 remains open at `35b230c`.
 The branch-rule/ruleset APIs return 403 requiring Pro or public visibility; no setting was changed.
-The owner previously declined payment; preparation uses $0 and does not change account settings.
+Preparation uses $0 and does not change account settings.
 
 See [HANDOFF.md](HANDOFF.md), [release notes](RELEASE_NOTES.md) and [reviewed evidence](evidence/README.md).
 
@@ -59,8 +70,8 @@ Publication commit `0caf861a4e09cafd855b0f07861af4310251e7dc` triggered
 [PR run38381515855](https://github.com/SamABZD/portwatch/actions/runs/38381515855).
 Both completed `startup_failure` before creating any jobs/check runs. The API reports
 `path: BuildFailed`, empty jobs, no downloadable logs and no detailed failure annotation.
-The earlier account billing lock is the last confirmed diagnosis; the current API does not
-prove its cause. Both official action commit pins still resolve, the workflow is active and
+Earlier hosted checks did not receive a runner; the current API does not
+prove the cause of this startup failure. Both official action commit pins still resolve, the workflow is active and
 local YAML parses the intended quality/integration jobs. No remote validation pass is claimed.
 
 Publication recheck passed185 unit tests plus lint/format/wheel checks, then stopped because
@@ -107,17 +118,17 @@ Existing protection inspection returned `Branch not protected`; repository rules
 
 - Focused [CI PR #2](https://github.com/SamABZD/portwatch/pull/2) is open and attached to the Codex chat, as is prerequisite PR#1. Initial CI code/head SHA: `97b8af116948088bf6730866b77cdffc71f0e16b`.
 - [PR run 38171159125](https://github.com/SamABZD/portwatch/actions/runs/38171159125) and [push run 38171158488](https://github.com/SamABZD/portwatch/actions/runs/38171158488) both concluded failure for that exact SHA. GitHub registered job/check names `quality` and `integration`, application ID15368, but neither job received a runner or executed any steps. There are no job logs because no jobs started.
-- The annotations on both PR checks report exactly: **“The job was not started because your account is locked due to a billing issue.”** Repository Actions are enabled with all actions allowed. This is an account-level execution blocker; no remote lint, test, package, PostGIS service, or migration pass is claimed.
+- Both PR checks reported a pre-run execution restriction. Private account details are omitted. At this historical checkpoint, repository Actions were enabled with all actions allowed; no remote lint, test, package, PostGIS service, or migration pass is claimed.
 - CI PR remains unmerged. Remote main is the prerequisite merge `f784a9374942c704630bd412704a67c4896ead24`; its Actions list is empty because the workflow is not on main yet. A resulting-main CI run cannot be verified until the setup PR passes and merges.
 - Local shared validation passed independently: 87 unit/12 integration tests, Ruff lint/format, real wheel import/resources/CLI, fresh/repeated migrations. The second run used the documented `uv run --locked --extra dev python scripts/validate.py` command and passed in 26.57s unit/6.29s integration. Eleven formatting-only files had identical Python ASTs; SQL migration bytes match the saved prerequisite snapshot.
 
 ### Required user action and resume
 
-Inspect GitHub Settings **Billing & Licensing** for `SamABZD`, then resolve the account lock. To keep the $0 constraint, review GitHub's [locked-account guidance](https://docs.github.com/en/billing/how-tos/troubleshooting/locked-account), including its GitHub Free option where applicable, or [contact GitHub Support](https://docs.github.com/en/support/contacting-github-support) about blocked free public Actions. No purchase, payment, plan change, or support message was made by this implementation. Account plan/payment decisions require the account owner.
+This historical checkpoint required the owner to resolve the hosted execution prerequisite before a remote pass could be claimed. The owner subsequently chose local validation and disabled Actions; the current override at the top of this document takes precedence. No purchase, plan change, support message or account setting change was made by this implementation.
 
 After GitHub clears the lock, resume Step05A: identify PR#2's latest head/run, rerun it, fix any actual execution failures, and confirm both jobs pass on that intended SHA. Apply the rule below only after a successful baseline, merge PR#2 while matching its head SHA, then verify the resulting main push run. Record successful URLs and SHAs before marking Step05A complete.
 
-On 2026-10-12, reran PR run38171408548 as attempt2 on latest CI head `35b230c6d40092d45fb9e7876f53b4fc9f9f649c`. It failed at `2026-10-12T10:26:37Z`; both new job checks had no steps and the same account billing-lock annotation. The owner declined paying to clear the lock and authorized choosing how to proceed. Continue local stages at $0 with CI explicitly pending; the prior pre-Step06 remote gate is deferred by that authorization. Step06 was completed on local branch `feat/geospatial-zones`, based on this pending CI head; its source has not been pushed. This does not authorize weakening existing protection, merging unchecked CI, or making account/payment changes. Main and remote PR remain unchanged.
+On 2026-10-12, reran PR run38171408548 as attempt2 on latest CI head `35b230c6d40092d45fb9e7876f53b4fc9f9f649c`. It failed at `2026-10-12T10:26:37Z`; both new job checks had no steps and the same pre-run restriction. The owner authorized continuing with local validation. Continue local stages at $0 with CI explicitly pending; the prior pre-Step06 remote gate is deferred by that authorization. Step06 was completed on local branch `feat/geospatial-zones`, based on this pending CI head; its source has not been pushed. This does not authorize weakening existing protection, merging unchecked CI, or making account/payment changes. Main and remote PR remain unchanged.
 
 ### Exact proposed main protection (unapplied)
 
