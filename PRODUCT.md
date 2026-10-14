@@ -21,7 +21,9 @@ reports its actual freshness and unavailable sources.
 
 ## Positioning
 
-An inspectable port replay that keeps observation, inference and missing evidence visible.
+A maritime data engineering demo: trace vessel reports through ingestion, validation,
+PostGIS analytics, historical replay and the map. Keep observation, inference and missing
+evidence visible.
 
 ## Brand Personality
 

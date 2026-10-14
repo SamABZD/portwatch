@@ -2,6 +2,14 @@
 
 ## Current stage state
 
+- PortWatch completion **Phase 3 is complete locally** at `f179020`: shared responsive header,
+  visible active route links, labeled port scope, independent data mode, validated URL state
+  and explicit data-engineering purpose/metadata. Port, mode and replay minute survive route
+  return, reload and browser history; prepared sessions normalize to historical. Selected-port
+  pipeline evidence is distinct from the fixed LA history artifact. **14 Node tests**,
+  typecheck/build and **27 browser checks** passed at four widths and native 200% zoom. See
+  [phase3-navigation.json](evidence/phase3-navigation.json). No push/deploy; Phase 1 cost gates
+  remain. Repository still private; source CTA waits for public visibility. Phase 4 untouched.
 - PortWatch completion **Phase 2 is complete locally** at code commit `9e6c6bf`, on
   `feat/phase1-cost-controls`: seven-day port context, bounded format/transport fallback,
   one news selection/provenance contract for SQL/frame/health, preserved date precision and
@@ -9,7 +17,7 @@
   typecheck/build and four actual Next.js proxy fixture forwards passed. See
   [CONTEXT](CONTEXT.md), [SOURCE_AUDIT](SOURCE_AUDIT.md) and
   [phase2-news.json](evidence/phase2-news.json). No push/deployment occurred; Phase 1 cost
-  gates remain. Phase 3 has not started. GDELT verification returned429; official saved
+  gates remain. GDELT verification returned429; official saved
   responses each contain one eligible article in seven days, with isolated storage/rendering
   evidence rather than a claim that the cloud now serves this revision.
 - PortWatch completion **Phase 1 is complete locally**: current Railway billing/resource
@@ -43,6 +51,76 @@
   superseded by the live runtime. No source observations were invented for this extension.
 
 ## Verified commands and observed outcomes
+
+### Completion phase 3: navigation and purpose (2026-10-14 Asia/Beirut)
+
+- Began with clean `5e6f683` on `feat/phase1-cost-controls`; read the phase brief, working
+  agreement, PRODUCT/DESIGN, current handoff/decisions and applicable web instructions.
+  Installed Next.js 16.4 documentation confirms native history integration with search params,
+  disabled Link prefetch and required Suspense for static pages. Impeccable refinement keeps
+  incumbent palette/type/layout; cavecrew handled pipeline integration, browser checks and review.
+- Added `app-header.tsx` on both routes: identical circle/arrow, type, alignment and spacing;
+  one labeled real-link nav; current-page aria/weight/underline; port label and native 44px
+  selector; visible links on mobile. Removed the competing compact/desktop navigation.
+  Data mode stays separately labeled on the map. Same-port/mode actions preserve loaded state
+  and issue no extra API reads. Loading a new port is distinct from unavailable saved data.
+- Added `view-state.ts` and `view-scope.ts`: only LA/Oakland, live/historical and integer
+  replay minutes 0–1440 are accepted. Defaults are LA/live/750; invalid URL fields are safely
+  replaced. Native history changes control scope without server navigation; real Next links
+  preserve it across routes. Replay playback replaces URL minutes rather than filling history.
+  Existing staleness, prefix inference, hidden polling/cancellation and cache identities remain.
+- Pipeline selection filters current operational sections to the selected port without an extra
+  acquisition or pipeline request. The seven-day LA artifact keeps its own scope label; map mode
+  does not turn current operational measurements into historical evidence. Prepared dashboard
+  and pipeline normalize to historical links/URL, disable unavailable live and respect available
+  ports. Review found pipeline prepared links initially retained live; fixed before browser checks;
+  follow-up reviewer: **No issues**. Architecture/map/data transformations are Phase 4 scope.
+- Added compact first-viewport data-engineering purpose, a prominent pipeline link and accurate
+  Python/PostGIS/Prefect/historical-dbt scope. Updated title/description/OpenGraph/Twitter metadata
+  without a separate marketing route or new assets/dependencies. `gh repo view SamABZD/portwatch
+  --json isPrivate,url` returned **isPrivate:true**; no source CTA or visibility change. Add and
+  verify that secondary CTA after the owner's public-visibility step.
+- From `web/`: `node --test scripts/view-state.test.mjs scripts/visible-polling.test.mjs`:
+  **14 passed, zero failed** (three URL/bounds/route checks and eleven existing lifecycle tests).
+  Node reports implicit ESM reparsing for TS imports; no package/config change. `npm run typecheck`
+  and final `npm run build`: **passed**; both pages remain static, API proxy stays dynamic/read-only.
+  No backend source/schema changes; the Phase 2 backend total was not rerun or claimed here.
+- `python -m scripts.verify_navigation_browser --help`, then final production-browser command:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m scripts.verify_navigation_browser --url http://127.0.0.1:3160 --fixtures C:\Users\samab\.codex\portwatch-phase3-private\browser-fixtures --output artifacts/phase3
+  ```
+
+  Existing `webapp-testing/scripts/with_server.py` supplied the temporary frontend, with its
+  upstream URL pointed at loopback port 9. All API responses were intercepted from saved genuine
+  fixtures; all external requests/tiles blocked. **27 browser checks passed**, zero page/fixture
+  errors or external requests: real keyboard links/focus, active state beyond color, current
+  selector/API scope, same-value no-op, route/back/forward/reload, unknown parameters,
+  390/768/1024/1440 widths, measured shared-header parity and no page overflow.
+- Native Chrome 200% zoom used an isolated Temp extension/profile and `tabs.setZoom(2)`:
+  content width 1440 to 720 CSS pixels, DPR 1 to 2, outer width unchanged, CSS zoom/visual viewport scale 1;
+  media query changed and controls/purpose remained visible on both routes. Initial Playwright
+  screenshots cropped the physical viewport despite valid layout measurements. One confirmation
+  after raw CDP capture produced complete 1440x804 pixels without resizing; all 27 checks passed again.
+  Six first-viewport screenshots (map/pipeline desktop/mobile/nativezoom) were visually checked.
+  No interface polishing loop. Temporary browser profiles closed/removed; temporary Node child
+  explicitly stopped after port/process ownership verification, because Windows helper shutdown
+  alone leaves its child. No local collectors started.
+- Bounded actual prepared `TestClient` queries used existing checksummed LA/Oakland exports,
+  DB port 9 and unset AIS key: both historical 10:00 UTC frames returned 200, with 26,093/22,864 genuine
+  prefix observations. Browser roundtrips/reloads retain minute 600 and those exact frames;
+  no timestamp/coordinate/count substitution. Actual prepared catalog/pipeline/12:30 frames
+  validate capability fallback and disabled live. Private captures retain receipts and analytics;
+  they are not a new hosted response or deployment claim. Existing Starlette TestClient warning
+  remains. Raw/live fixture bodies stay outside Git; screenshots stay in ignored `artifacts/phase3`.
+- Ruff `check`/`format --check` on the new verifier and `git diff --check`: **passed**.
+  Changed-file configured-long-secret scan found zero matches without printing values.
+  PRODUCT/DESIGN and D088–D090 record the shared navigation contract. Sanitized evidence is
+  committed; detailed fixture capture remains at `C:\Users\samab\.codex\portwatch-phase3-private`.
+- No push, preview/deployment, paid resource, dependency, CI, account, source cadence, data,
+  license, visibility or profile change. New route links disable prefetch; hosted monetary/query
+  delta remains unmeasured, so Phase 1 release gates still apply. Full release validation is
+  assigned to Phase 6. Next work is Phase 4 when requested.
 
 ### Completion phase 2: news end to end (2026-10-14 Asia/Beirut)
 

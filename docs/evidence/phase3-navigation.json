@@ -1,0 +1,366 @@
+{
+  "phase": 3,
+  "status": "completed_locally_not_deployed",
+  "tested_code_commit": "f179020",
+  "branch": "feat/phase1-cost-controls",
+  "verified_at_utc": "2026-10-14T09:26:53.956035+00:00",
+  "scope": "shared navigation, dataset scope, first-viewport purpose and metadata",
+  "requirements": {
+    "shared_header_brand_type_alignment": "same component; measured parity on both routes at all four widths",
+    "real_page_links": "one labeled nav, aria-current, weight and underline, keyboard Enter and browser history",
+    "port_selector": "associated label, actual current value, 44px targets, all controls within viewport",
+    "data_mode": "independent labeled segmented control; redundant selections retain loaded data without extra reads",
+    "url_state": "known port/mode and integer minute0..1440; safe defaults; route return/reload/back/forward",
+    "pipeline_scope": "only selected-port operational section displayed; fixed seven-day LA history stays explicit",
+    "prepared_mode": "actual prepared API capabilities; historical URL/link normalization, disabled live, available-port fallback",
+    "purpose": "explicit maritime data engineering in first viewport; compact pipeline CTA and accurate historical dbt scope",
+    "metadata": "title, description, OpenGraph and Twitter reflect data engineering; static routes retained",
+    "source_cta": "withheld: gh repo view SamABZD/portwatch --json isPrivate,url returned isPrivate=true; no visibility change",
+    "responsive": "390/768/1024/1440 CSS pixels, visible navigation and selector, no page overflow",
+    "zoom": "native Chrome tabs.setZoom=2; CSS width1440->720, DPR1->2; CSS zoom/visual scale remain1; complete1440x804 captures"
+  },
+  "validation": {
+    "node_tests": {
+      "command": "node --test scripts/view-state.test.mjs scripts/visible-polling.test.mjs",
+      "passed": 14,
+      "failed": 0,
+      "scope": "3 URL validation/route tests plus 11 existing polling lifecycle tests",
+      "warning": "implicit ESM reparsing for TS imports; no package/config change"
+    },
+    "typecheck": {
+      "command": "npm run typecheck",
+      "result": "passed"
+    },
+    "production_build": {
+      "command": "npm run build",
+      "result": "passed",
+      "static_pages": [
+        "/",
+        "/pipeline"
+      ],
+      "api_proxy": "unchanged dynamic read-only route"
+    },
+    "browser": {
+      "command": ".\\.venv\\Scripts\\python.exe -m scripts.verify_navigation_browser --fixtures <private-phase3-fixtures> --output artifacts/phase3",
+      "passed": 27,
+      "errors": [],
+      "checks": [
+        "first_viewport_purpose_metadata_prominent_pipeline_link",
+        "same_port_same_mode_leave_loaded_state_and_requests_unchanged",
+        "both_port_frame_queries_historical_scope_and_same_mode",
+        "keyboard_route_navigation_browser_back_forward_preserve_scope",
+        "pipeline_selector_changes_operational_scope_map_return_reload",
+        {
+          "route": "map",
+          "viewport": 390,
+          "scroll_width": 390,
+          "visible_controls": 3,
+          "minimum_control_height": 44.0
+        },
+        {
+          "route": "map",
+          "viewport": 768,
+          "scroll_width": 768,
+          "visible_controls": 3,
+          "minimum_control_height": 44
+        },
+        {
+          "route": "map",
+          "viewport": 1024,
+          "scroll_width": 1024,
+          "visible_controls": 3,
+          "minimum_control_height": 44.0
+        },
+        {
+          "route": "map",
+          "viewport": 1440,
+          "scroll_width": 1440,
+          "visible_controls": 3,
+          "minimum_control_height": 44.0
+        },
+        {
+          "route": "pipeline",
+          "viewport": 390,
+          "scroll_width": 390,
+          "visible_controls": 3,
+          "minimum_control_height": 44.0
+        },
+        {
+          "route": "pipeline",
+          "viewport": 768,
+          "scroll_width": 768,
+          "visible_controls": 3,
+          "minimum_control_height": 44
+        },
+        {
+          "route": "pipeline",
+          "viewport": 1024,
+          "scroll_width": 1024,
+          "visible_controls": 3,
+          "minimum_control_height": 44.0
+        },
+        {
+          "route": "pipeline",
+          "viewport": 1440,
+          "scroll_width": 1440,
+          "visible_controls": 3,
+          "minimum_control_height": 44.0
+        },
+        "brand_geometry_typography_header_spacing_match_both_routes_all_widths",
+        {
+          "route": "map",
+          "browser_zoom_percent": 200,
+          "chrome_tabs_get_zoom": 2,
+          "before": {
+            "width": 1440,
+            "dpr": 1,
+            "outerWidth": 1458,
+            "cssZoom": "1",
+            "visualScale": 1,
+            "compact": false
+          },
+          "after": {
+            "width": 720,
+            "dpr": 2,
+            "outerWidth": 1458,
+            "cssZoom": "1",
+            "visualScale": 1,
+            "compact": true
+          }
+        },
+        {
+          "route": "pipeline",
+          "browser_zoom_percent": 200,
+          "chrome_tabs_get_zoom": 2,
+          "before": {
+            "width": 1440,
+            "dpr": 1,
+            "outerWidth": 1458,
+            "cssZoom": "1",
+            "visualScale": 1,
+            "compact": false
+          },
+          "after": {
+            "width": 720,
+            "dpr": 2,
+            "outerWidth": 1458,
+            "cssZoom": "1",
+            "visualScale": 1,
+            "compact": true
+          }
+        },
+        {
+          "direct_url": "/",
+          "input": [
+            "oakland",
+            "live",
+            750
+          ],
+          "validated_scope": [
+            "oakland",
+            "live",
+            750
+          ]
+        },
+        {
+          "direct_url": "/pipeline",
+          "input": [
+            "los_angeles",
+            "historical",
+            0
+          ],
+          "validated_scope": [
+            "los_angeles",
+            "historical",
+            0
+          ]
+        },
+        {
+          "direct_url": "/pipeline",
+          "input": [
+            "oakland",
+            "live",
+            1440
+          ],
+          "validated_scope": [
+            "oakland",
+            "live",
+            1440
+          ]
+        },
+        {
+          "direct_url": "/",
+          "input": [
+            "unknown",
+            "invalid",
+            "NaN"
+          ],
+          "validated_scope": [
+            "los_angeles",
+            "live",
+            750
+          ]
+        },
+        {
+          "direct_url": "/",
+          "input": [
+            "oakland",
+            "historical",
+            -1
+          ],
+          "validated_scope": [
+            "oakland",
+            "historical",
+            750
+          ]
+        },
+        {
+          "direct_url": "/pipeline",
+          "input": [
+            "oakland",
+            "historical",
+            1441
+          ],
+          "validated_scope": [
+            "oakland",
+            "historical",
+            750
+          ]
+        },
+        {
+          "direct_url": "/",
+          "input": [
+            "oakland",
+            "historical",
+            "750.5"
+          ],
+          "validated_scope": [
+            "oakland",
+            "historical",
+            750
+          ]
+        },
+        {
+          "port": "los_angeles",
+          "case": "genuine_nondefault_replay_roundtrip_reload",
+          "minute": 600,
+          "cutoff_utc": "2024-01-01T10:00:00+00:00",
+          "prefix_observations": 26093
+        },
+        {
+          "port": "oakland",
+          "case": "genuine_nondefault_replay_roundtrip_reload",
+          "minute": 600,
+          "cutoff_utc": "2024-01-01T10:00:00+00:00",
+          "prefix_observations": 22864
+        },
+        "genuine_prepared_pipeline_normalizes_scope_map_links_disable_live",
+        "prepared_catalog_restricts_ports_incoming_oakland_falls_back_los_angeles"
+      ],
+      "browser_version": "151.0.7922.34",
+      "external_requests_sent": 0,
+      "resource_call_counts": {
+        "catalog": 21,
+        "health": 21,
+        "frame": 21,
+        "history": 12,
+        "pipeline": 12
+      },
+      "passes": "one batched inspection and one capture confirmation; no interface polishing loop"
+    },
+    "prepared_capture": [
+      {
+        "port": "los_angeles",
+        "http": 200,
+        "minute": 600,
+        "prefix_observations": 26093,
+        "revision": "7f214673225df6d6cfc1ffd3025a135ac6a2cbd6933e071cca6c68012a37b51d",
+        "database_port": 9,
+        "ais_key": "unset",
+        "ingestion_calls": 0
+      },
+      {
+        "port": "oakland",
+        "http": 200,
+        "minute": 600,
+        "prefix_observations": 22864,
+        "revision": "0fc68508fb322d7ade2c03ea277a915fc7bd877dd43a0a8b0b87171e857b39d2",
+        "database_port": 9,
+        "ais_key": "unset",
+        "ingestion_calls": 0
+      }
+    ],
+    "review": "prepared pipeline live-link finding fixed; follow-up No issues",
+    "ruff_and_diff": "check, format --check and git diff --check passed",
+    "screenshots": [
+      {
+        "file": "artifacts/phase3/map-mobile.png",
+        "pixels": [
+          390,
+          900
+        ],
+        "scope": "local recorded genuine fixtures; not deployed revision"
+      },
+      {
+        "file": "artifacts/phase3/map-desktop.png",
+        "pixels": [
+          1440,
+          900
+        ],
+        "scope": "local recorded genuine fixtures; not deployed revision"
+      },
+      {
+        "file": "artifacts/phase3/pipeline-mobile.png",
+        "pixels": [
+          390,
+          900
+        ],
+        "scope": "local recorded genuine fixtures; not deployed revision"
+      },
+      {
+        "file": "artifacts/phase3/pipeline-desktop.png",
+        "pixels": [
+          1440,
+          900
+        ],
+        "scope": "local recorded genuine fixtures; not deployed revision"
+      },
+      {
+        "file": "artifacts/phase3/map-browser-zoom-200.png",
+        "pixels": [
+          1440,
+          804
+        ],
+        "scope": "local recorded genuine fixtures; not deployed revision"
+      },
+      {
+        "file": "artifacts/phase3/pipeline-browser-zoom-200.png",
+        "pixels": [
+          1440,
+          804
+        ],
+        "scope": "local recorded genuine fixtures; not deployed revision"
+      }
+    ],
+    "full_release_checks": "deferred to Phase 6; no repeated backend test claim"
+  },
+  "cost_and_operations": {
+    "new_dependencies": 0,
+    "new_paid_resources": 0,
+    "backend_schema_changes": 0,
+    "acquisition_cadence_changed": false,
+    "local_collectors_started": false,
+    "prefetch": "disabled on new route links; control changes use native history without server navigation",
+    "production_data_mutated": false,
+    "push_or_deploy": false,
+    "temporary_browser_profiles": "owned Temp directories only; closed and removed",
+    "temporary_frontend": "port3160 explicitly stopped after process ownership check",
+    "hosted_cost_delta": "unmeasured; Phase1 release gates retained"
+  },
+  "limitations": [
+    "Screenshots/queries use local saved fixture responses, not a new cloud rollout",
+    "First zoom screenshot tool cropped native viewport; raw CDP capture confirmed complete pixels without rescaling",
+    "Repository remains private; add/verify secondary source CTA after owner public-visibility step",
+    "Phase4 map/pipeline readability and Phase5 repository presentation remain separate assigned work"
+  ]
+}

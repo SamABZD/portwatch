@@ -42,3 +42,16 @@ Preserve the established map workspace. Add port selection and reported vessel/v
 live mode is the default. The pipeline route inherits these tokens in Read mode: sequential
 source-to-map flow, flat comparison tables per port, actual scoped workflow history, clear
 failure/retry states and persistent map navigation on mobile. No public mutation controls.
+
+## Navigation and purpose
+
+Both routes use one header with the existing circle/arrow symbol and brand typography.
+Vessel map and Data pipeline are visible links at every width; underline and weight mark
+the current page. The labeled native Port selector changes dataset scope and retains a
+44px touch target. Data mode stays a separate labeled segmented control on the map.
+
+Validated URL state retains port, live/historical mode and the bounded replay minute across
+navigation and browser history. Prepared sessions show historical scope and disable live.
+Pipeline measurements follow the selected port; the fixed seven-day LA artifact remains
+separately identified. Use compact data-engineering purpose copy with a direct pipeline link,
+keeping the working map near the first viewport. Source CTA waits for public repository access.
