@@ -1,5 +1,16 @@
 # GitHub workflow
 
+## October 14, 2026 presentation checkpoint
+
+GitHub reports this repository public; visibility changed outside the Phase 4–5 task.
+Actions remain disabled. Phases 4–5 are on `feat/phase4-5-polish`, with current evidence in
+[workspace verification](evidence/phase4-workspace.json) and
+[public readiness](evidence/phase5-public-readiness.json). Production remains the prior release;
+Phase 6 release validation/deployment and the profile update remain. Older statuses below
+describe their recorded checkpoints and are superseded by this observation. No code license
+has been selected; non-secret operational context remains in older reachable commits.
+
+
 ## Current owner override (2026-10-13)
 
 The owner explicitly disabled GitHub Actions and requested continuing with health fixes and
@@ -21,8 +32,8 @@ establish a release. See [GITHUB_SETUP.md](GITHUB_SETUP.md) for observed remote 
 [Publication PR#3](https://github.com/SamABZD/portwatch/pull/3) is open. Initial publication
 push/PR runs completed `startup_failure` with zero jobs/checks and no detailed API annotation.
 An empty check list is not a pass; do not merge until quality/integration actually execute
-successfully on the intended current head. The old account billing lock is the last diagnosed
-cause, separate from the current startup failure whose exact cause is not exposed by the API.
+successfully on the intended current head. Earlier jobs did not receive a runner;
+the exact cause of the later startup failure is not exposed by the API.
 
 Step13 verified242 tests through the shared local validator, fresh native reproduction and
 Next.js build/browser checks. Publication attempts have not executed any hosted tests;
@@ -69,8 +80,8 @@ Tests use small labeled synthetic data, loopback HTTP/WebSocket servers, and tem
 `.github/workflows/ci.yml` runs on branch pushes, PRs targeting `main`, and manual dispatch. Distinct job names are `quality` and `integration`, each with an Ubuntu 24.04 runner and 15-minute timeout. Concurrency cancels obsolete runs for the same branch/PR. Permissions default to `contents: read`; checkout does not persist credentials. No provider secrets, failure artifact uploads, workspace caches, or scheduled AIS collectors are configured.
 
 The repository was public when CI was configured; it is now private. Standard hosted-runner
-usage follows the account's available allowance and billing state. The account lock previously
-prevented execution before any runner started. No paid runner, deployment service, artifact
+usage follows the account's available allowance. Earlier hosted runs
+failed before any runner started. No paid runner, deployment service, artifact
 upload or account/payment change is requested.
 
 Official action versions verified on 2026-10-11:
@@ -82,9 +93,9 @@ Both jobs use uv 0.13.0, Python 3.11, locked development dependencies, and only 
 
 Remote run, PR, and branch-rule evidence is recorded in [GITHUB_SETUP.md](GITHUB_SETUP.md) and [HANDOFF.md](HANDOFF.md). Reading YAML or passing local tests alone does not establish a GitHub pass.
 
-Current Step05A status: CI PR#2 is open; account billing lock prevented both hosted jobs from starting. Required check settings are proposed but unapplied until an actual baseline succeeds. The account owner must clear that lock before PR/main execution can be verified.
+Historical Step05A status: CI PR#2 was open; a pre-run restriction prevented both hosted jobs from starting. Required check settings were proposed but unapplied until an actual baseline succeeded. No PR/main execution pass was verified at that checkpoint; the later owner override keeps Actions disabled.
 
-On 2026-10-12 the user declined paying for the account lock and authorized continuing locally.
+On 2026-10-12 the owner authorized continuing with local validation while hosted execution remained unverified.
 Step06 is a local checkpoint on `feat/geospatial-zones`, based on pending CI head `35b230c`.
 Run the shared local validation command for each stage and preserve CI as a separate pending gate.
 No unchecked merge, paid runner, plan/payment change, or deployment is authorized by this deferral.
@@ -97,7 +108,7 @@ remote GitHub execution pass.
 Step08 context connectors are complete locally on `feat/weather-news`, based on Step07
 `ac684739f794997d67a63a9a97d403a99c1c1477`. Shared validation passes134 unit/32 integration
 tests and five migrations. Steps06–08 remain unpushed; the existing CI deferral persists.
-Real GDELT429 is a provider availability limit, separate from the GitHub account lock.
+Real GDELT429 is a provider availability limit, separate from the unexecuted hosted GitHub checks.
 
 Step09 analytical tables are complete locally on `feat/analytics-marts`, based on Step08 `8dd89ba`.
 Shared validation passes139 unit/44 integration tests, six migrations and the packaged hourly SQL

@@ -31,7 +31,7 @@ export default function HistoryResults() {
     {failed ? <p role="alert">History results are unavailable. <button onClick={() => setRetry(value => value + 1)}>Retry history</button></p>
       : !data ? <p role="status">Reading saved history results…</p> : <>
         <p>{data.hours.length} hourly results · {data.models} SQL models built · {data.tests} data tests passed</p>
-        <div className="table-scroll"><table className="pipeline-table">
+        <div className="table-scroll" role="region" aria-label="Los Angeles seven-day historical daily totals" tabIndex={0}><table className="pipeline-table">
           <caption>Daily totals from the seven-day historical snapshot</caption>
           <thead><tr><th scope="col">Date, UTC</th><th scope="col">AIS positions</th><th scope="col">Inferred arrivals</th><th scope="col">Inferred departures</th><th scope="col">Hours available</th></tr></thead>
           <tbody>{Object.entries(days).map(([day, hours]) => hours && <tr key={day}>

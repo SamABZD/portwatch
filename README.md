@@ -1,78 +1,96 @@
 # PortWatch
 
-[GitHub Actions: disabled by owner](https://github.com/SamABZD/portwatch/actions/workflows/ci.yml)
+**A maritime data engineering portfolio project for Los Angeles and Oakland.** Vessel reports arrive with duplicates, gaps and incomplete context. PortWatch preserves that evidence, turns it into traceable observations and experimental port analytics, and lets a reviewer inspect the pipeline or replay what was observable at a particular time.
 
-Vessel reports arrive with duplicates, gaps and incomplete context. PortWatch turns them into traceable observations, experimental port visits and hourly analytics for **Los Angeles and Oakland**. It preserves original inputs, makes transformations replayable, and shows what the evidence supports on a live map and historical replay.
+**[Explore the demo](https://portwatch-iota.vercel.app/)** · **[Inspect the pipelines](https://portwatch-iota.vercel.app/pipeline)** · [SQL lineage](https://portwatch-iota.vercel.app/api/history-lineage?view=static) · [Documentation](docs/README.md)
 
-**Works locally at $0:** Python/PostGIS processing, Prefect schedules, a read-only FastAPI service and a Next.js website. Historical replay needs no live API key; exported snapshots also work without a database. The owner disabled GitHub Actions; release validation runs locally. The repository remains private. Cloud deployment uses Vercel for the frontend and the owner's paid Railway Hobby workspace for the backend and database; see the [deployment record](deploy/README.md) for verified status and operating requirements.
+The repository is public as observed on October 14, 2026. GitHub Actions remain disabled; verification below is local evidence, not hosted CI. Phases 4–5 are prepared on a feature branch for the Phase 6 release; production currently serves the previous release.
 
-**[Open the hosted PortWatch app](https://portwatch-iota.vercel.app)** — live observations and
-historical replay for both ports. Source freshness and incomplete coverage stay explicit.
+## What this demonstrates
 
-The [historical expansion and dbt guide](docs/HISTORY_DBT.md) documents seven days of Los Angeles
-history, SQL lineage, typed hourly models and preliminary baselines. The
-[pipeline history view](https://portwatch-iota.vercel.app/pipeline#history) reads the frozen
-Railway snapshot:443,296 positions,168 hours,11 models and36 data tests. The vessel map retains
-its bounded one-day replay and continuous live collection. The budgeted rollout passed282
-Python tests, cloud parity, an automatic restart drill and a finished-backup restore;
-[deployment evidence](docs/evidence/cloud-history-operations.json) records the limits.
+- **Reproducible batch and live ingestion:** genuine NOAA historical AIS, separate continuous AISStream collectors, and independently fetched weather/news context.
+- **Evidence and quality:** immutable original files, SHA-256 manifests, retained duplicate lineage, validation and quarantines before analytical publication.
+- **Geospatial processing:** PostGIS zone assignments, experimental visit transitions and versioned hourly marts. Unknown coverage remains distinct from a valid zero.
+- **Event-time replay:** a cutoff excludes later observations, completed hours and visit confirmations. No interpolated movement or invented port calls.
+- **Recovery and orchestration:** resumable Prefect jobs, idempotent checkpoints, transactional analytical replacement, bounded retries and source cooldowns.
+- **Inspectable SQL:** a separate dbt environment builds and tests historical PostgreSQL models; published lineage describes a frozen seven-day Los Angeles snapshot.
 
-## Product tour
+## A five-minute review
 
-![Los Angeles historical map, replay controls, observed activity and weather](docs/assets/historical-los-angeles.png)
+![Los Angeles historical replay, vessel inspector and weather context](docs/assets/historical-los-angeles.png)
 
-This genuine NOAA snapshot at **2024-01-01 12:30 UTC** includes 99 fresh reporting vessels. It is a prepared historical session with live collection unavailable. Basemap requests were deliberately blocked during verification; local geometry remains usable.
+**Los Angeles · historical · January 1, 2024, 12:30 UTC.** Genuine NOAA evidence: 99 fresh reporting vessels at a 15-minute threshold. The saved list also includes stale observations. Basemap is off; PortWatch's local geometry remains usable. Weather is retrospective [Open-Meteo](https://open-meteo.com/) / Copernicus C3S ERA5 context, transformed into UTC selections under [CC BY 4.0](https://open-meteo.com/en/licence), not a forecast known on the replay date.
 
-1. Select **Historical replay**, choose a port and move the cutoff. Later observations, completed hours and visit confirmations stay outside earlier frames.
-2. Select a vessel or search by name/MMSI. Inspect actual report time, available profile, approximate zone and incomplete visit evidence.
-3. Compare reporting activity, completed-visit dwell samples and weather context. Unknown intervals remain unknown; low-speed candidates do not establish a cargo queue.
-4. Open **Data pipeline** for the selectable architecture drawing, source states, actual counts and port-scoped workflow runs.
-5. Enable **Live** after starting the separate runtime. Two collectors preserve received AIS reports; the website polls saved results every 30 seconds.
+1. Choose **Historical replay**, select a port and move the cutoff. Compare fresh reporting vessels with all saved observations.
+2. Search by vessel name or MMSI, then select a map point or list row. Inspect its actual report time and incomplete visit evidence.
+3. Toggle zones, trails, stale reports and the basemap. Trails preserve recorded segment boundaries; source gaps remain gaps.
+4. Open **Data pipeline** and select Python, PostGIS, dbt or Prefect. Follow original evidence through validation, publication and read-only queries.
+5. Compare the one-day map replay with **Seven days of Los Angeles history** and open SQL lineage. Inspect the reproduction results below.
 
 <details>
-<summary>Oakland historical replay — 75 fresh reporting vessels at the recorded cutoff</summary>
+<summary>Oakland and mobile views</summary>
 
-![Oakland historical replay and metrics](docs/assets/historical-oakland.png)
+![Oakland historical replay](docs/assets/historical-oakland.png)
+
+**Oakland · historical · the same UTC cutoff.** 75 fresh reporting vessels from its separate regional dataset. Weather attribution: [Open-Meteo](https://open-meteo.com/) / Copernicus C3S ERA5, transformed UTC selections, [CC BY 4.0](https://open-meteo.com/en/licence).
+
+![Los Angeles historical replay at a 390-pixel viewport](docs/assets/historical-mobile.png)
+
+**Los Angeles · historical · 390-pixel viewport.** Map, inspector and context stack vertically. Weather attribution: [Open-Meteo](https://open-meteo.com/) / Copernicus C3S ERA5, transformed UTC selections, [CC BY 4.0](https://open-meteo.com/en/licence).
 
 </details>
 
-![Pipeline components and data flow](docs/assets/pipeline.png)
+![PortWatch source paths, processing stages and historical dbt branch](docs/assets/pipeline.png)
 
-[Screenshot provenance](docs/assets/README.md) · [Five-minute demonstration](docs/DEMO.md)
+**Pipeline workspace.** Continuous collection, finite scheduled work and historical SQL modeling have distinct paths. The frozen dbt dataset is Los Angeles, January 1–7, 2024; it does not expand the one-day map replay or describe current live health.
+
+[Screenshot provenance and checksums](docs/assets/README.md) · [Guided demonstration](docs/DEMO.md)
 
 ## Architecture
 
 ```mermaid
-flowchart LR
-    NOAA[NOAA historical AIS] --> RAW[Immutable files and SHA-256 manifests]
-    AIS[AISStream live collectors] --> RAW
-    CONTEXT[Open-Meteo weather and attributed news metadata] --> RAW
-    RAW --> PY[Python validation and normalization]
-    PY --> PG[(PostgreSQL 17 and PostGIS 3.6)]
-    PG --> ANALYTICS[Versioned zones, visits and hourly marts]
-    ANALYTICS --> API[FastAPI read-only queries]
-    API --> WEB[Next.js map, replay and pipeline]
-    PREFECT[Local Prefect schedules] -.-> PY
-    PG --> EXPORT[Historical snapshot and checksum]
+flowchart TB
+    NOAA[NOAA historical AIS] --> RAW[Original files and SHA-256 manifests]
+    AIS[AISStream continuous collectors] --> RAW
+    WEATHER[Open-Meteo weather] --> RAW
+    NEWS[GDELT and official port news metadata] --> RAW
+    RAW --> PY[Python validation / deduplication / quarantine]
+    PY --> PG[(PostgreSQL 17 / PostGIS 3.6)]
+    PG --> MARTS[Zones / inferred visits / hourly marts]
+    MARTS --> API[FastAPI read-only queries]
+    API --> WEB[Next.js map / replay / pipeline]
+    PG -->|historical only| DBT[Manual dbt models and tests]
+    DBT --> FROZEN[Frozen seven-day LA results and lineage]
+    FROZEN --> API
+    PG --> EXPORT[Prepared historical export and checksum]
     EXPORT --> API
+    PREFECT[Prefect finite job schedules] -.-> PY
 ```
 
-Historical and live datasets remain separate. Original records retain lineage even when observations deduplicate. Business rows publish transactionally before workflow checkpoints; failed publication preserves the previous analytical partition. Replay reconstructs evidence at its event-time cutoff. See [data contracts](docs/DATA_CONTRACTS.md), [orchestration](docs/ORCHESTRATION.md) and [metric definitions](docs/ANALYTICS.md).
+Historical/live identity stays separate throughout storage and queries. Weather enriches matching hours; recent news stays outside replay and does not multiply vessel metrics. Prefect schedules finite work; AISStream collectors run independently. dbt has no automatic schedule. Prepared exports provide historical replay without a database or current live health.
 
-| Layer | Technology |
+Implementation: [connectors](src/portwatch/context.py), [orchestration](src/portwatch/orchestration.py), [SQL migrations](src/portwatch/migrations), [dbt project](analytics), [read-only queries](src/portwatch/demo), [web components](web/src/components). Contracts: [data](docs/DATA_CONTRACTS.md), [analytics](docs/ANALYTICS.md), [replay](docs/REPLAY.md).
+
+## Stack
+
+Versions come from the manifests/lockfiles used for the October 14, 2026 reproduction.
+
+| Layer | Runtime and dependencies |
 | --- | --- |
-| Ingestion and transformation | Python 3.11, PyArrow, bounded HTTP/WebSocket connectors |
-| Spatial and analytical storage | PostgreSQL 17, PostGIS 3.6, eight SQL migrations |
-| Orchestration | Prefect 3, resumable workflows, independent live collectors |
-| Query service | FastAPI, Uvicorn, bounded read-only queries and revision-aware cache |
-| Website | Next.js 16, React 19, TypeScript, MapLibre and local geometry fallback |
-| Validation | uv lockfile, Ruff, pytest, PostgreSQL integration tests, Playwright |
+| Processing | Python 3.11 tested; supported `>=3.11,<3.15`; PyArrow 26; root [uv lockfile](uv.lock) |
+| Storage | PostgreSQL 17 / PostGIS 3.6; native reproduction on 17.11 / 3.6.2; eight migrations |
+| Orchestration | Prefect **3.8.8**, finite resumable jobs and separate collectors |
+| Query API | FastAPI **0.143.0**, Uvicorn **0.54.0**; bounded read-only queries |
+| Historical SQL | Separate [analytics environment](analytics/pyproject.toml): dbt-core **1.12.5**, dbt-postgres **1.11.0**; PostgreSQL target |
+| Website | Next.js **16.4.0**, React **19.3.0**, TypeScript **5.9.3**, MapLibre **6.14.0** |
+| Frontend runtime | Node.js `>=20.9`; reproduction on **24.15.0**; [npm lockfile](web/package-lock.json) |
+| Verification | Ruff, pytest with PostgreSQL integration tests, Node tests and Playwright |
 
 ## Run the historical demo
 
-Requirements: Git, Python 3.11, [uv](https://docs.astral.sh/uv/getting-started/installation/), Node.js 20.9+ and PostgreSQL 17/PostGIS 3.6. Docker Compose is the portable database option; [existing native Windows cluster operation](docs/RUNBOOK.md#native-windows-database) is also documented. GitHub access is required while the repository is private.
+Requirements: Git, Python 3.11, [uv](https://docs.astral.sh/uv/getting-started/installation/), Node.js 20.9+ and PostgreSQL 17/PostGIS 3.6. Docker Compose is the portable database option; [native Windows operation](docs/RUNBOOK.md#native-windows-database) is documented separately. The public repository can be cloned without GitHub credentials.
 
-From a new clone, using the default localhost configuration:
+From a new clone, using the default localhost database configuration:
 
 ```sh
 git clone https://github.com/SamABZD/portwatch.git
@@ -82,9 +100,10 @@ docker compose up -d --wait db
 uv run --locked python -m portwatch db migrate
 uv run --locked python -m portwatch doctor
 uv run --locked python -m portwatch pipeline run --port los_angeles --demo --local
+uv run --locked python -m portwatch pipeline run --port oakland --demo --local
 ```
 
-The first historical run downloads the genuine **227 MB NOAA file for January 1, 2024** and matching ERA5 weather; it needs internet and local disk space. Matching reruns verify and reuse saved artifacts. No AISStream key or running Prefect server is needed with `--local`. Add Oakland with the pipeline command using `--port oakland`. Optional overrides are in [.env.example](.env.example); copy it to an ignored `.env` only for local changes. Its password is a public localhost example. An existing `.env` must match the database you start.
+Each port's first historical run needs the genuine **227,181,435-byte NOAA January 1, 2024 national file** and matching ERA5 weather. Allow internet access, database capacity and disk space; per-port receipts may retain separate raw copies. Matching reruns verify and reuse saved inputs. Historical replay needs no AISStream key and `--local` needs no Prefect server. Optional overrides belong in an ignored `.env`; [.env.example](.env.example) contains a public localhost password example. Existing settings must match the database you start.
 
 Keep the API running in the project root:
 
@@ -92,7 +111,7 @@ Keep the API running in the project root:
 uv run --locked python -m portwatch demo serve --listen-port 8000
 ```
 
-In a second terminal, enter `web` inside the cloned `portwatch` directory:
+In a second terminal, enter `web` inside the cloned project:
 
 ```sh
 cd web
@@ -101,71 +120,99 @@ npm run build
 npm run start
 ```
 
-Open [localhost:3000](http://127.0.0.1:3000) and select **Historical replay**. The [pipeline page](http://127.0.0.1:3000/pipeline) explains the components. Stop API/frontend with Ctrl+C; `docker compose stop db` preserves its volume. Docker startup was unavailable on the audit machine: Step 13 exercised fresh native PostgreSQL/PostGIS reproduction from saved genuine inputs. It did not re-download upstream data or prove current provider availability.
+Open [localhost:3000](http://127.0.0.1:3000/) and choose **Historical replay**. API port is **8000**, frontend port is **3000**. Stop both processes with Ctrl+C; run `docker compose stop db` from the project root to preserve its volume. Repeat the same pipeline commands to resume; `--rebuild` explicitly recomputes analytics from verified saved inputs.
 
-For a database-free session, export after processing, stop the ordinary API, then serve the export:
+The October 14 clean-clone audit exercised locked installs, migrations and both pipelines against a fresh owned database on an already-running native PostgreSQL/PostGIS server, reusing genuine saved inputs. Docker startup, socket-server startup and fresh upstream downloads were **not exercised**; in-process API checks verified the query contract. [Exact scope and results](docs/evidence/phase5-public-readiness.json).
+
+For a database-free Los Angeles session, export after processing, stop the ordinary API and serve the snapshot:
 
 ```sh
 uv run --locked python -m portwatch demo export --output data/demo/los-angeles.json
-uv run --locked python -m portwatch demo serve --prepared data/demo/los-angeles.json
+uv run --locked python -m portwatch demo serve --listen-port 8000 --prepared data/demo/los-angeles.json
 ```
 
-The snapshot/checksum stay ignored. Live collection and current health are unavailable in prepared mode. See [replay options](docs/REPLAY.md).
+Exports/checksums stay ignored. Prepared sessions expose only their saved port, select historical mode and disable live/current health. [Replay guide](docs/REPLAY.md).
 
-## Measured results
+The separate dbt environment is optional for the one-day demo:
 
-Frozen period: **2024-01-01 00:00 UTC to 2024-01-02 00:00 UTC**, exclusive end. These are regional observations, not complete port coverage.
+```sh
+uv sync --project analytics --locked
+```
+
+Follow [historical/dbt operations](docs/HISTORY_DBT.md) for the bounded seven-day backfill and `pipeline models` command. That downloads substantially more data; it is not part of page navigation or demo startup.
+
+## Pipeline guide
+
+| Boundary | Evidence and inspection |
+| --- | --- |
+| Original | `data/raw` plus immutable manifests; source identity, checksum and receipt time survive transformation. [Source audit](docs/SOURCE_AUDIT.md) |
+| Normalized | `ais_positions`, source ledgers and quarantines; duplicates retain lineage. [Data contracts](docs/DATA_CONTRACTS.md) |
+| Spatial and marts | Versioned zones, visit projections and hourly outputs; publication replaces an owned partition transactionally. [Metric definitions](docs/ANALYTICS.md) |
+| Workflow | `pipeline_runs`, `pipeline_steps`, `pipeline_checkpoints`, `pipeline_source_gaps`; failed/missing inputs stay auditable. [Orchestration](docs/ORCHESTRATION.md) |
+| Historical SQL | `pipeline_models` audit, 11 dbt models, typed hourly results and standalone lineage. [History/dbt](docs/HISTORY_DBT.md) |
+| Query/export | Read-only API, bounded event-time frames and checksum-protected prepared snapshots. [Replay](docs/REPLAY.md) |
+
+Input fingerprints and rule versions determine checkpoint reuse. Business rows commit before workflow checkpoints; interruption between those commits resumes idempotently. Late reports or changed quality/context invalidate publication. Prefect retries transient failures twice; connectors use bounded retries, preserve rate-limit cooldowns and distinguish failure from a verified empty result. Page refreshes never start ingestion.
+
+The source defaults register minute live-processing and hourly weather/news jobs, staggered across ports. Existing deployments can use audited, reduced schedules; [runtime ownership and current operations](docs/LIVE_MULTIPORT.md) and [cost-control evidence](docs/evidence/phase1-cost-controls.json) record those settings. Continuous collectors preserve incoming evidence separately. [Health and recovery](docs/HEALTH_RECOVERY.md) explains backlog, stale sources and failed runs.
+
+## Measured evidence
+
+**Clean-clone reproduction: October 14, 2026, Windows / Python 3.11.9 / PostgreSQL 17.11 / PostGIS 3.6.2.** Saved genuine input; no provider requests. Historical interval: **January 1, 2024 UTC**, exclusive January 2 end. Regional observations do not establish complete port coverage.
 
 | Measure | Los Angeles | Oakland |
 | --- | ---: | ---: |
 | Extracted reports | 62,159 | 52,785 |
 | Canonical positions | 62,157 | 52,783 |
 | Distinct observed vessels | 141 | 172 |
-| Duplicates with preserved lineage | 2 | 2 |
+| Duplicates with retained lineage | 2 | 2 |
 | Historical quarantines | 0 | 0 |
-| Fresh pipeline, saved local inputs | 65.45 s | 59.38 s |
-| Forced repeat | 24.47 s | 25.01 s |
+| Fresh pipeline using saved inputs | 73.052 s | 55.277 s |
+| Forced analytical repeat | 17.826 s | 14.911 s |
 
-Both-port reruns reproduced identical business and metric digests. LA uncached/cached replay frame samples were 0.457/0.045 seconds. Complete fresh-database/API/export/recovery verification took 295.53 seconds on Windows/Python 3.11, eight logical CPUs and approximately 24 GiB RAM. These are local samples, not production guarantees.
+Both runs preserved identical business, profile and per-port mart digests. Twenty recorded commands passed, including migrations (**8 applied / 0 on repeat**), locked installs, frontend build, both exports and in-process database/prepared API parity at **12:30 UTC** (**99 / 75 fresh vessels**). Original source checksums stayed unchanged; the owned test database was removed. Temporary-clone cleanup was rejected by automatic approval review, so scratch cleanup remains incomplete. [Reproduction and exposure record](docs/evidence/phase5-public-readiness.json).
 
-The [audit](docs/RELEASE_CHECK.md), [results](docs/RESULTS.md) and [reviewed evidence](docs/evidence/README.md) distinguish genuine-data reproduction from synthetic failure drills.
+The separately frozen **seven-day Los Angeles** result contains **443,296 positions, 168 hours, 11 SQL models and 36 dbt tests** for January 1–7, 2024. Its [historical evidence](docs/evidence/history-dbt.json) and [cloud parity/restore evidence](docs/evidence/cloud-history-operations.json) predate this frontend refinement. The map keeps bounded one-day history. Preliminary anomaly labels require more preceding history than this snapshot provides.
 
-## Verification and recovery
+Current frontend validation passes `npm run typecheck`, `npm run build`, and **14 Node tests** for URL state and visible polling. [Phase 4 workspace evidence](docs/evidence/phase4-workspace.json) records current browser checks and limits; [Phase 5 readiness](docs/evidence/phase5-public-readiness.json) records reproduction and exposure review. The earlier full Python validator passed **329 tests** in Phase 3; backend code is unchanged in phases 4–5. [Dated evidence archive](docs/evidence/README.md) keeps previous counts separate.
+
+The current Phase 6 candidate passes the full validator (**236 unit + 93 integration = 329 tests**), frontend checks and **63 browser checks**, including native 200% zoom. [Release evidence](docs/evidence/phase6-release.json) records genuine hosted API checks and fixture scope; [validator transcript](docs/evidence/phase6-validation.txt) records exact outcomes. Production/profile publication is pending until recorded below.
+
+To repeat release validation:
 
 ```sh
 uv run --locked --extra dev python scripts/validate.py
 cd web
 npm run typecheck
 npm run build
+node --test scripts/view-state.test.mjs scripts/visible-polling.test.mjs
 ```
 
-Step 13 passed **242 tests: 185 unit and 57 integration**. The current health/hosting implementation, including LA news resilience, passed **266 tests: 201 unit and 65 integration**, lint/format, package/installed-wheel checks and eight fresh migrations with zero on repeat. The Next.js production build passed locally and on Vercel. Browser checks covered replay, both ports, prepared sessions, keyboard/mobile behavior and the drawing. Integration tests need PostgreSQL 17/PostGIS 3.6 and create owned temporary schemas. Deterministic tests reject provider connections.
+Integration tests need PostgreSQL/PostGIS and owned temporary schemas. Deterministic tests reject provider connections. The [workflow source](.github/workflows/ci.yml) defines Python quality/integration gates, but Actions are disabled; local passes do not establish a GitHub-hosted pass.
 
-The [Validate workflow source](.github/workflows/ci.yml) defines shared Python `quality` and `integration` gates, but repository Actions are disabled by the owner. Local passes do not establish a GitHub-hosted pass. Next.js production builds also passed on Vercel. [GitHub setup](docs/GITHUB_SETUP.md) records the owner's override and actual publication evidence.
+## Demo costs and operation
 
-From the project root:
+Historical replay uses **$0 local services**; it still needs your computer, storage and internet. Hosted operation uses the existing Vercel frontend and Railway backend/database. Railway is paid usage; no permanently free 24/7 hosting or verified zero cloud cost is claimed. Phases 4–5 added no paid service, replica, volume or collector schedule. Preview verification used the existing Vercel Hobby project. Measured incremental cloud cost remains a Phase 6 check.
+
+The deployed runtime owns both live subscriptions. Keep local live collectors stopped while it runs. For an independent local setup, configure `PORTWATCH_AIS_API_KEY` privately and follow [LIVE_MULTIPORT.md](docs/LIVE_MULTIPORT.md). A sleeping local computer cannot collect missed evidence.
+
+Backups are operator work. From the project root:
 
 ```sh
 uv run --locked python -m portwatch health --port los_angeles
 uv run --locked python -m portwatch db backup --output artifacts/manual-backup.dump
 ```
 
-Backup verification restores into a new owned database and requires PostgreSQL client tools on PATH or the prepared native runtime. Failure drills demonstrated rollback, duplicate replay, quarantine, late-report replacement, corruption detection and reconnect gaps. [Recovery contracts](docs/HEALTH_RECOVERY.md) and the [runbook](docs/RUNBOOK.md) include diagnosis, restore and restart commands.
+[Runbook](docs/RUNBOOK.md) and [recovery contracts](docs/HEALTH_RECOVERY.md) cover restore into a new owned database, checksums, restart and diagnosis. Full live history grows; off-device backup and storage management remain requirements. [Deployment operations](deploy/README.md) preserves detailed rollout history.
 
-## Live operation and limitations
+## Sources, limitations and reuse
 
-Set `PORTWATCH_AIS_API_KEY` privately in the ignored root `.env`, then run `uv run --locked python -m portwatch.runtime` from the project root. Stop with `uv run --locked python -m portwatch.runtime --stop`. See [multiport operation](docs/LIVE_MULTIPORT.md) for process ownership, gaps, cooldowns and storage growth.
+- **Historical AIS:** NOAA OCM / MarineCadastre.gov 2024 AIS vessel traffic, [CC0 dataset and suggested citation](https://github.com/ocm-marinecadastre/ais-vessel-traffic/blob/main/data/ais-broadcast-points-2024-readme.md). Provider preprocessing and incomplete regional observations limit coverage claims.
+- **Weather:** [Open-Meteo](https://open-meteo.com/) and [Copernicus C3S / ERA5](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=overview), transformed UTC selections under [CC BY 4.0 and applicable API terms](https://open-meteo.com/en/licence). Coarse model context does not establish vessel delay causes.
+- **Live AIS:** [AISStream](https://aisstream.io/). Receipt-time fallback preserves provider timestamp text separately. Redistribution terms remain unverified; no raw/live payload or live vessel screenshot is packaged here.
+- **News metadata:** [GDELT](https://www.gdeltproject.org/), [Port of Los Angeles official release archive](https://portoflosangeles.org/news/news-release-archive), [Port of Oakland official RSS](https://www.portofoakland.com/feed/) and original publisher links. Only title/link/date metadata is retained. Official fallbacks cover releases, not all disruption news. Rate limits, source errors and a verified empty result stay distinct; news stays outside replay.
+- **Maps and inference:** optional tiles credit [OpenStreetMap contributors](https://www.openstreetmap.org/copyright). Packaged screenshots have basemap off. PortWatch polygons are independently authored approximations; inferred visits, waiting and dwell are experimental, not official calls or confirmed queues.
 
-- Local collection needs an awake, connected computer. The deployed Railway runtime runs independently; off-device backup and continuing storage management remain operator requirements.
-- NOAA is provider-preprocessed; live coverage is incomplete. Live analysis uses receipt-time fallback with provider timestamp text preserved separately.
-- Zones are approximate. Inferred visits, waiting and dwell are experimental, not official calls, confirmed queues or causality.
-- Weather is coarse model context. GDELT can return HTTP429; Oakland's official RSS fallback covers releases only. Verified empty responses do not establish absence of disruption. Recent news is excluded from replay.
-- Cloud services consume the owner's existing paid Railway plan. No billing plan, payment method or unrelated project was changed; no permanently free24/7 hosting is promised.
+Only reviewed historical screenshots and small aggregate evidence are packaged. Raw files, live payloads, snapshots, environments, dumps and credentials stay excluded. The [readiness record](docs/evidence/phase5-public-readiness.json) includes a reachable-history audit: no credential was detected, while older public commits retain non-secret workstation/service context. Current document cleanup preserves that history; the owner can review whether to accept it or authorize remediation. A scanner cannot prove complete absence of secrets.
 
-## Sources and attribution
-
-Historical AIS: **NOAA Office for Coastal Management / MarineCadastre.gov, 2024 AIS vessel traffic**, [CC0 data and suggested citation](https://github.com/ocm-marinecadastre/ais-vessel-traffic/blob/main/data/ais-broadcast-points-2024-readme.md). Weather: [Open-Meteo](https://open-meteo.com/) and [Copernicus Climate Change Service / ERA5](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=overview), transformed UTC selections with [CC BY 4.0 attribution](https://open-meteo.com/en/licence) and applicable noncommercial API terms. Live: [AISStream](https://aisstream.io/). News metadata: [GDELT](https://www.gdeltproject.org/), [Port of Oakland official RSS](https://www.portofoakland.com/feed/) and original publishers. Optional basemap: OpenStreetMap contributors.
-
-Included artifacts are reviewed historical screenshots and aggregate reports. Raw files, live payloads, databases, snapshots and credentials stay excluded. The [source audit](docs/SOURCE_AUDIT.md) records redistribution and timestamp limits. PortWatch polygons are independently authored approximations; official port maps are contextual references.
-
-[Release notes](docs/RELEASE_NOTES.md) · [Demo guide](docs/DEMO.md) · [Contributing](CONTRIBUTING.md) · [Handoff](docs/HANDOFF.md)
+**Code license: none selected.** No root `LICENSE` grants permission to reuse the code; public visibility alone would not grant that permission. Third-party data has its own terms. [Source audit](docs/SOURCE_AUDIT.md) · [Contributing](CONTRIBUTING.md) · [Release notes](docs/RELEASE_NOTES.md)

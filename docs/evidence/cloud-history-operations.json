@@ -96,7 +96,6 @@
   ],
   "before_compute_monthly_estimate": 30.6124333678,
   "backend_code_commit": "fa2abb78e9c3f69d434b2feed5da7f7acc77af7f",
-  "backend_deployment": "02446750-ef6e-4fb5-ae55-f173c5996e64",
   "actions_enabled": false,
   "budget": {
     "no_plan_upgrade": true,
@@ -106,9 +105,9 @@
       0.3,
       0.6
     ],
-    "stopped_project": "appealing-upliftment",
-    "stopped_project_compute_monthly_estimate_usd": 2.7,
     "retained_storage_still_billed": true,
-    "short_samples_not_a_hard_cap": true
+    "short_samples_not_a_hard_cap": true,
+    "separate_owner_designated_project_stopped": true,
+    "private_other_project_details_omitted": true
   }
 }

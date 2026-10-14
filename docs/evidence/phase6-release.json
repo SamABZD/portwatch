@@ -1,0 +1,301 @@
+{
+  "phase": 6,
+  "status": "validated_production_profile_pending",
+  "observed_at_utc": "2026-10-14T12:44:43.916903+00:00",
+  "tested_app_commit": "84be4c6e3a9b416ed785f65429342ae9cbdf85e8",
+  "verification": {
+    "python": {
+      "command": "uv run --locked --extra dev python scripts/validate.py",
+      "unit": 236,
+      "integration": 93,
+      "skipped": 0,
+      "failed": 0,
+      "lint": "passed",
+      "format": "passed;131 files",
+      "package_wheel_sql_cli": "passed",
+      "database": "PostgreSQL17/PostGIS3.6.2; owned temporary schemas and sanitized paths/key; no provider connection",
+      "migrations_first_repeat": [
+        8,
+        0
+      ],
+      "transcript_presentation": "Absolute workstation/temp prefixes redacted and trailing display whitespace trimmed; measurements/outcomes unchanged"
+    },
+    "frontend": {
+      "npm_ci": "passed in isolated checkout after existing process locked primary native DLL",
+      "typecheck": "passed",
+      "production_build": "passed",
+      "node_tests": 14,
+      "failed": 0
+    },
+    "browser": {
+      "initial_batch": "Found1440px routeheadermisalignment and encoded testdash; corrected together",
+      "confirmation": "Single full confirmation passed",
+      "navigation_checks": 27,
+      "workspace_checks": 36,
+      "total_checks": 63,
+      "widths": [
+        390,
+        768,
+        1024,
+        1440
+      ],
+      "native_zoom_percent": 200,
+      "fixture_provider_requests": 0,
+      "page_errors": [],
+      "scope": "Genuine saved frame/health/history responses plus explicit error projections; real MapLibre from intercepted test raster; final public PNGs use historical data, basemapoff. Separate real hosted verification below.",
+      "trail_limit": [
+        "Captured historical trails contain no same-MMSI multi-segment gap; saved segment/point boundaries verified without inventing tracks."
+      ]
+    },
+    "real_backend": {
+      "observed_at_utc": "2026-10-14T12:33:18.094011+00:00",
+      "origin": "https://backend-production-895d.up.railway.app",
+      "checks": [
+        {
+          "name": "ready",
+          "status": 200,
+          "bytes": 18,
+          "sha256": "31bf75f4c0a97cc1f7b60df824fa390b3be9ba014f29b63c87c698ba63d9a9fd"
+        },
+        {
+          "name": "catalog",
+          "status": 200,
+          "bytes": 11248,
+          "sha256": "ba486cdfc0a0d0a8ccc6e769f5f1447e46bb5d58bd2c5fcb80a122ad8f836f54"
+        },
+        {
+          "name": "pipeline",
+          "status": 200,
+          "bytes": 27477,
+          "sha256": "2fe0003a72f34e844e20681afe7972c97028f56179e4e31cfa9601041b7fad74"
+        },
+        {
+          "name": "history",
+          "status": 200,
+          "bytes": 50556,
+          "sha256": "797c0c255320723986d6e12fd5d15c05d3e23c67d8b3ca940a16b5d0af79cd58"
+        },
+        {
+          "name": "lineage",
+          "status": 200,
+          "bytes": 2622440,
+          "sha256": "a0ed3aa4422d90d44934b960f30dd562e7b45159742f087d690d143e9e1bce97"
+        },
+        {
+          "name": "health-los_angeles",
+          "status": 200,
+          "bytes": 13985,
+          "sha256": "4201e5dc75dec872e1cb8cb81d2f2f1eb0c6ab26ee3ff863b1b1524d487f8f41"
+        },
+        {
+          "name": "live-los_angeles",
+          "status": 200,
+          "bytes": 111225,
+          "sha256": "c517c8eb5679e0122431c2bca79f0bbd9003af35d8917fe5c6af8b4f8fd6b704"
+        },
+        {
+          "name": "historical-los_angeles",
+          "status": 200,
+          "bytes": 116949,
+          "sha256": "f10db56642df8136870636ee7e29579ea74f866593d18ffc3e805ac641f47bb7"
+        },
+        {
+          "name": "health-oakland",
+          "status": 200,
+          "bytes": 13642,
+          "sha256": "b90d3d51415eaaea148ba5470d029fd4f58a0c8fced7e1c81467eef1f2a5876b"
+        },
+        {
+          "name": "live-oakland",
+          "status": 200,
+          "bytes": 101784,
+          "sha256": "a403cbadc880fd1f9010e0c6fb634fa00312339b77284828fc78060875880a64"
+        },
+        {
+          "name": "historical-oakland",
+          "status": 200,
+          "bytes": 109096,
+          "sha256": "83e5363ddc4961cbd4f7668872052b97778e06e70cf16cd4b554e2ac972b6c50"
+        }
+      ],
+      "requests": 11,
+      "all_200": true
+    },
+    "real_backend_semantics": {
+      "ports": [
+        {
+          "port": "los_angeles",
+          "historical_positions": 62157,
+          "replay_fresh_vessels": 99,
+          "replay_cutoff_utc": "2024-01-01T12:30:00+00:00",
+          "historical_news_excluded": true,
+          "collector_status": "healthy_connected",
+          "news_provider": "Port of Los Angeles",
+          "news_status": "available",
+          "saved_news_rows": 1,
+          "request_window_hours": 168.0,
+          "last_successful_fetch_utc": "2026-10-14T12:00:23.767203+00:00",
+          "primary_status": "failed",
+          "primary_http": null,
+          "primary_error": "source_timeout",
+          "fallback_http": 200,
+          "backup_status": "ok"
+        },
+        {
+          "port": "oakland",
+          "historical_positions": 52783,
+          "replay_fresh_vessels": 75,
+          "replay_cutoff_utc": "2024-01-01T12:30:00+00:00",
+          "historical_news_excluded": true,
+          "collector_status": "healthy_connected",
+          "news_provider": "Port of Oakland",
+          "news_status": "available",
+          "saved_news_rows": 1,
+          "request_window_hours": 168.0,
+          "last_successful_fetch_utc": "2026-10-14T12:20:12.876377+00:00",
+          "primary_status": "failed",
+          "primary_http": 429,
+          "primary_error": "source_rate_limited",
+          "fallback_http": 200,
+          "backup_status": "ok"
+        }
+      ],
+      "frozen_history": {
+        "hours": 168,
+        "models": 11,
+        "tests": 36,
+        "positions": 443296,
+        "lineage_sha256": "a0ed3aa4422d90d44934b960f30dd562e7b45159742f087d690d143e9e1bce97"
+      }
+    },
+    "api_bounds_read_only": {
+      "checks": [
+        {
+          "case": "unknown_port",
+          "status": 404,
+          "expected": 404
+        },
+        {
+          "case": "invalid_mode",
+          "status": 422,
+          "expected": 422
+        },
+        {
+          "case": "trail_bounds",
+          "status": 422,
+          "expected": 422
+        },
+        {
+          "case": "live_cutoff",
+          "status": 422,
+          "expected": 422
+        }
+      ],
+      "api_methods": {
+        "/api/catalog": [
+          "get"
+        ],
+        "/api/frame": [
+          "get"
+        ],
+        "/api/health": [
+          "get"
+        ],
+        "/api/history": [
+          "get"
+        ],
+        "/api/history-lineage": [
+          "get"
+        ],
+        "/api/pipeline": [
+          "get"
+        ]
+      },
+      "mutation_routes_exposed": false
+    }
+  },
+  "cost": {
+    "observed_at_utc": "2026-10-14T12:37:40.459545+00:00",
+    "sampled_pre_release_existing_services": [
+      {
+        "service": "backend",
+        "window": {
+          "since": "2026-10-14T11:00:00+00:00",
+          "until": "2026-10-14T12:00:00+00:00"
+        },
+        "samples": 120,
+        "mean_cpu_vcpu": 0.24049246222222223,
+        "mean_ram_gb": 1.5050381994666666,
+        "cpu_limit_vcpu": 1.0,
+        "ram_limit_gb": 1.999998976,
+        "monthly_cpu_ram_extrapolation_usd": 19.86023123911111,
+        "replicas": 1,
+        "active_deployments": 1
+      },
+      {
+        "service": "database",
+        "window": {
+          "since": "2026-10-14T11:00:00+00:00",
+          "until": "2026-10-14T12:00:00+00:00"
+        },
+        "samples": 120,
+        "mean_cpu_vcpu": 0.18295232944444445,
+        "mean_ram_gb": 0.9462576128,
+        "cpu_limit_vcpu": 0.5,
+        "ram_limit_gb": 0.99999744,
+        "monthly_cpu_ram_extrapolation_usd": 13.12162271688889,
+        "replicas": 1,
+        "active_deployments": 1
+      }
+    ],
+    "phase1_cpu_ram_extrapolation_usd": 29.070874736444445,
+    "current_cpu_ram_extrapolation_usd": 32.981853955999995,
+    "raw_interval_extrapolation_difference_usd": 3.91097921955555,
+    "comparability": "Intervals have different traffic, retained data sizes and sampling density; not causal release delta. Existing consumption increased; no savings claim.",
+    "expected_frontend_release_recurring_delta_usd": 0,
+    "forecast_basis": "No backend/runtime/schema/provider schedule change, same visible30s polling and hidden cancellation, no new fetch endpoint or subscriber. Styling/geometry/architecture/source links change only rendering. Same traffic/backend workload assumption.",
+    "verified_hosted_money_delta_usd": null,
+    "one_time_audit_compute_cost_usd": null,
+    "one_time_audit_scope": "Bounded existing provider/account reads and11 read-only backend requests; metered transport not claimed zero. Vercel previews use existing active Hobby project; local tests use no provider connections.",
+    "vercel": {
+      "plan": "hobby",
+      "status": "active",
+      "usage_cost_data": "unavailable for October1\u201314; not zero usage",
+      "hard_spend_management": "not applicable to Hobby; included limits can pause features",
+      "new_paid_resources": 0
+    },
+    "railway": {
+      "services": 2,
+      "replicas_each": 1,
+      "active_deployments_each": 1,
+      "volume_capacity_mb_each": 5000,
+      "compute_spend_limit": null,
+      "backend_rollout_in_this_release": false,
+      "source_growth": "continues independently; preserve originals; no deletion/retention-horizon guarantee"
+    },
+    "references": [
+      "https://docs.railway.com/pricing/plans",
+      "https://vercel.com/docs/plans/hobby"
+    ]
+  },
+  "rollback": {
+    "frontend_commit": "b6e4009e32ad5bf78f1e791b64b10a585f679f9f",
+    "frontend_url": "https://portwatch-6el07u4v4-abzd.vercel.app",
+    "backend": "No code/runtime/source schedule change or redeployment in this release; existing successful deployment retained",
+    "private_configuration_saved": true
+  },
+  "publication": {
+    "repository_public": true,
+    "actions_enabled": false,
+    "release_tag_changed": false,
+    "profile_update": "Ready; latest SHA must be fetched immediately before write",
+    "pins": "PortWatch added without removing existing Flux/Retro pins; final proof pending"
+  },
+  "limitations": [
+    "Existing Railway workload/resource usage grows independently; raw hour extrapolation increased and cannot establish frontend causal delta or savings. Modeled release recurring delta0 assumes same traffic/query/backend workload; measured hosted dollar delta unavailable.",
+    "Vercel usage cost data unavailable; Hobby active verified, not inferred zero usage. No plan, limit, paidresource, replica or volume change.",
+    "Local socket/Docker startup not exercised due earlier limitations; clean-clone historical API verified inprocess inPhase5.",
+    "Older reachable history retains non-secret operational/workstation context; no code license selected.",
+    "Previously denied scratch-clone cleanup remains outside Git; no alternate deletion."
+  ]
+}

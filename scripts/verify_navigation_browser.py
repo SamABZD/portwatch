@@ -1,8 +1,9 @@
-"""Verify local navigation and scope using saved, genuine API responses.
+"""Verify navigation and scope using saved, genuine API responses.
 
-Requires an already running frontend. API routes use local fixture files only;
-all external requests and unexpected API endpoints are blocked. Historical AIS
-frames are verified only at their recorded cutoff, without changing analytics.
+Requires an already running local frontend or a verified immutable PortWatch HTTPS
+preview. API routes use local fixture files only; all other-origin requests and
+unexpected API endpoints are blocked. Historical AIS frames are verified only at
+their recorded cutoff, without changing analytics.
 """
 
 import argparse
@@ -10,6 +11,8 @@ import asyncio
 import base64
 import copy
 import json
+import os
+import re
 import struct
 import tempfile
 from collections import Counter
@@ -160,12 +163,19 @@ async def header(page, route, port, mode, minute=750):
         inactive_name,
     )
     assert any(styles.values()), f"Active navigation needs a cue beyond color: {styles}"
-    await expect(page.get_by_role("link", name="View source", exact=True)).to_have_count(0)
+    source = page.get_by_role("link", name="View source", exact=True)
+    if route == "map":
+        await expect(source).to_have_count(1)
+        await expect(source).to_be_visible()
+        await expect(source).to_have_attribute("href", "https://github.com/SamABZD/portwatch")
+    else:
+        await expect(source).to_have_count(0)
 
 
 async def layout(page):
     measurements = await page.evaluate("""() => {
-      const controls = [...document.querySelectorAll('.app-header nav a, .app-header select')];
+      const controls = [...document.querySelectorAll(
+        '.app-header nav a, .app-header select, .intro-row a')];
       const brand = document.querySelector('.brand'), b = brand.getBoundingClientRect(),
         style = getComputedStyle(brand), header = document.querySelector('.app-header'),
         h = header.getBoundingClientRect(), headerStyle = getComputedStyle(header);
@@ -359,6 +369,12 @@ async def verify(args):
     output.mkdir(parents=True, exist_ok=True)
     fixtures = Fixtures(Path(args.fixtures))
     origin = urlparse(args.url)
+    bypass = (
+        os.environ.get("PORTWATCH_TEST_VERCEL_BYPASS")
+        if origin.scheme == "https"
+        and re.fullmatch(r"portwatch-[a-z0-9]+-abzd\.vercel\.app", origin.hostname or "")
+        else None
+    )
     requests, errors, blocked, checks, screenshots = [], [], [], [], []
     report = {
         "verified": False,
@@ -369,6 +385,8 @@ async def verify(args):
         "errors": errors,
         "screenshots": screenshots,
         "external_requests_sent": 0,
+        "upstream_api_requests_sent": 0,
+        "vercel_bypass_scope": "Selected preview origin static requests only" if bypass else None,
     }
 
     async def serve(route):
@@ -378,7 +396,12 @@ async def verify(args):
             await route.abort()
             return
         if not url.path.startswith("/api/"):
-            await route.continue_()
+            if bypass:
+                await route.continue_(
+                    headers={**route.request.headers, "x-vercel-protection-bypass": bypass}
+                )
+            else:
+                await route.continue_()
             return
         endpoint = url.path.rsplit("/", 1)[-1]
         query = parse_qs(url.query)
@@ -437,7 +460,12 @@ async def verify(args):
             await assert_scope_url(
                 urljoin(page.url, await intro_link.get_attribute("href")), "los_angeles", "live"
             )
-            checks.append("first_viewport_purpose_metadata_prominent_pipeline_link")
+            source_link = page.get_by_role("link", name="View source", exact=True)
+            await expect(source_link).to_be_visible()
+            await expect(source_link).to_have_attribute(
+                "href", "https://github.com/SamABZD/portwatch"
+            )
+            checks.append("first_viewport_purpose_metadata_pipeline_and_public_source_links")
 
             before = counts()
             await page.get_by_role("combobox", name="Select port").select_option("los_angeles")
@@ -629,13 +657,28 @@ async def verify(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--url", default="http://127.0.0.1:3160")
+    parser.add_argument(
+        "--url",
+        default="http://127.0.0.1:3160",
+        help="Already running local frontend or verified immutable PortWatch HTTPS preview",
+    )
     parser.add_argument("--fixtures", required=True)
     parser.add_argument("--output", default="artifacts/phase3")
     parser.add_argument("--browser-executable")
     args = parser.parse_args()
-    if urlparse(args.url).hostname not in {"localhost", "127.0.0.1", "::1"}:
-        parser.error("Local verification only")
+    parsed = urlparse(args.url)
+    local = parsed.scheme in {"http", "https"} and parsed.hostname in {
+        "localhost",
+        "127.0.0.1",
+        "::1",
+    }
+    preview = (
+        parsed.scheme == "https"
+        and re.fullmatch(r"portwatch-[a-z0-9]+-abzd\.vercel\.app", parsed.hostname or "")
+        and parsed.port in {None, 443}
+    )
+    if parsed.username or parsed.password or not (local or preview):
+        parser.error("Only local frontends or immutable PortWatch HTTPS previews are supported")
     raise SystemExit(asyncio.run(verify(args)))
 
 

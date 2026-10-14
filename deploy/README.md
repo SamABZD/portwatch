@@ -6,7 +6,7 @@ available at $0; cloud resource consumption is billed by Railway under that exis
 
 | Component | Endpoint / storage |
 | --- | --- |
-| Frontend | [PortWatch](https://portwatch-iota.vercel.app), Vercel `abzd/portwatch` |
+| Frontend | [PortWatch](https://portwatch-iota.vercel.app), Vercel project `portwatch` |
 | Read-only API | [Readiness](https://backend-production-895d.up.railway.app/readyz), Railway `backend` |
 | Database | Private Railway networking only; `postgis/postgis:17-3.6-alpine` |
 | Database volume | `/var/lib/postgresql/data`, `PGDATA=/var/lib/postgresql/data/pgdata` |
@@ -29,8 +29,7 @@ The browser renders live observations and operational health; missing basemap ti
 existing local geographic fallback. These checks establish operation at that time, not an
 uptime or source-coverage guarantee. An initial frontend-only deployment was superseded.
 
-Backend live deployment: `c7394e40-070e-4cd2-bde5-5df1820b9fa5`; database deployment:
-`57033f2a-b959-4c82-8860-a4205d4115f9`, both SUCCESS. The Next.js production deployment
+Backend and database deployments both reached SUCCESS. The Next.js production deployment
 `portwatch-fhxc3doq2-abzd.vercel.app` was built from reviewed source checkpoint `2197e72`.
 The local runtime stopped cleanly at11:25:00.742834UTC before cloud live was enabled.
 Release/publication evidence is maintained in [GITHUB_SETUP](../docs/GITHUB_SETUP.md).
@@ -105,11 +104,11 @@ build was checked locally; the deployed frontend uses Vercel's Next.js integrati
 ## Budgeted history and continuous operation
 
 The owner approved merging Step16 and deploying its seven-day history, with no additional
-spending and no 30-day expansion. They also explicitly requested stopping the separate
-`appealing-upliftment` project without deleting it. Its three deployments were stopped and
-the two GitHub auto-deploy settings disabled; project, sources and PostgreSQL volume remain.
-Retained storage and prior usage still bill. Its observed pre-stop compute was approximately
-$2.7/month at Railway's current RAM/CPU rates; this is an estimate, not a credit or refund.
+spending and no 30-day expansion. A separate owner-designated project had three deployments
+stopped and two GitHub auto-deploy settings disabled without deleting its project, sources
+or PostgreSQL volume. Its retained storage and prior usage still bill. Private account and
+other-project cost details are excluded; this action alone does not prove a nonpositive
+PortWatch cost delta.
 
 Keep PortWatch's existing two services, CPU/RAM limits and 5000MB volumes. The frozen
 `portwatch_history_7d` database shares the existing private PostGIS service. Import a verified
@@ -157,9 +156,8 @@ against database-volume failure, but is not independent protection against accou
 loss; keep an off-cloud copy. Test restores in an explicitly owned temporary database.
 
 History and compressed copies add roughly $0.3–0.6/month of used storage at
-[current Railway volume rates](https://docs.railway.com/pricing/plans), within the compute
-removed from `appealing-upliftment`; finite import/model execution
-has a small one-time usage cost. Actual usage remains metered: this is not a hard spending
+[current Railway volume rates](https://docs.railway.com/pricing/plans); finite import/model
+execution has a small one-time usage cost. Actual usage remains metered: this is not a hard spending
 cap. Monitor the two fixed volumes, source growth and CPU/RAM trend. Source retention beyond
 the available capacity still requires an archive policy; disk pressure stops collection
 before losing preserved bytes. Do not silently delete original data to claim endless uptime.

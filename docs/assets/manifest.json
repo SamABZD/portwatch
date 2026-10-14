@@ -1,26 +1,66 @@
 [
   {
     "file": "historical-los-angeles.png",
-    "original": "artifacts/step13/prepared-browser/los_angeles-desktop.png",
-    "bytes": 126785,
-    "sha256": "ca1d40859ac5ff848415e9a4dfa8eb7657b176c689df62b8c2cc5b936b570b02"
+    "original": "artifacts/release/workspace/map-los-angeles-historical.png",
+    "bytes": 140631,
+    "sha256": "cddec45af603310ccd007489e84d7ebc062961d5ca5267ed34abe3fe7edd15e5",
+    "source_commit": "84be4c6e3a9b416ed785f65429342ae9cbdf85e8",
+    "capture_date_utc": "2026-10-14",
+    "port": "los_angeles",
+    "mode": "historical",
+    "cutoff_utc": "2024-01-01T12:30:00+00:00",
+    "frame_sha256": "76e6894b0146f8183c4965e20527ed79de8eed280382c5aac5c49478dea91932",
+    "viewport_width": 1440,
+    "basemap": "off",
+    "unchanged_png": true,
+    "synthetic_state": false
   },
   {
     "file": "historical-oakland.png",
-    "original": "artifacts/step13/prepared-browser/oakland-desktop.png",
-    "bytes": 127760,
-    "sha256": "d68b0fc7f220e9e4cdd5034a8debb52e6fb8213030c20ac677bb49a8c439c39f"
+    "original": "artifacts/release/workspace/map-oakland-historical.png",
+    "bytes": 142450,
+    "sha256": "6249409e6ef88dab85a9324bb60389fa3d45956582c8f5ef52ecc3989611a62b",
+    "source_commit": "84be4c6e3a9b416ed785f65429342ae9cbdf85e8",
+    "capture_date_utc": "2026-10-14",
+    "port": "oakland",
+    "mode": "historical",
+    "cutoff_utc": "2024-01-01T12:30:00+00:00",
+    "frame_sha256": "cc7ab8b864749e28feb41fd0070ec039ca380886f15cb97b0e154baeb7ba6679",
+    "viewport_width": 1440,
+    "basemap": "off",
+    "unchanged_png": true,
+    "synthetic_state": false
   },
   {
     "file": "historical-mobile.png",
-    "original": "artifacts/step13/prepared-browser/los_angeles-mobile.png",
-    "bytes": 105222,
-    "sha256": "ccdaf35a9f30dca2a597870daf018b0b1e880e455569dcf4754365805d4f6399"
+    "original": "artifacts/release/workspace/map-mobile-historical.png",
+    "bytes": 124992,
+    "sha256": "ad7b1d8cf5839ca735d63a2cfabf22c0ccf58ecef2f7a18209b9b01edff2e23b",
+    "source_commit": "84be4c6e3a9b416ed785f65429342ae9cbdf85e8",
+    "capture_date_utc": "2026-10-14",
+    "port": "los_angeles",
+    "mode": "historical",
+    "cutoff_utc": "2024-01-01T12:30:00+00:00",
+    "frame_sha256": "76e6894b0146f8183c4965e20527ed79de8eed280382c5aac5c49478dea91932",
+    "viewport_width": 390,
+    "basemap": "off",
+    "unchanged_png": true,
+    "synthetic_state": false
   },
   {
     "file": "pipeline.png",
-    "original": "artifacts/step13/diagram/desktop.png",
-    "bytes": 67161,
-    "sha256": "01dfdc9532ebe6dfd15958512eeb09ecb814b31a523afd5602b7fb52271696b7"
+    "original": "artifacts/release/workspace/pipeline-architecture.png",
+    "bytes": 87341,
+    "sha256": "bae55574e70ec1b520654f5bf7bb2f602a2fdc77523c0243b0c73ebb5fc62482",
+    "source_commit": "84be4c6e3a9b416ed785f65429342ae9cbdf85e8",
+    "capture_date_utc": "2026-10-14",
+    "port": "los_angeles",
+    "mode": "historical",
+    "cutoff_utc": "2024-01-01T12:30:00+00:00",
+    "frame_sha256": "76e6894b0146f8183c4965e20527ed79de8eed280382c5aac5c49478dea91932",
+    "viewport_width": 1440,
+    "basemap": "off",
+    "unchanged_png": true,
+    "synthetic_state": false
   }
 ]

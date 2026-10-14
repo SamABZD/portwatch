@@ -1,4 +1,24 @@
-# Reviewed Step 13 evidence
+# Reviewed evidence archive
+
+## Current completion phases
+
+- [Phase 6 release](phase6-release.json) and [validator transcript](phase6-validation.txt):
+  329 current Python tests,14 Node tests,63 browser checks, actual hosted API contracts and
+  scoped cost/rollback evidence. Production/profile status is recorded only after verification.
+
+- [Phase 4 workspace](phase4-workspace.json): current frontend build/typecheck,14 Node tests
+  and37 recorded browser checks, including preserved unchanged-code checks and narrow follow-ups.
+- [Phase 5 public readiness](phase5-public-readiness.json):20 successful clean-clone commands,
+  two-port genuine saved-input parity, exposure audit, actual cleanup limitations and release steps.
+- [Phase 3 navigation](phase3-navigation.json), [Phase 2 news](phase2-news.json),
+  [Phase 1 cost controls](phase1-cost-controls.json): original dated phase checkpoints.
+
+The phases1–3 release at `d39d9bd` passed236 unit +93 integration =329 Python tests;
+[handoff](../HANDOFF.md) records the exact validator. Backend code is unchanged in phases4–5.
+Full release validation remains Phase6. GitHub now reports public; Actions remain disabled.
+New feature-branch presentation and UI are not a production rollout.
+
+## Earlier stage evidence
 
 Small selected reports from the completed local audit, packaged for repository review.
 The reports retain their measured values and original UTC timestamps. Absolute workstation

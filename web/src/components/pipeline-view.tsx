@@ -61,6 +61,7 @@ export default function PipelineView() {
 
   return <main className="workspace pipeline-workspace">
     <AppHeader page="pipeline" scope={mapScope} onPortChange={port => updateScope({ port })} ports={availablePorts} />
+    <div className="pipeline-content">
     <section className="pipeline-intro">
       <h1>Maritime data engineering.</h1>
       <p>Python validates source evidence. PostGIS builds port analytics; Prefect schedules processing. dbt records the frozen seven-day Los Angeles history.</p>
@@ -70,7 +71,11 @@ export default function PipelineView() {
         : <p className="panel-note">Refreshes every 30 seconds while visible. Live coverage depends on received AIS reports; gaps remain unknown.</p>}
     </section>
     <PipelineDiagram />
-    <HistoryResults />
+    <section className="pipeline-section" aria-labelledby="quality-heading">
+      <h2 id="quality-heading">Data quality and workflow evidence</h2>
+      <p>Raw batches have SHA-256 checksums. Clean records retain their source batch and record offset. Spatial assignments carry port and geofence versions; visits and hourly marts record their inference rules and workflow lineage.</p>
+      <p className="panel-note">Measurements below follow the selected port. Historical replay and current collection remain separate; missing measurements are unknown.</p>
+    </section>
     {error && <div role="alert" className="query-error">Pipeline status is disconnected. {report && "The last received results below are stale."} <button onClick={() => setRetry(v => v + 1)}>Retry pipeline</button></div>}
     {!report && !error && <p role="status">Reading pipeline measurements…</p>}
     {report && <>
@@ -79,7 +84,7 @@ export default function PipelineView() {
         <div className="panel-heading"><h2>{port.name}</h2><span>{words(port.overall)}</span></div>
         <p>Collector: <strong>{words(port.collector.status)}</strong> · Last AIS report received: {date(port.collector.last_observed_ais_message_utc)}</p>
         <p className="panel-note">Context sources: {port.context ? Object.entries(port.context).map(([kind, state]) => `${words(kind)}: ${words(state.status)}${state.last_http_status ? ` (HTTP ${state.last_http_status})` : ""}`).join(" · ") : "Not connected"}.</p>
-        <div className="table-scroll"><table className="pipeline-table"><caption>Historical and live processing remain separate</caption><thead><tr><th scope="col">Measurement</th><th scope="col">Historical</th><th scope="col">Live collection</th></tr></thead>
+        <div className="table-scroll" role="region" aria-label={`${port.name} historical and live processing measurements`} tabIndex={0}><table className="pipeline-table"><caption>Historical and live processing remain separate</caption><thead><tr><th scope="col">Measurement</th><th scope="col">Historical</th><th scope="col">Live collection</th></tr></thead>
           <tbody>
             <tr><th scope="row">Data state</th><td>{words(port.historical.status)}</td><td>{words(port.live.status)}</td></tr>
             <tr><th scope="row">Canonical positions</th><td>{count(port.historical.canonical_positions)}</td><td>{count(port.live.canonical_positions)}</td></tr>
@@ -91,14 +96,20 @@ export default function PipelineView() {
           </tbody></table></div>
         <p className="panel-note">Latency uses recorded raw receipt and clean commit times, including delayed or manual processing. It does not measure source-to-screen latency or guarantee coverage.</p>
         <h3>Recent workflow runs</h3>
-        {port.runs?.recent.length ? <div className="table-scroll"><table className="pipeline-table"><thead><tr><th scope="col">Workflow</th><th scope="col">State</th><th scope="col">Started</th><th scope="col">Duration</th><th scope="col">Input / output</th></tr></thead><tbody>
+        {port.runs?.recent.length ? <div className="table-scroll" role="region" aria-label={`${port.name} recent workflow runs`} tabIndex={0}><table className="pipeline-table"><thead><tr><th scope="col">Workflow</th><th scope="col">State</th><th scope="col">Started</th><th scope="col">Duration</th><th scope="col">Input / output</th></tr></thead><tbody>
           {port.runs.recent.slice(0, 6).map(run => <tr key={run.run_id}><td>{words(run.stage)}</td><td>{words(run.status)}</td><td>{date(run.started_at)}</td><td>{count(run.duration_seconds)} s</td><td>{count(run.input_count)} / {count(run.output_count)}</td></tr>)}
         </tbody></table></div> : <p>No workflow history is connected for this port.</p>}
         <p className="panel-note">Counts belong to each workflow’s stage and may use different units. Checked {date(port.checked_at_utc)}.</p>
-        {port.operations?.backups.length ? <p className="panel-note">Database backups: {port.operations.backups.map(backup => `${backup.database}: ${words(backup.status)}${backup.created_at_utc ? ` (${date(backup.created_at_utc)})` : ""}`).join(" · ")}. Two compressed copies are kept on the second Railway volume.</p> : null}
       </section>)}
-      <section className="pipeline-section"><h2>Evidence behind the result</h2><p>Raw batches have SHA-256 checksums. Clean records retain their source batch and record offset. Spatial assignments carry port and geofence versions; visits and hourly marts record their inference rules and workflow lineage.</p><p>Vessel properties and destinations are reported AIS data. Waiting candidates and visits are experimental inferences, and approximate zones are not official port boundaries.</p></section>
     </>}
+    <HistoryResults />
+    <section className="pipeline-section" aria-labelledby="operations-heading">
+      <h2 id="operations-heading">Operational limits and recovery</h2>
+      <p>Vessel properties and destinations are reported AIS data. Waiting candidates and visits are experimental inferences, and approximate zones are not official port boundaries.</p>
+      {selectedPorts.map(port => port.operations?.backups.length ? <p className="panel-note" key={port.port_id}>Database backups: {port.operations.backups.map(backup => `${backup.database}: ${words(backup.status)}${backup.created_at_utc ? ` (${date(backup.created_at_utc)})` : ""}`).join(" · ")}. Two compressed copies are kept on the second Railway volume.</p> : null)}
+      <p className="panel-note">The continuous collectors run independently of page visits. Current source health and saved backups do not guarantee complete coverage or protection from loss of the hosting provider.</p>
+    </section>
     <footer className="app-footer">PortWatch · Public read-only pipeline view · <Link href={scopeHref("/", mapScope)} prefetch={false}>Return to the vessel map</Link></footer>
+    </div>
   </main>;
 }
