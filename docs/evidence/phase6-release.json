@@ -17,7 +17,8 @@
       "migrations_first_repeat": [
         8,
         0
-      ]
+      ],
+      "transcript_presentation": "Absolute workstation/temp prefixes redacted and trailing display whitespace trimmed; measurements/outcomes unchanged"
     },
     "frontend": {
       "npm_ci": "passed in isolated checkout after existing process locked primary native DLL",
@@ -166,6 +167,51 @@
         "positions": 443296,
         "lineage_sha256": "a0ed3aa4422d90d44934b960f30dd562e7b45159742f087d690d143e9e1bce97"
       }
+    },
+    "api_bounds_read_only": {
+      "checks": [
+        {
+          "case": "unknown_port",
+          "status": 404,
+          "expected": 404
+        },
+        {
+          "case": "invalid_mode",
+          "status": 422,
+          "expected": 422
+        },
+        {
+          "case": "trail_bounds",
+          "status": 422,
+          "expected": 422
+        },
+        {
+          "case": "live_cutoff",
+          "status": 422,
+          "expected": 422
+        }
+      ],
+      "api_methods": {
+        "/api/catalog": [
+          "get"
+        ],
+        "/api/frame": [
+          "get"
+        ],
+        "/api/health": [
+          "get"
+        ],
+        "/api/history": [
+          "get"
+        ],
+        "/api/history-lineage": [
+          "get"
+        ],
+        "/api/pipeline": [
+          "get"
+        ]
+      },
+      "mutation_routes_exposed": false
     }
   },
   "cost": {

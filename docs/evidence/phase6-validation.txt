@@ -24,11 +24,11 @@ Successfully built <owned-validation-temp>\dist\portwatch-0.1.0.tar.gz
 Successfully built <owned-validation-temp>\dist\portwatch-0.1.0-py3-none-any.whl
 + <project>\.venv\Scripts\python.exe -I -c <Python verification> <owned-validation-temp>\dist\portwatch-0.1.0-py3-none-any.whl 001_raw_bookkeeping.sql 002_clean_positions.sql 003_port_zones.sql 004_visits_waiting.sql 005_weather_news.sql 006_analytical_marts.sql 007_orchestration.sql 008_vessel_profiles.sql
 Built wheel imports and includes every committed SQL migration
-                                                                               
- Usage: portwatch [OPTIONS] COMMAND [ARGS]...                                  
-                                                                               
- PortWatch local data engineering commands.                                    
-                                                                               
+
+ Usage: portwatch [OPTIONS] COMMAND [ARGS]...
+
+ PortWatch local data engineering commands.
+
 +- Options -------------------------------------------------------------------+
 | --log-json              --no-log-json      Structured events on stderr.     |
 |                                            [default: no-log-json]           |
