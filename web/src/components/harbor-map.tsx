@@ -16,10 +16,14 @@ type Props = {
   basemap: boolean;
 };
 
+function hasPosition(vessel: Vessel) {
+  return typeof vessel.longitude === "number" && Number.isFinite(vessel.longitude)
+    && typeof vessel.latitude === "number" && Number.isFinite(vessel.latitude);
+}
+
 function sources(props: Props) {
   const vessels = (props.frame?.vessels || []).filter(
-    (v) =>
-      v.longitude !== null && v.latitude !== null && (props.stale || !v.stale),
+    (v) => hasPosition(v) && (props.stale || !v.stale),
   );
   return {
     points: {
@@ -57,16 +61,33 @@ export default function HarborMap(props: Props) {
   const [renderer, setRenderer] = useState<"loading" | "tiles" | "vector">(
     "loading",
   );
-  const [failed, setFailed] = useState(false);
+  const [failure, setFailure] = useState<"tiles" | "renderer" | null>(null);
+  const [viewport, setViewport] = useState({ width: 720, height: 440 });
+
+  useEffect(() => {
+    const element = container.current;
+    if (!element) return;
+    const measure = () => {
+      const width = element.clientWidth;
+      const height = element.clientHeight;
+      if (width <= 0 || height <= 0) return;
+      setViewport(previous => previous.width === width && previous.height === height
+        ? previous : { width, height });
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
     if (!props.basemap) {
-      setFailed(false);
+      setFailure(null);
       setRenderer("vector");
       return;
     }
-    setFailed(false);
+    setFailure(null);
     setRenderer("loading");
     import("maplibre-gl")
       .then((maplibre) => {
@@ -80,8 +101,12 @@ export default function HarborMap(props: Props) {
           );
           const instance = new maplibre.Map({
             container: container.current,
-            center: [-118.277, 33.74],
+            center: [
+              (props.dataset.bounds[0] + props.dataset.bounds[2]) / 2,
+              (props.dataset.bounds[1] + props.dataset.bounds[3]) / 2,
+            ],
             zoom: 12,
+            cooperativeGestures: true,
             attributionControl: { compact: true },
             style: {
               version: 8,
@@ -120,11 +145,11 @@ export default function HarborMap(props: Props) {
               [props.dataset.bounds[0], props.dataset.bounds[1]],
               [props.dataset.bounds[2], props.dataset.bounds[3]],
             ],
-            { padding: 28, duration: 0 },
+            { padding: { top: 60, right: 28, bottom: 84, left: 52 }, duration: 0 },
           );
-          instance.on("error", () => {
+          instance.on("error", (event) => {
             if (cancelled || map.current !== instance) return;
-            setFailed(true);
+            setFailure("sourceId" in event && event.sourceId === "osm" ? "tiles" : "renderer");
             setRenderer("vector");
             map.current = null;
             instance.remove();
@@ -210,13 +235,15 @@ export default function HarborMap(props: Props) {
             setRenderer("tiles");
           });
         } catch {
-          setFailed(true);
+          map.current?.remove();
+          map.current = null;
+          setFailure("renderer");
           setRenderer("vector");
         }
       })
       .catch(() => {
         if (!cancelled) {
-          setFailed(true);
+          setFailure("renderer");
           setRenderer("vector");
         }
       });
@@ -259,49 +286,27 @@ export default function HarborMap(props: Props) {
   }, [props, renderer]);
 
   return (
+    <div className="map-shell">
     <div className="map-stage" aria-label="Vessel map">
       <div
         ref={container}
         className="tile-map"
         style={{ visibility: renderer === "tiles" ? "visible" : "hidden" }}
       />
-      {renderer !== "tiles" && <VectorMap {...props} />}
-      <div className="map-caption">
+      {renderer !== "tiles" && <VectorMap {...props} viewport={viewport} />}
+      <div className="map-caption" role="status">
         <span className="map-north">↑ N</span>
         <span>
           {renderer === "tiles"
             ? props.dataset.port_name
-            : failed
-              ? "Basemap unavailable · local geometry active"
-              : "Local map · polygons + observations"}
+            : failure === "tiles"
+              ? "Basemap tiles unavailable · local geometry active"
+              : failure === "renderer"
+                ? "Map renderer unavailable · local geometry active"
+                : renderer === "loading"
+                  ? "Loading basemap · local geometry active"
+                  : "Basemap off · local geometry active"}
         </span>
-      </div>
-      <div className="map-legend">
-        <span>
-          <i className="legend-point" />
-          Fresh observation
-        </span>
-        <span>
-          <i className="legend-point stale-dot" />
-          {props.stale ? "Stale observation" : "Stale points hidden"}
-        </span>
-        <span>
-          Gaps &gt;{" "}
-          {Math.round((props.frame?.max_trail_gap_seconds || 900) / 60)}m break
-          trails
-        </span>
-      </div>
-      <div className="map-credit">
-        AIS: NOAA OCM / AISStream · Zones: PortWatch approximations
-        {renderer === "tiles" && (
-          <>
-            {" "}
-            ·{" "}
-            <a href="https://www.openstreetmap.org/copyright">
-              © OpenStreetMap contributors
-            </a>
-          </>
-        )}
       </div>
       {props.frame && props.frame.vessels.length === 0 && (
         <div className="map-empty">
@@ -330,10 +335,41 @@ export default function HarborMap(props: Props) {
           </div>
         )}
     </div>
+    <div className="map-footer">
+      <div className="map-legend">
+        <span>
+          <i className="legend-point" />
+          Fresh observation
+        </span>
+        <span>
+          <i className="legend-point stale-dot" />
+          {props.stale ? "Stale observation" : "Stale points hidden"}
+        </span>
+        <span>
+          Gaps &gt;{" "}
+          {Math.round((props.frame?.max_trail_gap_seconds || 900) / 60)}m break
+          trails
+        </span>
+      </div>
+      <div className="map-credit">
+        AIS: NOAA OCM / AISStream · Zones: PortWatch approximations
+        {renderer === "tiles" && (
+          <>
+            {" "}
+            ·{" "}
+            <a href="https://www.openstreetmap.org/copyright">
+              © OpenStreetMap contributors
+            </a>
+          </>
+        )}
+      </div>
+    </div>
+    </div>
   );
 }
 
-function VectorMap(props: Props) {
+function VectorMap(props: Props & { viewport: { width: number; height: number } }) {
+  const { width, height } = props.viewport;
   const [west, south, east, north] = props.dataset.bounds;
   const merc = (lat: number) =>
     Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
@@ -341,10 +377,14 @@ function VectorMap(props: Props) {
     e = (east * Math.PI) / 180;
   const s = merc(south),
     n = merc(north);
-  const scale = Math.min(640 / (e - w), 330 / (n - s));
+  const top = 64, bottom = 24, side = 24;
+  const scale = Math.min(
+    Math.max(1, width - side * 2) / (e - w),
+    Math.max(1, height - top - bottom) / (n - s),
+  );
   const project = (lon: number, lat: number) => [
-    360 + ((lon * Math.PI) / 180 - (w + e) / 2) * scale,
-    220 - (merc(lat) - (s + n) / 2) * scale,
+    width / 2 + ((lon * Math.PI) / 180 - (w + e) / 2) * scale,
+    top + (height - top - bottom) / 2 - (merc(lat) - (s + n) / 2) * scale,
   ];
   const path = (zone: Zone) => {
     const polys =
@@ -366,12 +406,12 @@ function VectorMap(props: Props) {
       .join(" ");
   };
   const vessels = (props.frame?.vessels || []).filter(
-    (v) => v.longitude !== null && (props.stale || !v.stale),
+    (v) => hasPosition(v) && (props.stale || !v.stale),
   );
   return (
     <svg
       className="vector-map"
-      viewBox="0 0 720 440"
+      viewBox={`0 0 ${width} ${height}`}
       role="img"
       aria-label="Local geographic map of actual observations and approximate zones"
     >
@@ -391,8 +431,8 @@ function VectorMap(props: Props) {
         </pattern>
       </defs>
       <rect
-        width="720"
-        height="440"
+        width={width}
+        height={height}
         fill="url(#map-grid)"
         className="map-grid"
       />
@@ -436,7 +476,7 @@ function VectorMap(props: Props) {
           </circle>
         );
       })}
-      <text x="24" y="65" className="coordinate-label">
+      <text x="24" y={height - 10} className="coordinate-label">
         Local Mercator projection · observed paths only
       </text>
     </svg>

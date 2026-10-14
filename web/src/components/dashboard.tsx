@@ -209,6 +209,10 @@ export default function Dashboard() {
   }
   const labelZone = zone === "UTC" ? "UTC" : "Pacific";
   const list = (shown?.vessels || []).filter((v) => `${v.mmsi} ${v.reported_profile?.name || ""}`.toLowerCase().includes(search.toLowerCase()));
+  const plotted = shown?.vessels.filter(v =>
+    typeof v.longitude === "number" && Number.isFinite(v.longitude)
+    && typeof v.latitude === "number" && Number.isFinite(v.latitude)
+    && (showStale || !v.stale)).length;
 
   return (
     <main className="workspace">
@@ -256,16 +260,19 @@ export default function Dashboard() {
         </div>
       )}
 
-      {!catalogError && !catalogLoading && !dataset && datasets.length > 0 && (
+      {!catalogError && !catalogLoading && !dataset && (
         <div className="unavailable" role="status">
-          <strong>This source is unavailable.</strong>
+          <strong>{datasets.length ? "This source is unavailable." : "No datasets are available for this port."}</strong>
           <p>
             {text(
-              datasets.find((d) => d.mode === mode)?.reason ||
+              datasets.find((d) => d.port_id === port && d.mode === mode)?.reason ||
                 "No prepared data is available",
             )}
-            . Switch to historical replay to explore the saved day.
+            . {mode === "live" && datasets.some(d => d.port_id === port && d.mode === "historical" && d.available)
+              ? "Switch to historical replay to explore the saved day."
+              : "Retry the saved dataset catalog. Collection runs independently."}
           </p>
+          <button onClick={loadCatalog}>Retry datasets</button>
         </div>
       )}
 
@@ -357,8 +364,9 @@ export default function Dashboard() {
             <aside className="vessel-inspector" aria-label="Vessel inspector">
               <div className="panel-heading">
                 <h2>Vessel inspector</h2>
-                <span>{shown?.metrics.seen_vessels ?? "—"} observed</span>
+                <span>{shown?.metrics.seen_vessels ?? "—"} total observed · {plotted ?? "—"} plotted</span>
               </div>
+              <p className="inspector-scope">{showStale ? "Map includes fresh and stale reports." : "Map shows fresh reports; list includes saved stale reports."}</p>
               {vessel ? (
                 <VesselDetails
                   vessel={vessel}
@@ -635,7 +643,7 @@ export default function Dashboard() {
         </>
       )}
 
-      {!dataset && !catalogError && (catalogLoading || !datasets.length) && (
+      {!dataset && !catalogError && catalogLoading && (
         <div className="initial-loading" role="status">
           <div className="loading-skeleton" />
           <p>Reading the selected port dataset…</p>
