@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import AppHeader from "@/components/app-header";
 import PipelineDiagram from "@/components/pipeline-diagram";
 import HistoryResults from "@/components/history-results";
 import { startVisiblePolling } from "@/lib/visible-polling";
+import { PORT_OPTIONS, portName, useViewScope } from "@/lib/view-scope";
+import { scopeHref } from "@/lib/view-state";
 
 type Series = {
   status: string;
@@ -32,6 +36,7 @@ const count = (value: number | null | undefined) => value == null ? "Unknown" : 
 const date = (value?: string) => value ? new Date(value).toLocaleString("en-GB", { timeZone: "UTC" }) + " UTC" : "Not recorded";
 
 export default function PipelineView() {
+  const { scope, updateScope } = useViewScope();
   const [report, setReport] = useState<Report | null>(null);
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
@@ -44,23 +49,33 @@ export default function PipelineView() {
       onData: (data) => { setReport(data); setError(false); },
       onError: () => setError(true),
   }), [retry]);
+  const availablePorts = report
+    ? PORT_OPTIONS.filter(option => report.ports.some(port => port.port_id === option.port_id))
+    : PORT_OPTIONS;
+  const selectedPorts = report?.ports.filter(port => port.port_id === scope.port) ?? [];
+  const preparedMode = report?.ports.some(port => port.overall === "prepared_snapshot") ?? false;
+  const mapScope = { ...scope, mode: preparedMode ? "historical" as const : scope.mode };
+  useEffect(() => {
+    if (preparedMode && scope.mode === "live") updateScope({ mode: "historical" }, true);
+  }, [preparedMode, scope.mode, updateScope]);
 
   return <main className="workspace pipeline-workspace">
-    <header className="app-header">
-      <a className="brand" href="/">PortWatch</a>
-      <nav className="header-right" aria-label="Main navigation"><a href="/">Vessel map</a><a href="/pipeline" aria-current="page">Data pipeline</a></nav>
-    </header>
+    <AppHeader page="pipeline" scope={mapScope} onPortChange={port => updateScope({ port })} ports={availablePorts} />
     <section className="pipeline-intro">
-      <h1>From a received report to a point on the map.</h1>
-      <p>Inspect the collection, validation and analytical work behind PortWatch. These are current operational measurements, separate from the historical replay.</p>
-      <p className="panel-note">Refreshes every 30 seconds. Live coverage depends on received AIS reports; gaps never establish that the sea is empty.</p>
+      <h1>Maritime data engineering.</h1>
+      <p>Python validates source evidence. PostGIS builds port analytics; Prefect schedules processing. dbt records the frozen seven-day Los Angeles history.</p>
+      <p className="panel-note">Map view: {portName(scope.port)} · {mapScope.mode === "historical" ? "Historical" : "Live"}. Operational evidence below reflects current saved measurements. Seven-day history remains a fixed Los Angeles artifact.</p>
+      {preparedMode
+        ? <p className="panel-note">Historical snapshot session. Current collection measurements are unavailable.</p>
+        : <p className="panel-note">Refreshes every 30 seconds while visible. Live coverage depends on received AIS reports; gaps remain unknown.</p>}
     </section>
     <PipelineDiagram />
     <HistoryResults />
     {error && <div role="alert" className="query-error">Pipeline status is disconnected. {report && "The last received results below are stale."} <button onClick={() => setRetry(v => v + 1)}>Retry pipeline</button></div>}
     {!report && !error && <p role="status">Reading pipeline measurements…</p>}
     {report && <>
-      {report.ports.map(port => <section className="pipeline-section" key={port.port_id} aria-label={`${port.name} pipeline`}>
+      {!selectedPorts.length && <p role="status">Operational measurements for {portName(scope.port)} are unavailable in this session. Choose an available port above.</p>}
+      {selectedPorts.map(port => <section className="pipeline-section" key={port.port_id} aria-label={`${port.name} pipeline`}>
         <div className="panel-heading"><h2>{port.name}</h2><span>{words(port.overall)}</span></div>
         <p>Collector: <strong>{words(port.collector.status)}</strong> · Last AIS report received: {date(port.collector.last_observed_ais_message_utc)}</p>
         <p className="panel-note">Context sources: {port.context ? Object.entries(port.context).map(([kind, state]) => `${words(kind)}: ${words(state.status)}${state.last_http_status ? ` (HTTP ${state.last_http_status})` : ""}`).join(" · ") : "Not connected"}.</p>
@@ -82,8 +97,8 @@ export default function PipelineView() {
         <p className="panel-note">Counts belong to each workflow’s stage and may use different units. Checked {date(port.checked_at_utc)}.</p>
         {port.operations?.backups.length ? <p className="panel-note">Database backups: {port.operations.backups.map(backup => `${backup.database}: ${words(backup.status)}${backup.created_at_utc ? ` (${date(backup.created_at_utc)})` : ""}`).join(" · ")}. Two compressed copies are kept on the second Railway volume.</p> : null}
       </section>)}
-      <section className="pipeline-section"><h2>Evidence behind the result</h2><p>Raw batches have SHA-256 checksums. Clean records retain their source batch and record offset. Spatial assignments carry port and geofence versions; visits and hourly marts record their inference rules and workflow lineage.</p><p>Vessel properties and destinations are reported AIS data. Waiting candidates and visits are experimental inferences, and approximate zones are not official port boundaries.</p><a href={`${report.repository}/tree/main/docs`} target="_blank" rel="noreferrer">Explore the engineering documentation</a></section>
+      <section className="pipeline-section"><h2>Evidence behind the result</h2><p>Raw batches have SHA-256 checksums. Clean records retain their source batch and record offset. Spatial assignments carry port and geofence versions; visits and hourly marts record their inference rules and workflow lineage.</p><p>Vessel properties and destinations are reported AIS data. Waiting candidates and visits are experimental inferences, and approximate zones are not official port boundaries.</p></section>
     </>}
-    <footer className="app-footer">PortWatch · Public read-only pipeline view · <a href="/">Return to the vessel map</a></footer>
+    <footer className="app-footer">PortWatch · Public read-only pipeline view · <Link href={scopeHref("/", mapScope)} prefetch={false}>Return to the vessel map</Link></footer>
   </main>;
 }

@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import HarborMap from "./harbor-map";
 import NewsPanel from "./news-panel";
+import AppHeader from "./app-header";
+import Link from "next/link";
+import { useViewScope } from "@/lib/view-scope";
 import type { Dataset, Frame, Health, Mode, Vessel } from "@/lib/types";
 import { startVisiblePolling } from "@/lib/visible-polling";
 
@@ -65,12 +68,13 @@ async function query<T>(path: string, signal?: AbortSignal): Promise<T> {
 }
 
 export default function Dashboard() {
+  const { scope, updateScope, href } = useViewScope();
   const [datasets, setDatasets] = useState<Dataset[]>([]);
-  const [mode, setMode] = useState<Mode>("live");
-  const [port, setPort] = useState("los_angeles");
+  const port = scope.port;
   const [ports, setPorts] = useState<{ port_id: string; name: string }[]>([]);
   const [preparedMode, setPreparedMode] = useState(false);
-  const [minute, setMinute] = useState(750);
+  const mode = preparedMode ? "historical" : scope.mode;
+  const minute = scope.minute;
   const [zone, setZone] = useState("UTC");
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
@@ -86,12 +90,13 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(true);
   const [catalogError, setCatalogError] = useState<string | null>(null);
+  const [catalogLoading, setCatalogLoading] = useState(true);
   const [catalogRetry, setCatalogRetry] = useState(0);
   const [tick, setTick] = useState(0);
   const [healthError, setHealthError] = useState(false);
   const busyRef = useRef(busy);
   busyRef.current = busy;
-  const dataset = datasets.find((d) => d.mode === mode && d.available);
+  const dataset = datasets.find((d) => d.port_id === port && d.mode === mode && d.available);
   const cutoff = dataset
     ? new Date(
         new Date(dataset.start_utc).getTime() + minute * 60000,
@@ -114,24 +119,38 @@ export default function Dashboard() {
   useEffect(() => {
     const stop = startVisiblePolling({
       intervalMs: null,
-      onStart: () => setCatalogError(null),
+      onStart: () => { setCatalogError(null); setCatalogLoading(true); },
       load: (signal) => query<{ datasets: Dataset[]; ports: { port_id: string; name: string }[]; prepared_mode: boolean }>(`catalog?port=${port}`, signal),
       onData: (data) => {
+        setCatalogLoading(false);
         setDatasets(data.datasets); setPorts(data.ports); setPreparedMode(data.prepared_mode);
         if (data.prepared_mode) {
-          setMode("historical");
-          if (data.ports[0] && !data.ports.some(item => item.port_id === port)) setPort(data.ports[0].port_id);
+          const first = data.ports[0]?.port_id;
+          updateScope({
+            mode: "historical",
+            port: !data.ports.some(item => item.port_id === port)
+              && (first === "los_angeles" || first === "oakland") ? first : port,
+          }, true);
         }
         // A successful catalog is one-shot; revision changes and retries reload it.
         stop();
       },
       onError: (failure) => {
+        setCatalogLoading(false);
         setCatalogError(failure instanceof Error ? failure.message : "prepared_data_unavailable");
         setBusy(false);
       },
     });
     return stop;
-  }, [port, catalogRetry]);
+  }, [port, catalogRetry, updateScope]);
+  useEffect(() => {
+    setPlaying(false); setSelected(null); setFrame(null); setHealth(null);
+    setSearch(""); setError(null);
+  }, [port]);
+  useEffect(() => {
+    setPlaying(false); setSelected(null); setError(null);
+    if (preparedMode && scope.mode === "live") updateScope({ mode: "historical" }, true);
+  }, [mode, preparedMode, scope.mode, updateScope]);
   useEffect(() => {
     if (!dataset) {
       setFrame(null);
@@ -173,87 +192,49 @@ export default function Dashboard() {
     if (!playing || mode !== "historical") return;
     const timer = setInterval(() => {
       if (document.visibilityState === "visible" && !busyRef.current)
-        setMinute((previous) => Math.min(1440, previous + 5 * speed));
+        updateScope(current => ({ minute: Math.min(1440, current.minute + 5 * speed) }), true);
     }, 1200);
     return () => clearInterval(timer);
-  }, [playing, speed, mode]);
+  }, [playing, speed, mode, updateScope]);
   useEffect(() => {
     if (minute >= 1440) setPlaying(false);
   }, [minute]);
   function switchMode(next: Mode) {
+    if (next === mode || (next === "live" && preparedMode)) return;
     setPlaying(false);
     setSelected(null);
     setFrame(null);
     setError(null);
-    setMode(next);
+    updateScope({ mode: next });
   }
   const labelZone = zone === "UTC" ? "UTC" : "Pacific";
   const list = (shown?.vessels || []).filter((v) => `${v.mmsi} ${v.reported_profile?.name || ""}`.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <main className="workspace">
-      <header className="app-header">
-        <a className="brand" href="/" aria-label="PortWatch home">
-          <span className="brand-symbol" aria-hidden="true">
-            ↗
-          </span>
-          PortWatch
-        </a>
-        <span className="header-divider" />
-        <div className="port-label">
-          <label className="port-picker">Port
-            <select aria-label="Select port" value={port} onChange={(e) => {
-              setPlaying(false); setSelected(null); setFrame(null); setDatasets([]);
-              setHealth(null); setSearch(""); setPort(e.target.value);
-            }}>
-              {(ports.length ? ports : [{port_id: "los_angeles", name: "Port of Los Angeles"}]).map((p) => <option key={p.port_id} value={p.port_id}>{p.name}</option>)}
-            </select></label>
-          <span>Port observation &amp; replay</span>
-        </div>
-        <div className="header-right">
-          <span
-            className={`status-dot ${health?.overall === "ok" ? "ok" : "warning"}`}
-          />
-          <span>
-            {healthError
-              ? "Health disconnected"
-              : health
-                ? `Pipeline ${text(health.overall)}`
-                : "Checking pipeline"}
-          </span>
-          <a href="/pipeline" className="subtle-link">Data pipeline</a>
-          <a href="#pipeline-health" className="subtle-link">
-            View health ↓
-          </a>
-        </div>
-        <a href="/pipeline" className="compact-pipeline-link">Data pipeline</a>
-      </header>
+      <AppHeader page="map" scope={{ ...scope, mode }} onPortChange={next => updateScope({ port: next })}
+        ports={ports.length ? ports : undefined} />
 
       <section className="intro-row" aria-label="Dataset selection">
         <div>
-          <h1>The harbor, as observed.</h1>
+          <h1>PortWatch — maritime data engineering demo</h1>
+          <p className="purpose-description">Trace vessel reports from ingestion and validation to PostGIS analytics, historical replay and the map.</p>
+          <p className="purpose-stack">Python · PostGIS · Prefect · dbt for the frozen Los Angeles history</p>
+          <Link className="purpose-link" href={href("/pipeline")} prefetch={false}>Explore the data pipeline</Link>
+        </div>
+        <div className="mode-controls">
+          <span className="control-label">Data mode</span>
+          <div className="segmented" role="group" aria-label="Data mode">
+            <button aria-pressed={mode === "historical"} onClick={() => switchMode("historical")}>Historical replay</button>
+            <button aria-pressed={mode === "live"} disabled={preparedMode}
+              aria-describedby={preparedMode ? "prepared-mode-note" : undefined}
+              onClick={() => switchMode("live")}>Live</button>
+          </div>
           <p>
             {mode === "historical"
               ? "Jan 1 → Jan 2, 2024 UTC · saved NOAA OCM AIS · event-time replay"
               : "Live AISStream collection · received positions refresh every 30 seconds"}
           </p>
-        </div>
-        <div className="segmented" role="group" aria-label="Data mode">
-          <button
-            aria-pressed={mode === "historical"}
-            onClick={() => switchMode("historical")}
-          >
-            Historical replay
-          </button>
-          <button
-            aria-pressed={mode === "live"}
-            disabled={preparedMode}
-            aria-describedby={preparedMode ? "prepared-mode-note" : undefined}
-            onClick={() => switchMode("live")}
-          >
-            <span className="small-dot" />
-            Live
-          </button>
         </div>
       </section>
 
@@ -275,7 +256,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {!catalogError && !dataset && datasets.length > 0 && (
+      {!catalogError && !catalogLoading && !dataset && datasets.length > 0 && (
         <div className="unavailable" role="status">
           <strong>This source is unavailable.</strong>
           <p>
@@ -475,7 +456,7 @@ export default function Dashboard() {
                       className="reset-button"
                       onClick={() => {
                         setPlaying(false);
-                        setMinute(0);
+                        updateScope({ minute: 0 });
                       }}
                     >
                       ↺ Reset
@@ -536,7 +517,7 @@ export default function Dashboard() {
                   value={minute}
                   onChange={(e) => {
                     setPlaying(false);
-                    setMinute(Number(e.target.value));
+                    updateScope({ minute: Number(e.target.value) }, true);
                   }}
                 />
                 <div className="time-ticks">
@@ -654,10 +635,10 @@ export default function Dashboard() {
         </>
       )}
 
-      {!datasets.length && !catalogError && (
+      {!dataset && !catalogError && (catalogLoading || !datasets.length) && (
         <div className="initial-loading" role="status">
           <div className="loading-skeleton" />
-          <p>Reading the prepared harbor dataset…</p>
+          <p>Reading the selected port dataset…</p>
         </div>
       )}
 
