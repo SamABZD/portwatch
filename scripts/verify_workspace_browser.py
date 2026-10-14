@@ -804,7 +804,7 @@ async def verify(args):
                     server.state = "frame_failure"
                     await page.reload()
                     await expect(page.locator(".query-error")).to_contain_text("disconnected")
-                    await expect(page.locator(".metric strong").first).to_have_text("â€”")
+                    await expect(page.locator(".metric strong").first).to_have_text("—")
                     await expect(page.locator(".map-empty")).to_have_count(0)
                     server.state = "normal"
                     await page.get_by_role("button", name="Retry frame").click()

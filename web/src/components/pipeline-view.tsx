@@ -61,6 +61,7 @@ export default function PipelineView() {
 
   return <main className="workspace pipeline-workspace">
     <AppHeader page="pipeline" scope={mapScope} onPortChange={port => updateScope({ port })} ports={availablePorts} />
+    <div className="pipeline-content">
     <section className="pipeline-intro">
       <h1>Maritime data engineering.</h1>
       <p>Python validates source evidence. PostGIS builds port analytics; Prefect schedules processing. dbt records the frozen seven-day Los Angeles history.</p>
@@ -109,5 +110,6 @@ export default function PipelineView() {
       <p className="panel-note">The continuous collectors run independently of page visits. Current source health and saved backups do not guarantee complete coverage or protection from loss of the hosting provider.</p>
     </section>
     <footer className="app-footer">PortWatch · Public read-only pipeline view · <Link href={scopeHref("/", mapScope)} prefetch={false}>Return to the vessel map</Link></footer>
+    </div>
   </main>;
 }

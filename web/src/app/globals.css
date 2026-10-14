@@ -16,7 +16,7 @@
 .port-picker select { width: 228px; min-height: 44px; padding-right: 36px; font-weight: 400; }
 .reported-profile { border-top: 1px solid var(--line); padding: 12px 0; }
 .reported-profile summary { font-weight: 600; padding: 6px 0; }
-.workspace.pipeline-workspace { max-width: 1280px; }
+.pipeline-content { max-width: 1216px; margin-inline: auto; }
 .pipeline-intro { padding: 24px 0; max-width: 74ch; }
 .pipeline-intro h1 { font-size: 32px; line-height: 1.2; text-wrap: balance; }
 .pipeline-section { padding: 28px 0; border-top: 1px solid var(--line); }
