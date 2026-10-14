@@ -519,7 +519,21 @@
       "Local --all reachable refs audited; dangling/unreachable objects and external forks/caches not inspected.",
       "Known local secret matches cannot detect unknown/rotated secret without recognizable pattern.",
       "Only eight bounded current public API responses, not every past response."
-    ]
+    ],
+    "post_commit_confirmation": {
+      "checked_commit": "9d8d9956f456621c2260ec578558e85fd7929b83",
+      "reachable_commits": 51,
+      "tracked_files": 237,
+      "unique_reachable_blobs": 636,
+      "reachable_blob_bytes": 11287816,
+      "result": "passed_with_recorded_nonsecret_history",
+      "known_private_secret_matches": 0,
+      "unresolved_candidates": 0,
+      "forbidden_tracked_paths": 0,
+      "large_reachable_blobs_over_1mb": 0,
+      "history_preserved": true,
+      "scope": "After presentation commit9d8d995; includes committed README, screenshots, reports and verifier; next change contains this audit metadata only"
+    }
   },
   "presentation": {
     "reference": "SamABZD/flux README hierarchy; PortWatch-specific claims and license status",
