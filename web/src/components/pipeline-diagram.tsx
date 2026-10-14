@@ -119,7 +119,7 @@ export default function PipelineDiagram() {
       <figcaption><span className="architecture-key"><i />Saved data dependencies</span><span className="architecture-key"><i className="dashed" />Finite scheduling, separate from collection</span><span>Every source retains its own identity.</span></figcaption>
     </figure>
     <div id="architecture-details" className="architecture-details" role="region" aria-label="Component details" aria-live="polite" aria-atomic="true">
-      <div><h3>{selected.name} · {selected.role}</h3><p>{selected.description}</p></div><div className="architecture-source-link"><a href={`https://github.com/SamABZD/portwatch/blob/main/${selected.path}`} target="_blank" rel="noreferrer">Read the {selected.name} implementation</a><span>Repository access required.</span></div>
+      <div><h3>{selected.name} · {selected.role}</h3><p>{selected.description}</p></div><div className="architecture-source-link"><a href={`https://github.com/SamABZD/portwatch/blob/main/${selected.path}`} target="_blank" rel="noreferrer">Read the {selected.name} implementation</a><span>Public source on GitHub.</span></div>
     </div>
   </section>;
 }

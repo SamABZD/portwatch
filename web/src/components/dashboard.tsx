@@ -224,7 +224,10 @@ export default function Dashboard() {
           <h1>PortWatch — maritime data engineering demo</h1>
           <p className="purpose-description">Trace vessel reports from ingestion and validation to PostGIS analytics, historical replay and the map.</p>
           <p className="purpose-stack">Python · PostGIS · Prefect · dbt for the frozen Los Angeles history</p>
-          <Link className="purpose-link" href={href("/pipeline")} prefetch={false}>Explore the data pipeline</Link>
+          <div className="purpose-actions">
+            <Link className="purpose-link" href={href("/pipeline")} prefetch={false}>Explore the data pipeline</Link>
+            <a className="purpose-source-link" href="https://github.com/SamABZD/portwatch" target="_blank" rel="noreferrer">View source</a>
+          </div>
         </div>
         <div className="mode-controls">
           <span className="control-label">Data mode</span>
