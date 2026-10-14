@@ -154,4 +154,8 @@ incur a small amount of existing metered usage; they are not advertised as free.
 inspect Vercel's actual plan/usage/controls, compare the same measurement window and traffic basis,
 and account for rollout runtime/storage/egress. A comparable positive delta blocks rollout.
 No paid integration, account change, extra port, historical backfill, dbt schedule or CI enablement
-was added. Phase 2 has not started.
+was added. Completion Phase 2 subsequently changed only local news code/configuration and
+verification: unchanged hourly acquisition, one HTTP attempt per provider, at most primary plus
+official fallback, no extra official call after a valid-empty primary. It added no paid resource,
+dependency or schema. Broader seven-day results and shared selection queries have no measured
+hosted cost delta yet; these release gates still apply. No push or deployment occurred.

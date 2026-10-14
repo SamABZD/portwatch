@@ -1,0 +1,402 @@
+{
+  "phase": 2,
+  "tested_code_commit": "9e6c6bf",
+  "branch": "feat/phase1-cost-controls",
+  "status": "completed_locally_not_deployed",
+  "verified_at_utc": "2026-10-14T05:19:25.311099+00:00",
+  "scope": "news acquisition, normalization, selection, source state, read-only API and existing panel",
+  "trace": [
+    "port configuration",
+    "plan_context",
+    "scheduled news_flow/run_context",
+    "ingest_context",
+    "immutable raw/normalization",
+    "context tables/news_mentions",
+    "shared news resolver",
+    "replay/frame/health",
+    "Next.js proxy",
+    "NewsPanel"
+  ],
+  "ports": [
+    {
+      "port": "los_angeles",
+      "configured_primary_query": "(\"Port of Los Angeles\" OR \"Los Angeles Harbor\")",
+      "window_hours": 168,
+      "max_records": 100,
+      "baseline": {
+        "provider": "port_los_angeles_releases",
+        "data_status": "valid_empty",
+        "http_status": 200,
+        "window_start_utc": "2026-10-12T20:00:00+00:00",
+        "window_end_utc": "2026-10-13T20:00:00+00:00",
+        "stored_rows": 0,
+        "frame_rows": 0,
+        "frame_and_health_batch_match": true,
+        "raw_bytes_and_parser_counts": "not exposed by deployed health; unavailable from cloud SQL"
+      },
+      "official_saved_response_replay": {
+        "kind": "isolated_schema_replay_of_recorded_real_official_response",
+        "source": "port_los_angeles_releases",
+        "source_url": "https://portoflosangeles.org/news/news-release-archive",
+        "receipt_utc": "2026-10-13T20:47:21.031006+00:00",
+        "http_status": 200,
+        "format": "official HTML release archive",
+        "bytes": 312946,
+        "sha256": "3969ddc07b56c8a07d9cfea757d202ce89cbe88b93e19aefc7f4dd0757a6b173",
+        "window_start_utc": "2026-10-06T20:45:00+00:00",
+        "window_end_utc": "2026-10-13T20:45:00+00:00",
+        "quality": {
+          "label": "official Port of Los Angeles releases",
+          "format": "official HTML release archive",
+          "coverage": "official authority releases only; not a broad disruption-news search",
+          "truncated": false,
+          "exhaustive": false,
+          "unknown_count": 1,
+          "duplicate_urls": 0,
+          "outside_window": 635,
+          "response_bytes": 312946,
+          "excluded_by_date": 635,
+          "window_semantics": "publication calendar day overlaps request; exact publication time unknown",
+          "parsed_item_count": 637,
+          "stored_item_count": 1,
+          "archive_dated_rows": 636,
+          "deduplicated_count": 1,
+          "unknown_date_count": 1,
+          "eligible_item_count": 1,
+          "provider_cap_reached": false,
+          "date_coverage_complete": false,
+          "provider_article_count": 637,
+          "unknown_publication_rows": 1
+        },
+        "saved_batch_id": "2c6ade3559f40a0aa531541e6133e68100856b7fe0ca9b4ffc37ca7553c55a20",
+        "stored_and_selected_batch_match": true,
+        "normalized_rows": 1,
+        "stored_rows": 1,
+        "selected_rows": 1,
+        "browser_rendered_rows": 1,
+        "source_health_matches_selection": true,
+        "receipt_preserved": true,
+        "primary_evidence": "recorded HTTP429 replay; exact failed receipt unavailable",
+        "upstream_calls_during_replay": 0
+      }
+    },
+    {
+      "port": "oakland",
+      "configured_primary_query": "\"Port of Oakland\"",
+      "window_hours": 168,
+      "max_records": 100,
+      "baseline": {
+        "provider": "gdelt_doc_v2",
+        "data_status": "valid_empty",
+        "http_status": 200,
+        "window_start_utc": "2026-10-12T20:15:00+00:00",
+        "window_end_utc": "2026-10-13T20:15:00+00:00",
+        "stored_rows": 0,
+        "frame_rows": 0,
+        "frame_and_health_batch_match": true,
+        "raw_bytes_and_parser_counts": "not exposed by deployed health; unavailable from cloud SQL"
+      },
+      "official_saved_response_replay": {
+        "kind": "isolated_schema_replay_of_recorded_real_official_response",
+        "source": "port_oakland_rss",
+        "source_url": "https://www.portofoakland.com/feed/",
+        "receipt_utc": "2026-10-13T20:47:24.260159+00:00",
+        "http_status": 200,
+        "format": "RSS 2.0",
+        "bytes": 100729,
+        "sha256": "5f06f97957882af1a836fe4a91205a5d6d97b3616dd10ace0edc6bb35d7ff428",
+        "window_start_utc": "2026-10-06T20:45:00+00:00",
+        "window_end_utc": "2026-10-13T20:45:00+00:00",
+        "quality": {
+          "label": "official Port of Oakland releases",
+          "format": "RSS 2.0",
+          "coverage": "official authority feed only; not a broad disruption-news search",
+          "truncated": false,
+          "exhaustive": false,
+          "unknown_count": 0,
+          "duplicate_urls": 0,
+          "outside_window": 9,
+          "response_bytes": 100729,
+          "feed_item_count": 10,
+          "excluded_by_date": 9,
+          "parsed_item_count": 10,
+          "stored_item_count": 1,
+          "deduplicated_count": 1,
+          "unknown_date_count": 0,
+          "eligible_item_count": 1,
+          "provider_cap_reached": false,
+          "date_coverage_complete": true,
+          "provider_article_count": 10,
+          "unknown_publication_items": 0
+        },
+        "saved_batch_id": "3329134b8b76c54ec7dc97c6c610a0c3eb02d27825909c5f172761df0252aa89",
+        "stored_and_selected_batch_match": true,
+        "normalized_rows": 1,
+        "stored_rows": 1,
+        "selected_rows": 1,
+        "browser_rendered_rows": 1,
+        "source_health_matches_selection": true,
+        "receipt_preserved": true,
+        "primary_evidence": "no contemporaneous primary probe; direct official connector evidence",
+        "upstream_calls_during_replay": 0
+      }
+    }
+  ],
+  "bounded_primary_probe": {
+    "port": "los_angeles",
+    "source": "gdelt_doc_v2",
+    "endpoint": "https://api.gdeltproject.org/api/v2/doc/doc",
+    "window_start_utc": "2026-10-06T20:45:00+00:00",
+    "window_end_utc": "2026-10-13T20:45:00+00:00",
+    "parameters": {
+      "query": "(\"Port of Los Angeles\" OR \"Los Angeles Harbor\")",
+      "mode": "artlist",
+      "format": "json",
+      "sort": "datedesc",
+      "maxrecords": 100,
+      "startdatetime": "20261006204500",
+      "enddatetime": "20261013204500"
+    },
+    "attempts": 1,
+    "parsed": false,
+    "error_code": "source_rate_limited",
+    "http_status": 429,
+    "next_allowed_utc": null
+  },
+  "validation": {
+    "targeted_pytest": {
+      "passed": 146,
+      "failed": 0,
+      "seconds": 49.64,
+      "warning": "existing Starlette httpx TestClient deprecation",
+      "command": ".\\.venv\\Scripts\\python.exe -m pytest -q tests/test_context.py tests/test_news_rss.py tests/test_news_archive.py tests/test_news_contract.py tests/test_news_storage.py tests/test_context_storage.py tests/test_replay.py tests/test_replay_storage.py tests/test_health.py tests/test_health_storage.py tests/test_pipeline.py tests/test_pipeline_storage.py",
+      "environment": "PORTWATCH_TEST_DB=1; PORTWATCH_AIS_API_KEY empty; fixture-owned UUID schemas only"
+    },
+    "frontend_typecheck": "npm run typecheck: passed",
+    "frontend_build": "npm run build: passed",
+    "ruff": "check and format --check on changed Python files: passed",
+    "review": "two findings fixed; follow-up No issues",
+    "next_proxy": {
+      "checked_at_utc": "2026-10-14T05:11:27.000831+00:00",
+      "checks": [
+        "los_angeles/frame: exact fixture JSON forwarded, HTTP200/no-store",
+        "los_angeles/health: exact fixture JSON forwarded, HTTP200/no-store",
+        "oakland/frame: exact fixture JSON forwarded, HTTP200/no-store",
+        "oakland/health: exact fixture JSON forwarded, HTTP200/no-store"
+      ],
+      "scope": "real Next.js proxy; loopback recorded fixture backend; no provider calls"
+    },
+    "browser": {
+      "verified": true,
+      "cases": 29,
+      "checks": [
+        {
+          "port": "los_angeles",
+          "case": "recorded_official_news",
+          "rows": 1,
+          "passed": true
+        },
+        {
+          "port": "los_angeles",
+          "case": "available",
+          "rows": 4,
+          "passed": true
+        },
+        {
+          "port": "los_angeles",
+          "case": "valid_empty",
+          "rows": 0,
+          "passed": true
+        },
+        {
+          "port": "los_angeles",
+          "case": "fallback_429",
+          "rows": 4,
+          "passed": true
+        },
+        {
+          "port": "los_angeles",
+          "case": "stale",
+          "rows": 4,
+          "passed": true
+        },
+        {
+          "port": "los_angeles",
+          "case": "deferred_saved",
+          "rows": 4,
+          "passed": true
+        },
+        {
+          "port": "los_angeles",
+          "case": "deferred_no_saved",
+          "rows": 0,
+          "passed": true
+        },
+        {
+          "port": "los_angeles",
+          "case": "unavailable",
+          "rows": 0,
+          "passed": true
+        },
+        {
+          "port": "los_angeles",
+          "case": "primary_parser_200",
+          "rows": 4,
+          "passed": true
+        },
+        {
+          "port": "los_angeles",
+          "case": "frame_independent_of_health",
+          "rows": 4,
+          "passed": true
+        },
+        {
+          "port": "los_angeles",
+          "case": "pacific_date_precision",
+          "passed": true
+        },
+        {
+          "port": "los_angeles",
+          "case": "keyboard_article_link_blocked",
+          "passed": true
+        },
+        {
+          "port": "los_angeles",
+          "case": "desktop_mobile_no_overflow",
+          "passed": true
+        },
+        {
+          "port": "los_angeles",
+          "case": "historical_exclusion_current_context",
+          "passed": true
+        },
+        {
+          "port": "oakland",
+          "case": "recorded_official_news",
+          "rows": 1,
+          "passed": true
+        },
+        {
+          "port": "oakland",
+          "case": "available",
+          "rows": 4,
+          "passed": true
+        },
+        {
+          "port": "oakland",
+          "case": "valid_empty",
+          "rows": 0,
+          "passed": true
+        },
+        {
+          "port": "oakland",
+          "case": "fallback_429",
+          "rows": 4,
+          "passed": true
+        },
+        {
+          "port": "oakland",
+          "case": "stale",
+          "rows": 4,
+          "passed": true
+        },
+        {
+          "port": "oakland",
+          "case": "deferred_saved",
+          "rows": 4,
+          "passed": true
+        },
+        {
+          "port": "oakland",
+          "case": "deferred_no_saved",
+          "rows": 0,
+          "passed": true
+        },
+        {
+          "port": "oakland",
+          "case": "unavailable",
+          "rows": 0,
+          "passed": true
+        },
+        {
+          "port": "oakland",
+          "case": "primary_parser_200",
+          "rows": 4,
+          "passed": true
+        },
+        {
+          "port": "oakland",
+          "case": "frame_independent_of_health",
+          "rows": 4,
+          "passed": true
+        },
+        {
+          "port": "oakland",
+          "case": "pacific_date_precision",
+          "passed": true
+        },
+        {
+          "port": "oakland",
+          "case": "keyboard_article_link_blocked",
+          "passed": true
+        },
+        {
+          "port": "oakland",
+          "case": "desktop_mobile_no_overflow",
+          "passed": true
+        },
+        {
+          "port": "oakland",
+          "case": "historical_exclusion_current_context",
+          "passed": true
+        },
+        {
+          "case": "prepared_historical_no_current_context_button",
+          "passed": true
+        }
+      ],
+      "page_errors": [],
+      "route_errors": [],
+      "provider_requests_sent": 0,
+      "browser_version": "151.0.7922.34",
+      "viewports": [
+        "1365x900",
+        "390x844"
+      ],
+      "screenshots": [
+        "news-desktop.png",
+        "news-mobile.png",
+        "news-oakland-desktop.png",
+        "news-historical.png"
+      ],
+      "scope": "Recorded AIS and official saved articles; TEST ONLY news edge controls"
+    },
+    "corrected_verification_failures": [
+      "LA synthetic date fixtures needed Pacific calendar dates after UTC midnight",
+      "Windows server launch required native path separators",
+      "browser catalog fixture merge needed to preserve availability and zones",
+      "browser actions now avoid artificial same-value select/change events and wait for rendered news"
+    ],
+    "full_release_validation": "deferred to phase 6; not claimed"
+  },
+  "cost_and_operations": {
+    "new_paid_resources": 0,
+    "new_dependencies": 0,
+    "schema_migrations": 0,
+    "hourly_acquisition_cadence_changed": false,
+    "maximum_http_attempts_per_news_invocation": 2,
+    "valid_empty_extra_request": false,
+    "production_data_mutated": false,
+    "local_collectors_started": false,
+    "push_or_deployment": false,
+    "recurring_delta_after_this_phase": "no rollout; expected/measured hosted query and monetary delta unresolved before release; phase1 gates retained"
+  },
+  "limitations": [
+    "No successful proposed-query GDELT feed response: one 429, no retry or second-port probe",
+    "Cloud primary LA failure and raw parser counts hidden by old API; SQL/SSH inaccessible",
+    "Stored official-body evidence is temporary isolated SQL replay; rendering files compose distinct real AIS/news capture times",
+    "Synthetic edge-state/API fixtures are test controlled and never enter analytical storage",
+    "Official releases are incomplete authority coverage; valid-empty primary remains valid empty",
+    "Private raw/live fixtures and screenshots excluded from Git; no deployed contract claim"
+  ]
+}

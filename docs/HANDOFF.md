@@ -2,13 +2,23 @@
 
 ## Current stage state
 
+- PortWatch completion **Phase 2 is complete locally** at code commit `9e6c6bf`, on
+  `feat/phase1-cost-controls`: seven-day port context, bounded format/transport fallback,
+  one news selection/provenance contract for SQL/frame/health, preserved date precision and
+  explicit news panel states. **146 targeted tests**, **29 browser checks**, frontend
+  typecheck/build and four actual Next.js proxy fixture forwards passed. See
+  [CONTEXT](CONTEXT.md), [SOURCE_AUDIT](SOURCE_AUDIT.md) and
+  [phase2-news.json](evidence/phase2-news.json). No push/deployment occurred; Phase 1 cost
+  gates remain. Phase 3 has not started. GDELT verification returned429; official saved
+  responses each contain one eligible article in seven days, with isolated storage/rendering
+  evidence rather than a claim that the cloud now serves this revision.
 - PortWatch completion **Phase 1 is complete locally**: current Railway billing/resource
   baseline inspected, hidden polling and request overlap corrected, genuine prepared replay
   checked, and cost/stop/rollback evidence recorded in [COST_CONTROL](COST_CONTROL.md).
   Tested code commit: `01ac067`, local branch `feat/phase1-cost-controls`.
   No provider setting, deployment, paid resource or account limit changed. Vercel billing
   access and a comparable hosted monetary delta remain explicit release gates; no verified
-  hosted cost reduction is claimed. Phase 2 has not started.
+  hosted cost reduction is claimed. Its release gates still apply to Phase 2.
 - Project: this repository; default branch `main`. Publication PR#3 merged at
   `8fcaa933971f5ce98816d97761a5979e7e2c2560`; first release
   [v0.1.0](https://github.com/SamABZD/portwatch/releases/tag/v0.1.0) points to that exact
@@ -33,6 +43,89 @@
   superseded by the live runtime. No source observations were invented for this extension.
 
 ## Verified commands and observed outcomes
+
+### Completion phase 2: news end to end (2026-10-14 Asia/Beirut)
+
+- Chose completing Phase 2 locally before pushing because deployment/preview cost and billing
+  gates remain unresolved. Continued on the existing branch after `d458c74`; preserved original
+  data and kept local collectors stopped. No new dependency, service, schema migration or
+  provider setting. Changed port news configuration; connector/parser/storage code; pipeline
+  fallback; shared `news.py`; replay/health; `NewsPanel`/dashboard/types; relevant tests and
+  `verify_news_browser.py`. The full config/flow/raw/SQL/API/proxy/panel trace is in
+  [CONTEXT](CONTEXT.md).
+- Saved deployed frame/health snapshots for both ports and both same-origin/backend endpoints,
+  inspected prior attempts and bounded logs, then performed one primary and two official
+  source checks. Exact windows, queries, HTTP/format/byte/count evidence and access limits are
+  in [SOURCE_AUDIT](SOURCE_AUDIT.md). Old 24-hour keyword-filtered LA official/Oakland primary
+  results were valid empty; a successful primary empty response still completes without an
+  extra official request. Broadened named-port context to 168 hours, retained optional title
+  tags and maximum 100 records, and left hourly schedules unchanged. News uses one HTTP attempt
+  per provider, maximum two per eligible invocation; no hot 429 retry. GDELT availability remains
+  limited.
+- Raw HTML/XML remained private and unchanged. Replayed the actual recorded bodies/receipts
+  through `ingest_context`, SQL row selection and the shared health resolver in a temporary
+  owned UUID schema: one article per port; saved/stored/selected batches matched. LA retains
+  Pacific date `2026-10-09` with null publication/first-seen instants; Oakland retains its
+  supplied publication timestamp. Local fixture attempts/cooldowns are explicitly test
+  metadata; Oakland received no contemporaneous GDELT probe. The temporary schema/raw directory
+  was removed. An initial concurrent-test advisory lock prevented capture; retry after tests
+  completed succeeded without bypassing ownership or adding source calls.
+- Added deterministic parser/date/DST/dedup/cap/unknown tests and real isolated PostgreSQL
+  integration for ordering before limit, primary429/fallback/empty, retained receipts,
+  identical-byte refetch revision, saved-raw recovery, scheduler deferral and SQL/API lineage.
+  The actual ingest/fingerprint/load_dataset/FastAPI frame/health path uses fixture-owned
+  synthetic AIS/news; historical frames exclude current news. Review caught two defects:
+  selected-primary failure hidden by later failed fallback, and an incomplete-response error
+  code absent from the allowlist. Both fixed with regressions; follow-up reviewer: **No issues**.
+  Frame dataset metadata also recomputes the same age/state as its top-level news contract.
+- Final targeted command from repository root:
+
+  ```powershell
+  $env:PORTWATCH_TEST_DB='1'
+  $env:PORTWATCH_AIS_API_KEY=''
+  .\.venv\Scripts\python.exe -m pytest -q tests/test_context.py tests/test_news_rss.py tests/test_news_archive.py tests/test_news_contract.py tests/test_news_storage.py tests/test_context_storage.py tests/test_replay.py tests/test_replay_storage.py tests/test_health.py tests/test_health_storage.py tests/test_pipeline.py tests/test_pipeline_storage.py
+  ```
+
+  **146 passed, zero failed, 49.64s**. One existing Starlette/httpx TestClient deprecation warning;
+  no dependency change. A rerun across UTC midnight exposed synthetic LA fixtures using UTC
+  calendar dates; corrected them to Pacific dates. No external network/AIS collection in tests;
+  SQL tests used their own migrated UUID schemas, leaving original analytical data intact.
+- From `web/`, `npm run typecheck` and `npm run build`: **passed**. Build initially caught two
+  Windows text writes introducing non-UTF8 separator bytes; corrected the string encoding.
+  Existing stylesheet/design remains; no navigation/header/map/pipeline redesign in this phase.
+- `python -m scripts.verify_news_browser --help`, then final local production browser command:
+
+  ```powershell
+  .\.venv\Scripts\python.exe -m scripts.verify_news_browser --url http://127.0.0.1:3160 --fixtures C:\Users\samab\.codex\portwatch-phase2-private\browser-fixtures --output artifacts/phase2
+  ```
+
+  Existing `webapp-testing/scripts/with_server.py` supplied the temporary Next.js server. Final
+  result: **29 checks passed**, zero page/fixture-route errors, zero provider calls; both ports,
+  all six states, primary200 parse failure, date-only/first-seen/unknown precision, contradictory
+  health/frame attribution, historical exclusion/current-context button, prepared historical
+  mode, keyboard article links, 1365x900 and 390x844 with no page overflow. External links/tiles
+  were blocked. Initial harness attempts failed due to Windows server paths, dropping catalog
+  availability/geometry and artificial same-value select events; corrected harness and awaited
+  actual rendered readiness. No cosmetic iteration. Existing same-mode/same-value handler
+  behavior is a Phase 3 navigation consideration; these checks exercise changed-value selections.
+- Separately performed four bounded reads through the **actual Next.js proxy** against a
+  loopback fixture backend: frame/health for each port matched complete fixture JSON with200
+  and `Cache-Control: no-store`. Browser fixtures compose recorded genuine AIS values with
+  actual stored official news from a different capture time; they are rendering tests, never
+  deployed-frame proof. Synthetic edge-state headlines carry `TEST ONLY`. Genuine LA desktop/
+  mobile, Oakland desktop and historical exclusion screenshots are in ignored `artifacts/phase2`;
+  visually checked news date/source/state/layout. Old failure captures remain ignored evidence.
+- Ruff `check` and `format --check` on changed Python files: **passed**. `git diff --check`:
+  **passed**. Changed-file scan found zero configured long-secret matches without printing
+  secret values; full reachable-history/public-readiness audit remains assigned to Phase 5.
+  Verification servers on ports 3160/8713 were explicitly stopped after checking process ownership;
+  Windows helper termination alone left child processes. No local collectors started.
+- Private receipts/bodies/API fixtures and capture/proxy scripts remain at
+  `C:\Users\samab\.codex\portwatch-phase2-private`. Sanitized evidence is committed; bulk/raw/live
+  fixtures and screenshots are excluded. No push/deploy, account spending cap, Actions, license,
+  visibility or profile change. Query/monetary delta after rollout remains unresolved; run Phase 6
+  validation once before release, resolve cost gates, deploy backend before dependent frontend,
+  and verify normal scheduled progress. Next assigned work is Phase 3 only when requested.
 
 ### Completion phase 1: cost controls (2026-10-13 Asia/Beirut)
 
