@@ -80,6 +80,41 @@
 
 ## Verified commands and observed outcomes
 
+### Completion phase 6: validated release candidate (2026-10-14 UTC)
+
+- Owner clarified the active "Phase7" goal means the remaining Phase6 release/deployment/profile
+  scope from the completion plan. `84be4c6` is the tested app checkpoint on `feat/phase4-5-polish`.
+  Public visibility is verified; source CTA is enabled and obsolete private-access copy removed.
+- Full `uv run --locked --extra dev python scripts/validate.py`:236 unit +93 integration =329,
+  no skips/failures;131 Ruff formats, wheel/SQL/CLI, eight migrations and zero repeat. Owned
+  temporary schemas/sanitized input paths and no AIS key; provider sockets rejected by tests.
+- Primary `npm ci` hit an existing-process nativeDLL lock. App create_worktree returned
+  "Not a git repository" because the chat root is the parent directory. Created an explicit
+  detached Git worktree in private release evidence; there npm ci/typecheck/build and14 Node
+  tests pass. Repaired primary ignored dependencies from the locked verified install, preserving
+  the identical locked native DLL and existing process. No local preview listener started.
+- One batched HTTPS preview run found1440px header misalignment plus an encoded testdash.
+  Fixed together: shared outer header workspace1540; inner pipeline content1216. One full
+  confirmation at `84be4c6` passes27 navigation +36 workspace =63 browser checks, both ports,
+  both modes/routes, widths390/768/1024/1440, native200% zoom, selection/camera/touch/fallbacks
+  and standalone dbt. Fixtures/raster failures are isolated; no provider request from browserQA.
+- Eleven real existing backend GETs return200: readiness, catalog, two-port health/live/replay,
+  pipeline/history/lineage. Replay62157/52783 positions and99/75 fresh, current news excluded;
+  frozen443296 positions/168hours/11models/36tests, unchanged standalone HTML checksum.
+  Both collectors healthy_connected/processalive; one deployment/replica per service; backupsok.
+  Current LA primary timed out; Oakland primary429. Official fallbacks each save one eligible
+  article in actual168h windows. These are limited authority releases, not broad coverage.
+- Existing-hour Railway CPU/RAM extrapolation32.98185/month versus old29.07087 is an unmatched
+  traffic/retained-data/sampling comparison, not frontend causal delta or savings. Frontend-only
+  recurring forecast0 assumes same traffic/backend workload: no backend/schema/source schedule,
+  fetch endpoint/subscriber or paid resource added. Actual hosted money delta remains unavailable.
+  Vercel activeHobby confirmed; cost-data command unavailable. Keep raw financial responses private.
+- Saved previous frontend `b6e4009`/READY production and current backend configuration/rollback.
+  No backend deployment or live restart required for UI changes. Actions stay disabled; original
+  release tag stays unchanged. Final screenshots are genuine historical/tilesoff, copied unchanged
+  with exact source SHA/hash manifest. Current [release evidence](evidence/phase6-release.json)
+  records validation/limits. Production merge/rollout and profile publication still pending.
+
 ### Completion phase 4: map and pipeline refinement (2026-10-14 UTC)
 
 - Source `4b6a185` refines both-port map sizing/fallbacks, plotted-versus-saved scope,

@@ -176,7 +176,9 @@ The separately frozen **seven-day Los Angeles** result contains **443,296 positi
 
 Current frontend validation passes `npm run typecheck`, `npm run build`, and **14 Node tests** for URL state and visible polling. [Phase 4 workspace evidence](docs/evidence/phase4-workspace.json) records current browser checks and limits; [Phase 5 readiness](docs/evidence/phase5-public-readiness.json) records reproduction and exposure review. The earlier full Python validator passed **329 tests** in Phase 3; backend code is unchanged in phases 4–5. [Dated evidence archive](docs/evidence/README.md) keeps previous counts separate.
 
-The full release validator belongs to Phase 6:
+The current Phase 6 candidate passes the full validator (**236 unit + 93 integration = 329 tests**), frontend checks and **63 browser checks**, including native 200% zoom. [Release evidence](docs/evidence/phase6-release.json) records genuine hosted API checks and fixture scope; [validator transcript](docs/evidence/phase6-validation.txt) records exact outcomes. Production/profile publication is pending until recorded below.
+
+To repeat release validation:
 
 ```sh
 uv run --locked --extra dev python scripts/validate.py

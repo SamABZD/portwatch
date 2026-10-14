@@ -2,6 +2,10 @@
 
 ## Current completion phases
 
+- [Phase 6 release](phase6-release.json) and [validator transcript](phase6-validation.txt):
+  329 current Python tests,14 Node tests,63 browser checks, actual hosted API contracts and
+  scoped cost/rollback evidence. Production/profile status is recorded only after verification.
+
 - [Phase 4 workspace](phase4-workspace.json): current frontend build/typecheck,14 Node tests
   and37 recorded browser checks, including preserved unchanged-code checks and narrow follow-ups.
 - [Phase 5 public readiness](phase5-public-readiness.json):20 successful clean-clone commands,

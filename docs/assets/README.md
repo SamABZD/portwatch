@@ -1,7 +1,7 @@
 # Screenshot provenance
 
 These unchanged PNGs were captured and visually inspected on October 14, 2026 from the
-verified Phase 4 HTTPS preview at source commit `000f37c`. API responses use genuine saved
+verified release HTTPS preview at source commit `84be4c6`. API responses use genuine saved
 NOAA/ERA5 frames and saved operational evidence. No screenshot was generated, retouched or
 populated with invented records. The [manifest](manifest.json) records source artifacts,
 SHA-256, size, port, cutoff, viewport and exact source commit; ignored originals stay local.
