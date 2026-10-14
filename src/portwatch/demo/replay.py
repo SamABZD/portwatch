@@ -15,6 +15,7 @@ from portwatch.db import connect_db
 from portwatch.health import json_value
 from portwatch.live import live_spec
 from portwatch.marts import configured_marts
+from portwatch.news import news_identity, news_state, read_news_context, read_news_rows
 from portwatch.settings import load_port_config
 from portwatch.storage import checksum_file
 from portwatch.visit_storage import rules_for_port
@@ -243,10 +244,22 @@ class ReplayDataset:
             <= cutoff
             < stamp(w["valid_time_utc"]) + timedelta(hours=1)
         ]
+        news_context = (
+            news_state(
+                self.metadata["news_context"], cutoff, self.metadata.get("news_stale_seconds", 7200)
+            )
+            if self.metadata["mode"] == "live" and self.metadata.get("news_context")
+            else None
+        )
         return public_json(
             dict(
                 cutoff_utc=cutoff,
-                dataset=self.metadata,
+                dataset=self.metadata
+                | (
+                    dict(news_context=news_context, news_status=news_context["status"])
+                    if news_context
+                    else {}
+                ),
                 vessels=vessels,
                 trails=trails,
                 prefix_observations=prefix_count,
@@ -269,8 +282,11 @@ class ReplayDataset:
                 chart=chart,
                 weather=weather[0] if weather else None,
                 news=[] if self.metadata["mode"] == "historical" else self.news,
+                news_context=news_context,
                 news_status="excluded_recent_source"
                 if self.metadata["mode"] == "historical"
+                else news_context["status"]
+                if news_context
                 else self.metadata.get("news_status", "unavailable"),
                 staleness_minutes=stale_minutes,
                 trail_minutes=trail_minutes,
@@ -321,21 +337,13 @@ def fingerprint(connection, settings, mode, now):
         "ORDER BY c.input_id",
         (source, dataset),
     ).fetchall()
-    news = (
-        connection.execute(
-            "SELECT selected_batch_id FROM context_requests WHERE port_id=%s "
-            "AND product='recent_news' ORDER BY selected_retrieved_at DESC NULLS LAST LIMIT 1",
-            (port.port_id,),
-        ).fetchone()
-        if mode == "live"
-        else None
-    )
+    news = read_news_context(connection, port.port_id, now, settings) if mode == "live" else None
     revision = hashlib.sha256(
         json.dumps(
             [
                 ledger,
                 weather,
-                news,
+                news_identity(news) if news else None,
                 fence.content_sha256,
                 version,
                 start,
@@ -366,7 +374,9 @@ def fingerprint(connection, settings, mode, now):
             analytical_version=version,
             revision=revision,
             weather_batch_id=weather,
-            news_batch_id=news[0] if news else None,
+            news_batch_id=news["saved_batch_id"] if news else None,
+            news_context=news,
+            news_stale_seconds=settings.health_context_stale_seconds,
             bounds=list(port.bounding_box),
             display_timezone="UTC",
             port_timezone=port.timezone,
@@ -446,24 +456,8 @@ def load_dataset(connection, metadata, fence, port):
     ).fetchall()
     news = []
     if metadata["mode"] == "live":
-        news_rows = connection.execute(
-            "SELECT title,original_url,source_domain,publication_time_utc,"
-            "first_seen_time_utc FROM news_mentions WHERE batch_id=%s LIMIT 10",
-            (metadata["news_batch_id"],),
-        ).fetchall()
-        news = [
-            dict(
-                zip(
-                    ("title", "url", "domain", "publication_time_utc", "first_seen_time_utc"),
-                    r,
-                    strict=True,
-                )
-            )
-            for r in news_rows
-        ]
-        metadata["news_status"] = (
-            "available" if news else "valid_empty" if metadata["news_batch_id"] else "unavailable"
-        )
+        news = read_news_rows(connection, metadata["news_context"], port.timezone)
+        metadata["news_status"] = metadata["news_context"]["status"]
     zones = dict(
         type="FeatureCollection",
         features=[feature.model_dump(mode="json") for feature in fence.document.features],

@@ -15,7 +15,6 @@ from portwatch.bookkeeping import (
     start_run,
 )
 from portwatch.context import (
-    PARSER_VERSION,
     ContextError,
     ContextRequest,
     normalize_news,
@@ -65,7 +64,7 @@ def save_response(connection, store, request, response) -> ContextResult:
             received_at=response.retrieved_at,
             source_start_utc=request.start_utc,
             source_end_utc=request.end_utc,
-            processing_version=PARSER_VERSION,
+            processing_version=request.parser_version,
             file_suffix={
                 "port_oakland_rss": ".xml",
                 "port_los_angeles_releases": ".html",
@@ -214,25 +213,38 @@ def _ingest_locked(settings, connection, request, *, refresh, fetch, now):
             request.product,
             request.source_id,
             request.endpoint,
-            Jsonb(dict(api=request.parameters, keywords=request.keywords, parser=PARSER_VERSION)),
+            Jsonb(
+                dict(
+                    api=request.parameters, keywords=request.keywords, parser=request.parser_version
+                )
+            ),
             request.start_utc,
             request.end_utc,
         ),
     )
     cached = cached_response(connection, request)
-    if not cached and not refresh and request.product == "historical_reanalysis":
+    if (
+        not cached
+        and not refresh
+        and (request.product == "historical_reanalysis" or request.kind == "news")
+    ):
         # Rebuild an empty database from verified saved evidence without fabricating a fetch.
         store = RawStore(settings.project_path(settings.raw_dir))
         saved = [
             item.manifest
-            for item in store.inspect()
+            for item in store.inspect(source_id=request.source_id)
             if item.state == "complete"
             and item.manifest.dataset_id == "ctx-" + request.request_key
             and item.manifest.source_id == request.source_id
             and item.manifest.source_url == request.endpoint
-            and item.manifest.mode == "historical"
+            and item.manifest.mode
+            == ("historical" if request.product == "historical_reanalysis" else "live")
             and item.manifest.source_start_utc == request.start_utc
             and item.manifest.source_end_utc == request.end_utc
+            and (
+                request.product == "historical_reanalysis"
+                or now < item.manifest.received_at + timedelta(minutes=15)
+            )
         ]
         if saved:
             manifest = max(saved, key=lambda item: item.received_at)
@@ -296,7 +308,13 @@ def _ingest_locked(settings, connection, request, *, refresh, fetch, now):
     )
     result, response = None, None
     try:
-        response = fetch(request.url)
+        # News has at most one HTTP attempt per provider. A format fallback therefore
+        # stays within the former two-attempt primary budget, without hot retries.
+        response = (
+            fetch_context(request.url, attempts=1)
+            if (request.kind == "news" and fetch is fetch_context)
+            else fetch(request.url)
+        )
         store = RawStore(settings.project_path(settings.raw_dir))
         result = save_response(connection, store, request, response)
         with connection.transaction():

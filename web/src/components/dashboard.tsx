@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import HarborMap from "./harbor-map";
+import NewsPanel from "./news-panel";
 import type { Dataset, Frame, Health, Mode, Vessel } from "@/lib/types";
 import { startVisiblePolling } from "@/lib/visible-polling";
 
@@ -609,67 +610,12 @@ export default function Dashboard() {
               )}
               <p className="panel-note">
                 {mode === "historical"
-                  ? "Retrospective, model-derived context. Not information known on the replay date."
-                  : "Saved model forecast. Check successful-fetch age in pipeline health."}
+                  ? "Open-Meteo \u00b7 Retrospective, model-derived context. Not information known on the replay date."
+                  : "Open-Meteo \u00b7 Saved model forecast. Check successful-fetch age in pipeline health."}
               </p>
             </div>
-            <div className="news-panel">
-              <div className="panel-heading">
-                <h2>
-                  {mode === "historical" ? "Historical context" : "Recent news"}
-                </h2>
-              </div>
-              {mode === "historical" ? (
-                <>
-                  <div className="context-symbol" aria-hidden="true">
-                    ◷
-                  </div>
-                  <strong>Current articles are excluded.</strong>
-                  <p>
-                    Recent news cannot explain a vessel’s behavior on January 1,
-                    2024. No historical disruption evidence is available.
-                  </p>
-                </>
-              ) : shown?.news.length ? (
-                <ul>
-                  {shown.news.map((item) => (
-                    <li key={item.url}>
-                      <a
-                        href={/^https?:\/\//.test(item.url) ? item.url : "#"}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        {item.title}
-                      </a>
-                      <small>
-                        {item.domain} ·{" "}
-                        {item.publication_time_utc
-                          ? time(item.publication_time_utc, zone, true)
-                          : "Publication time unknown"}
-                      </small>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <>
-                  <strong>
-                    News source {text(shown?.news_status || "unavailable")}.
-                  </strong>
-                  <p>
-                    {shown?.news_status === "valid_empty"
-                      ? "The latest successful saved response contained no matching articles. This is an empty result, not a provider failure."
-                      : health?.context?.recent_news?.last_http_status === 429
-                        ? "The last saved request was rate limited (HTTP 429). This is not an empty-news result."
-                        : "No usable recent news response is connected. This does not establish absence of disruptions."}
-                  </p>
-                </>
-              )}
-              <p className="panel-note">
-                Open-Meteo weather · {health?.context?.recent_news?.using_fallback
-                  ? health.context.recent_news.fallback_label || "Official port releases (limited coverage)"
-                  : "GDELT article metadata when available"}
-              </p>
-            </div>
+            <NewsPanel mode={mode} frame={shown} zone={zone}
+              liveAvailable={!preparedMode} onLive={() => switchMode("live")} />
           </section>
 
           <details className="provenance">

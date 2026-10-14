@@ -2,6 +2,7 @@
 
 from dataclasses import replace
 from datetime import timedelta
+from zoneinfo import ZoneInfo
 
 import pytest
 from psycopg import sql
@@ -243,7 +244,9 @@ def test_official_news_fallback_preserves_primary_failure_and_original_bytes(
             payload = (
                 rss_payload(request.end_utc - timedelta(hours=1))
                 if port == "oakland"
-                else archive_payload(request.end_utc.strftime("%m/%d/%Y"))
+                else archive_payload(
+                    request.end_utc.astimezone(ZoneInfo("America/Los_Angeles")).strftime("%m/%d/%Y")
+                )
             )
             return HttpResponse(payload, now, 200)
 
@@ -263,13 +266,106 @@ def test_official_news_fallback_preserves_primary_failure_and_original_bytes(
     ]
     settings = isolated_pipeline[0]
     health = context_health(connection, port, "recent_news", now, settings)
-    assert health["status"] == "available" and health["using_fallback"]
+    assert health["status"] == "fallback" and health["using_fallback"]
+    assert health["data_status"] == "available"
+    assert health["primary_attempt"]["http_status"] == 429
     assert "official releases" in health["fallback_label"]
     assert (
         connection.execute("SELECT local_path FROM ingestion_batches")
         .fetchone()[0]
         .endswith(extension)
     )
+
+
+@pytest.mark.parametrize("port", ["los_angeles", "oakland"])
+@pytest.mark.parametrize(
+    "payload,code",
+    [
+        (b"not JSON", "invalid_json_response"),
+        (b'{"error":"synthetic source error"}', "provider_error_or_invalid_object"),
+        (b'{"articles":"wrong"}', "news_articles_missing_or_invalid"),
+        (None, "source_timeout"),
+        (None, "source_incomplete_response"),
+    ],
+)
+def test_provider_format_or_timeout_failure_reaches_official_news(
+    isolated_pipeline, connection, monkeypatch, port, payload, code
+):
+    from datetime import UTC, datetime
+
+    import portwatch.pipeline as pipeline
+    from portwatch.context import ContextError
+    from portwatch.context_http import HttpResponse
+    from portwatch.context_storage import ingest_context
+    from portwatch.news import read_news_context
+    from tests.test_news_archive import archive_payload
+    from tests.test_news_rss import rss_payload
+
+    now, calls = datetime.now(UTC), []
+
+    def ingest(settings, connection, request, **kwargs):
+        def fetch(url):
+            calls.append(request.source_id)
+            if request.source_id == "gdelt_doc_v2":
+                if payload is None:
+                    raise ContextError(code, http_status=200 if "incomplete" in code else None)
+                return HttpResponse(payload, now, 200)
+            body = (
+                rss_payload(request.end_utc - timedelta(hours=1))
+                if port == "oakland"
+                else archive_payload(
+                    request.end_utc.astimezone(ZoneInfo("America/Los_Angeles")).strftime("%m/%d/%Y")
+                )
+            )
+            return HttpResponse(body, now, 200)
+
+        return ingest_context(settings, connection, request, fetch=fetch, now=now, **kwargs)
+
+    monkeypatch.setattr(pipeline, "ingest_context", ingest)
+    result = pipeline.run_context("news", port)
+    assert result["rows"] == 1 and result["fallback_reason"] == code
+    assert len(calls) == 2
+    report = read_news_context(connection, port, now, isolated_pipeline[0])
+    assert report["status"] == "fallback" and report["primary_attempt"]["error_code"] == code
+    assert report["primary_attempt"]["http_status"] == (
+        None if payload is None and code == "source_timeout" else 200
+    )
+    files = RawStore(isolated_pipeline[0].raw_dir).inspect()
+    assert len(files) == (1 if payload is None else 2)
+    if payload is not None:
+        original = next(item for item in files if item.manifest.source_id == "gdelt_doc_v2")
+        assert (
+            RawStore(isolated_pipeline[0].raw_dir)._path(original.manifest.local_path).read_bytes()
+            == payload
+        )
+
+
+def test_valid_empty_primary_does_not_add_an_official_network_request(
+    isolated_pipeline, connection, monkeypatch
+):
+    from datetime import UTC, datetime
+
+    import portwatch.pipeline as pipeline
+    from portwatch.context_http import HttpResponse
+    from portwatch.context_storage import ingest_context
+
+    calls, now = [], datetime.now(UTC)
+
+    def ingest(settings, connection, request, **kwargs):
+        calls.append(request.source_id)
+        return ingest_context(
+            settings,
+            connection,
+            request,
+            fetch=lambda url: HttpResponse(b'{"articles":[]}', now, 200),
+            now=now,
+            **kwargs,
+        )
+
+    monkeypatch.setattr(pipeline, "ingest_context", ingest)
+    result = pipeline.run_context("news", "los_angeles")
+    assert result["rows"] == 0 and result["fallback_reason"] is None
+    assert calls == ["gdelt_doc_v2"]
 
 
 def test_owned_lock_excludes_other_sessions_releases_after_failure(connection):

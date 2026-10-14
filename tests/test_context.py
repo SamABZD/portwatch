@@ -86,7 +86,10 @@ def test_current_weather_and_recent_news_have_distinct_partitions():
     assert current.end_utc - current.start_utc == timedelta(days=2)
     assert "wind_gusts_10m" in current.parameters["hourly"]
     assert current.request_key != request().request_key
-    assert news.parameters["startdatetime"] == "20240101120000"
+    assert news.parameters["startdatetime"] == "20231226120000"
+    assert news.end_utc - news.start_utc == timedelta(days=7)
+    assert news.parser_version == "news-v2"
+    assert current.parser_version == "context-v1"
     assert news.parameters["enddatetime"] == "20240102120000"
     assert news.product == "recent_news"
     with pytest.raises(ContextError, match="recent_news_excluded"):

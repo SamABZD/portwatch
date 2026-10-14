@@ -17,8 +17,9 @@ visit_min_consistent_observations: 2
 snapshot_staleness_minutes: 15
 weather_latitude: 33.71466
 weather_longitude: -118.24239
-news_query: '("Port of Los Angeles" OR "Los Angeles Harbor") (disruption OR closure OR strike OR congestion OR storm)'
-news_lookback_hours: 24
+news_query: '("Port of Los Angeles" OR "Los Angeles Harbor")'
+# Port context, not a disruption-only feed. Keywords remain optional relevance tags.
+news_lookback_hours: 168
 news_max_records: 100
 news_archive_url: https://portoflosangeles.org/news/news-release-archive
 news_keywords: [disruption, closure, strike, congestion, storm]

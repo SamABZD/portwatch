@@ -24,7 +24,11 @@ class ReleaseTableParser(HTMLParser):
         attributes = dict(attrs)
         if tag == "table":
             self.depth += 1
-            if "news releases" in attributes.get("summary", "").casefold():
+            labels = (
+                " ".join((attributes.get(name) or "").casefold().split())
+                for name in ("summary", "aria-label")
+            )
+            if any("news releases" in label.replace("-", " ") for label in labels):
                 self.archive_depth = self.depth
                 self.tables += 1
         if self.archive_depth is None:
@@ -111,16 +115,24 @@ def normalize_official_archive(payload, request):
         dates.setdefault(selected["url"], publication_date.isoformat())
     if not dated:
         raise ContextError("news_archive_publication_dates_unavailable")
-    cap = int(request.parameters["maxrecords"])
-    result = normalize_news(json.dumps(dict(articles=articles[:cap])).encode(), request)
+    result = normalize_news(json.dumps(dict(articles=articles)).encode(), request)
     for row in result.rows:
         row["quality_flags"].append("publication_date_only_window_overlap")
     result.quality.update(
         label="official Port of Los Angeles releases",
         exhaustive=False,
         archive_dated_rows=dated,
+        provider_article_count=dated + unknown,
+        parsed_item_count=dated + unknown,
+        eligible_item_count=len(articles),
+        excluded_by_date=outside,
+        unknown_date_count=unknown,
+        unknown_count=unknown,
         outside_window=outside,
         unknown_publication_rows=unknown,
+        date_coverage_complete=unknown == 0,
+        response_bytes=len(payload),
+        format="official HTML release archive",
         coverage="official authority releases only; not a broad disruption-news search",
         window_semantics=(
             "publication calendar day overlaps request; exact publication time unknown"
@@ -129,9 +141,14 @@ def normalize_official_archive(payload, request):
     result.metadata.update(
         provider="Port of Los Angeles",
         format="official HTML release archive",
-        publication_dates={item["url"]: dates[item["url"]] for item in articles[:cap]},
+        response_bytes=len(payload),
+        publication_dates={row["original_url"]: dates[row["original_url"]] for row in result.rows},
         publication_time_precision="calendar date only; no UTC instant inferred",
         publication_date_timezone_assumption="America/Los_Angeles",
         first_seen_field="unknown",
+        window_semantics=(
+            "publication calendar day overlaps request; exact publication time unknown; "
+            "unknown dates excluded"
+        ),
     )
     return result
