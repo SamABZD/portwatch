@@ -598,9 +598,10 @@ export default function Dashboard() {
                 </p>
               )}
               <p className="panel-note">
+                <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a>
                 {mode === "historical"
-                  ? "Open-Meteo \u00b7 Retrospective, model-derived context. Not information known on the replay date."
-                  : "Open-Meteo \u00b7 Saved model forecast. Check successful-fetch age in pipeline health."}
+                  ? " \u00b7 Copernicus C3S / ERA5. Retrospective, model-derived context. Not information known on the replay date."
+                  : " \u00b7 Saved model forecast. Check successful-fetch age in pipeline health."}
               </p>
             </div>
             <NewsPanel mode={mode} frame={shown} zone={zone}
