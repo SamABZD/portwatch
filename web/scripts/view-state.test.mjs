@@ -6,13 +6,13 @@ test("untrusted scope cannot change the API port or create a foreign route", () 
   const scope = readViewScope(new URLSearchParams({
     port: "javascript:alert(1)", mode: "arbitrary", minute: "Infinity",
   }));
-  assert.deepEqual(scope, { port: "los_angeles", mode: "live", minute: 750 });
-  assert.equal(scopeHref("/pipeline", scope), "/pipeline?port=los_angeles&mode=live&minute=750");
+  assert.deepEqual(scope, { port: "los_angeles", mode: "historical", minute: 750 });
+  assert.equal(scopeHref("/pipeline", scope), "/pipeline?port=los_angeles&mode=historical&minute=750");
 });
 
 test("replay bounds accept zero/end and reject out-of-range or malformed minutes", () => {
   for (const minute of ["0", "1", "750", "1440"]) {
-    assert.equal(readViewScope(new URLSearchParams({ minute })).minute, Number(minute));
+    assert.equal(readViewScope(new URLSearchParams({ minute })).minute, Math.floor(Number(minute) / 5) * 5);
   }
   for (const minute of ["", "-1", "1441", "750.5", "1e3", "NaN", " 750", "0x10"]) {
     assert.equal(readViewScope(new URLSearchParams({ minute })).minute, 750);

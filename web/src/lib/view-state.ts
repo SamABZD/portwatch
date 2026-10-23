@@ -17,9 +17,9 @@ export function readViewScope(params: Pick<URLSearchParams, "get">): ViewScope {
   const minute = params.get("minute");
   return {
     port: port === "oakland" ? "oakland" : "los_angeles",
-    mode: params.get("mode") === "historical" ? "historical" : "live",
+    mode: "historical",
     minute: minute !== null && /^\d{1,4}$/.test(minute) && Number(minute) <= 1440
-      ? Number(minute) : 750,
+      ? Math.floor(Number(minute) / 5) * 5 : 750,
   };
 }
 

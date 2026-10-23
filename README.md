@@ -2,9 +2,11 @@
 
 **A maritime data engineering portfolio project for Los Angeles and Oakland.** Vessel reports arrive with duplicates, gaps and incomplete context. PortWatch preserves that evidence, turns it into traceable observations and experimental port analytics, and lets a reviewer inspect the pipeline or replay what was observable at a particular time.
 
-**[Explore the demo](https://portwatch-iota.vercel.app/)** · **[Inspect the pipelines](https://portwatch-iota.vercel.app/pipeline)** · [SQL lineage](https://portwatch-iota.vercel.app/api/history-lineage?view=static) · [Documentation](docs/README.md)
+**[Explore the demo](https://portwatch-iota.vercel.app/)** · **[Inspect the pipelines](https://portwatch-iota.vercel.app/pipeline)** · [SQL models](analytics) · [Documentation](docs/README.md)
 
-The October 14, 2026 release is merged through [PR #9](https://github.com/SamABZD/portwatch/pull/9) and verified on the public HTTPS demo. PortWatch is also published and pinned on [Sam's GitHub profile](https://github.com/SamABZD). GitHub Actions remain disabled; verification below is local and observed deployment evidence, not hosted CI.
+The public demo uses saved January 1–2, 2024 observations for both ports, exported on October 23, 2026. It runs entirely as static files on [Cloudflare](https://portwatch-demo.samabouzeidd.workers.dev/) and at the existing Vercel address. Live collection, database access and scheduled jobs are disconnected. The separate seven-day SQL results remain in the private project archive. See [static deployment and recovery](docs/STATIC-DEMO.md).
+
+The full pipeline release is preserved through [PR #9](https://github.com/SamABZD/portwatch/pull/9). The architecture and reproduction evidence below describe that implementation. GitHub Actions remain disabled; verification is local and observed deployment evidence, not hosted CI.
 
 ## What this demonstrates
 
@@ -25,7 +27,7 @@ The October 14, 2026 release is merged through [PR #9](https://github.com/SamABZ
 2. Search by vessel name or MMSI, then select a map point or list row. Inspect its actual report time and incomplete visit evidence.
 3. Toggle zones, trails, stale reports and the basemap. Trails preserve recorded segment boundaries; source gaps remain gaps.
 4. Open **Data pipeline** and select Python, PostGIS, dbt or Prefect. Follow original evidence through validation, publication and read-only queries.
-5. Compare the one-day map replay with **Seven days of Los Angeles history** and open SQL lineage. Inspect the reproduction results below.
+5. Open **Data pipeline** for the saved dataset counts and SQL model source. The seven-day SQL results are archived separately from the public one-day replay.
 
 <details>
 <summary>Oakland and mobile views</summary>
