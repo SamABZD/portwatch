@@ -2,6 +2,8 @@
 
 Start with the [project overview and local setup](../README.md), [hosted vessel map](https://portwatch-iota.vercel.app/) or [pipeline workspace](https://portwatch-iota.vercel.app/pipeline). Phase 6 is merged and verified on production, with a published and pinned [profile entry](https://github.com/SamABZD). The repository is public; Actions remain disabled. [Release evidence](evidence/phase6-release.json) records exact revisions and verification scope.
 
+The October 23, 2026 public deployment is a static historical snapshot. See [static deployment and recovery](STATIC-DEMO.md) for its current behavior; the full pipeline guides below document the preserved implementation.
+
 ## Understand and reproduce
 
 | Guide | Use it for |

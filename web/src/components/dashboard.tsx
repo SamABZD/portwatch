@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useViewScope } from "@/lib/view-scope";
 import type { Dataset, Frame, Health, Mode, Vessel } from "@/lib/types";
 import { startVisiblePolling } from "@/lib/visible-polling";
+import { snapshotQuery as query } from "@/lib/snapshot-query";
 
 function labelForZone(zone: string) { return zone === "UTC" ? "UTC" : "Pacific"; }
 function coordinate(value: number | null) { return value == null ? "Unknown" : value.toFixed(5); }
@@ -59,20 +60,13 @@ function vesselType(code: number | null) {
     )[code] || `AIS type ${code}`
   );
 }
-async function query<T>(path: string, signal?: AbortSignal): Promise<T> {
-  const response = await fetch(`/api/${path}`, { signal, cache: "no-store" });
-  const data = await response.json();
-  if (!response.ok)
-    throw new Error(data.detail?.code || "prepared_data_unavailable");
-  return data;
-}
-
 export default function Dashboard() {
   const { scope, updateScope, href } = useViewScope();
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const port = scope.port;
   const [ports, setPorts] = useState<{ port_id: string; name: string }[]>([]);
-  const [preparedMode, setPreparedMode] = useState(false);
+  const [preparedMode, setPreparedMode] = useState(true);
+  const [capturedAt, setCapturedAt] = useState<string | null>(null);
   const mode = preparedMode ? "historical" : scope.mode;
   const minute = scope.minute;
   const [zone, setZone] = useState("UTC");
@@ -120,10 +114,11 @@ export default function Dashboard() {
     const stop = startVisiblePolling({
       intervalMs: null,
       onStart: () => { setCatalogError(null); setCatalogLoading(true); },
-      load: (signal) => query<{ datasets: Dataset[]; ports: { port_id: string; name: string }[]; prepared_mode: boolean }>(`catalog?port=${port}`, signal),
+      load: (signal) => query<{ datasets: Dataset[]; ports: { port_id: string; name: string }[]; prepared_mode: boolean; captured_at_utc: string }>(`catalog?port=${port}`, signal),
       onData: (data) => {
         setCatalogLoading(false);
         setDatasets(data.datasets); setPorts(data.ports); setPreparedMode(data.prepared_mode);
+        setCapturedAt(data.captured_at_utc);
         if (data.prepared_mode) {
           const first = data.ports[0]?.port_id;
           updateScope({
@@ -181,6 +176,7 @@ export default function Dashboard() {
     });
   }, [mode, port, cutoff, dataset?.revision, staleness, tick, loadCatalog]);
   useEffect(() => startVisiblePolling({
+        intervalMs: null,
         load: (signal) => query<Health>(`health?port=${port}`, signal),
         onData: (result) => {
           setHealth(result);
@@ -245,7 +241,7 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {preparedMode && <p className="panel-note" id="prepared-mode-note">Historical snapshot session. Live collection is unavailable.</p>}
+      {preparedMode && <p className="panel-note" id="prepared-mode-note">Historical snapshot — live collection is unavailable. {dataset && <>Coverage: {dataset.start_utc} through {dataset.end_utc}. </>}{capturedAt && <>Snapshot published {capturedAt}.</>}</p>}
 
       {catalogError && (
         <div className="unavailable" role="alert">
@@ -728,7 +724,7 @@ export default function Dashboard() {
               </p>
             ))}
             <p className="panel-note">
-              Checked {time(health.checked_at_utc, zone, true)} {labelZone}.{" "}
+              Snapshot published {time(health.checked_at_utc, zone, true)} {labelZone}. Current collection is disconnected.{" "}
               {healthError &&
                 "This is an older snapshot; connection refresh failed."}{" "}
               Rendering never starts ingestion or migrations.

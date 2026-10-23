@@ -48,7 +48,9 @@ data/demo/
 # Next.js dependencies/builds and browser test artifacts
 web/node_modules/
 web/.next/
+web/.wrangler/
 web/out/
+web/public/snapshot/
 web/test-results/
 web/playwright-report/
 web/public/vendor/maplibre/

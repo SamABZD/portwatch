@@ -8,6 +8,7 @@ import HistoryResults from "@/components/history-results";
 import { startVisiblePolling } from "@/lib/visible-polling";
 import { PORT_OPTIONS, portName, useViewScope } from "@/lib/view-scope";
 import { scopeHref } from "@/lib/view-state";
+import { snapshotQuery } from "@/lib/snapshot-query";
 
 type Series = {
   status: string;
@@ -41,11 +42,8 @@ export default function PipelineView() {
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
   useEffect(() => startVisiblePolling({
-      load: async (signal) => {
-        const response = await fetch("/api/pipeline", { cache: "no-store", signal });
-        if (!response.ok) throw new Error("disconnected");
-        return await response.json() as Report;
-      },
+      intervalMs: null,
+      load: (signal) => snapshotQuery<Report>("pipeline", signal),
       onData: (data) => { setReport(data); setError(false); },
       onError: () => setError(true),
   }), [retry]);
@@ -65,7 +63,7 @@ export default function PipelineView() {
     <section className="pipeline-intro">
       <h1>Maritime data engineering.</h1>
       <p>Python validates source evidence. PostGIS builds port analytics; Prefect schedules processing. dbt records the frozen seven-day Los Angeles history.</p>
-      <p className="panel-note">Map view: {portName(scope.port)} · {mapScope.mode === "historical" ? "Historical" : "Live"}. Operational evidence below reflects current saved measurements. Seven-day history remains a fixed Los Angeles artifact.</p>
+      <p className="panel-note">Map view: {portName(scope.port)} · Historical. This static demonstration uses an archived dataset. Collection and database services are disconnected.</p>
       {preparedMode
         ? <p className="panel-note">Historical snapshot session. Current collection measurements are unavailable.</p>
         : <p className="panel-note">Refreshes every 30 seconds while visible. Live coverage depends on received AIS reports; gaps remain unknown.</p>}
@@ -99,7 +97,7 @@ export default function PipelineView() {
         {port.runs?.recent.length ? <div className="table-scroll" role="region" aria-label={`${port.name} recent workflow runs`} tabIndex={0}><table className="pipeline-table"><thead><tr><th scope="col">Workflow</th><th scope="col">State</th><th scope="col">Started</th><th scope="col">Duration</th><th scope="col">Input / output</th></tr></thead><tbody>
           {port.runs.recent.slice(0, 6).map(run => <tr key={run.run_id}><td>{words(run.stage)}</td><td>{words(run.status)}</td><td>{date(run.started_at)}</td><td>{count(run.duration_seconds)} s</td><td>{count(run.input_count)} / {count(run.output_count)}</td></tr>)}
         </tbody></table></div> : <p>No workflow history is connected for this port.</p>}
-        <p className="panel-note">Counts belong to each workflow’s stage and may use different units. Checked {date(port.checked_at_utc)}.</p>
+        <p className="panel-note">Counts belong to each workflow’s stage and may use different units. Snapshot published {date(port.checked_at_utc)}. This is not a current health check.</p>
       </section>)}
     </>}
     <HistoryResults />
@@ -107,7 +105,7 @@ export default function PipelineView() {
       <h2 id="operations-heading">Operational limits and recovery</h2>
       <p>Vessel properties and destinations are reported AIS data. Waiting candidates and visits are experimental inferences, and approximate zones are not official port boundaries.</p>
       {selectedPorts.map(port => port.operations?.backups.length ? <p className="panel-note" key={port.port_id}>Database backups: {port.operations.backups.map(backup => `${backup.database}: ${words(backup.status)}${backup.created_at_utc ? ` (${date(backup.created_at_utc)})` : ""}`).join(" · ")}. Two compressed copies are kept on the second Railway volume.</p> : null)}
-      <p className="panel-note">The continuous collectors run independently of page visits. Current source health and saved backups do not guarantee complete coverage or protection from loss of the hosting provider.</p>
+      <p className="panel-note">No collector, database or scheduled job runs for this static demo. Archived reports and experimental inferences do not guarantee complete coverage.</p>
     </section>
     <footer className="app-footer">PortWatch · Public read-only pipeline view · <Link href={scopeHref("/", mapScope)} prefetch={false}>Return to the vessel map</Link></footer>
     </div>

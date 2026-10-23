@@ -113,7 +113,7 @@ export default function PipelineDiagram() {
         <div className="architecture-history" role="group" aria-label="Historical-only branch from PostGIS">
           <p className="architecture-history-origin"><strong>Historical branch from PostGIS</strong>Frozen Los Angeles history only. One-day map replay and current live evidence stay separate.</p>
           {node(dbt)}
-          <div className="architecture-history-output"><h3>Published history & lineage</h3><p>Saved model results served through the read-only API.</p><a href="#history">View frozen seven-day results</a><a href="/api/history-lineage?view=static" target="_blank" rel="noreferrer">Explore SQL models and lineage</a></div>
+          <div className="architecture-history-output"><h3>Archived history & lineage</h3><p>Seven-day model results are retained in the private backup. This demo publishes the one-day map snapshot.</p><a href="#history">About the archived seven-day results</a><a href="https://github.com/SamABZD/portwatch/tree/main/analytics" target="_blank" rel="noreferrer">Explore SQL models in source</a></div>
         </div>
       </div>
       <figcaption><span className="architecture-key"><i />Saved data dependencies</span><span className="architecture-key"><i className="dashed" />Finite scheduling, separate from collection</span><span>Every source retains its own identity.</span></figcaption>
