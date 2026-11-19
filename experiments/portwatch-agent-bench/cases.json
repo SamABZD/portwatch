@@ -1,0 +1,185 @@
+{
+  "pairs": [
+    {
+      "id": "freshness",
+      "cases": [
+        {
+          "id": "freshness-at-limit",
+          "shipment": {
+            "id": "S-101",
+            "current_status": "in_transit",
+            "events": [
+              {"id": "E-101", "shipment_id": "S-101", "kind": "report", "source": "carrier", "confirmed": true, "age_minutes": 120, "status": "delivered"}
+            ]
+          },
+          "expected": {"decision": "update", "status": "delivered", "evidence_ids": ["E-101"]}
+        },
+        {
+          "id": "freshness-over-limit",
+          "shipment": {
+            "id": "S-101",
+            "current_status": "in_transit",
+            "events": [
+              {"id": "E-101", "shipment_id": "S-101", "kind": "report", "source": "carrier", "confirmed": true, "age_minutes": 121, "status": "delivered"}
+            ]
+          },
+          "expected": {"decision": "defer", "status": null, "evidence_ids": ["E-101"]}
+        }
+      ]
+    },
+    {
+      "id": "confirmation",
+      "cases": [
+        {
+          "id": "confirmation-pending",
+          "shipment": {
+            "id": "S-102",
+            "current_status": "picked_up",
+            "events": [
+              {"id": "E-102", "shipment_id": "S-102", "kind": "report", "source": "carrier", "confirmed": false, "age_minutes": 15, "status": "in_transit"}
+            ]
+          },
+          "expected": {"decision": "defer", "status": null, "evidence_ids": ["E-102"]}
+        },
+        {
+          "id": "confirmation-received",
+          "shipment": {
+            "id": "S-102",
+            "current_status": "picked_up",
+            "events": [
+              {"id": "E-102", "shipment_id": "S-102", "kind": "report", "source": "carrier", "confirmed": true, "age_minutes": 15, "status": "in_transit"}
+            ]
+          },
+          "expected": {"decision": "update", "status": "in_transit", "evidence_ids": ["E-102"]}
+        }
+      ]
+    },
+    {
+      "id": "conflict",
+      "cases": [
+        {
+          "id": "conflict-tied",
+          "shipment": {
+            "id": "S-103",
+            "current_status": "in_transit",
+            "events": [
+              {"id": "E-103", "shipment_id": "S-103", "kind": "report", "source": "carrier", "confirmed": true, "age_minutes": 18, "status": "delivered"},
+              {"id": "E-104", "shipment_id": "S-103", "kind": "report", "source": "warehouse", "confirmed": true, "age_minutes": 18, "status": "exception"}
+            ]
+          },
+          "expected": {"decision": "escalate", "status": null, "evidence_ids": ["E-103", "E-104"]}
+        },
+        {
+          "id": "conflict-resolved-by-age",
+          "shipment": {
+            "id": "S-103",
+            "current_status": "in_transit",
+            "events": [
+              {"id": "E-103", "shipment_id": "S-103", "kind": "report", "source": "carrier", "confirmed": true, "age_minutes": 18, "status": "delivered"},
+              {"id": "E-104", "shipment_id": "S-103", "kind": "report", "source": "warehouse", "confirmed": true, "age_minutes": 19, "status": "exception"}
+            ]
+          },
+          "expected": {"decision": "update", "status": "delivered", "evidence_ids": ["E-103"]}
+        }
+      ]
+    },
+    {
+      "id": "identity",
+      "cases": [
+        {
+          "id": "identity-matching",
+          "shipment": {
+            "id": "S-104",
+            "current_status": "in_transit",
+            "events": [
+              {"id": "E-105", "shipment_id": "S-104", "kind": "report", "source": "warehouse", "confirmed": true, "age_minutes": 5, "status": "exception"},
+              {"id": "E-106", "shipment_id": "S-104", "kind": "report", "source": "carrier", "confirmed": true, "age_minutes": 30, "status": "in_transit"}
+            ]
+          },
+          "expected": {"decision": "update", "status": "exception", "evidence_ids": ["E-105"]}
+        },
+        {
+          "id": "identity-other-shipment",
+          "shipment": {
+            "id": "S-104",
+            "current_status": "in_transit",
+            "events": [
+              {"id": "E-105", "shipment_id": "S-204", "kind": "report", "source": "warehouse", "confirmed": true, "age_minutes": 5, "status": "exception"},
+              {"id": "E-106", "shipment_id": "S-104", "kind": "report", "source": "carrier", "confirmed": true, "age_minutes": 30, "status": "in_transit"}
+            ]
+          },
+          "expected": {"decision": "defer", "status": null, "evidence_ids": ["E-106"]}
+        }
+      ]
+    },
+    {
+      "id": "source",
+      "cases": [
+        {
+          "id": "source-customer",
+          "shipment": {
+            "id": "S-105",
+            "current_status": "picked_up",
+            "events": [
+              {"id": "E-107", "shipment_id": "S-105", "kind": "report", "source": "customer", "confirmed": true, "age_minutes": 7, "status": "delivered"},
+              {"id": "E-108", "shipment_id": "S-105", "kind": "report", "source": "warehouse", "confirmed": true, "age_minutes": 24, "status": "in_transit"}
+            ]
+          },
+          "expected": {"decision": "update", "status": "in_transit", "evidence_ids": ["E-108"]}
+        },
+        {
+          "id": "source-carrier",
+          "shipment": {
+            "id": "S-105",
+            "current_status": "picked_up",
+            "events": [
+              {"id": "E-107", "shipment_id": "S-105", "kind": "report", "source": "carrier", "confirmed": true, "age_minutes": 7, "status": "delivered"},
+              {"id": "E-108", "shipment_id": "S-105", "kind": "report", "source": "warehouse", "confirmed": true, "age_minutes": 24, "status": "in_transit"}
+            ]
+          },
+          "expected": {"decision": "update", "status": "delivered", "evidence_ids": ["E-107"]}
+        }
+      ]
+    },
+    {
+      "id": "hold",
+      "cases": [
+        {
+          "id": "hold-active",
+          "shipment": {
+            "id": "S-106",
+            "current_status": "in_transit",
+            "events": [
+              {"id": "E-109", "shipment_id": "S-106", "kind": "report", "source": "carrier", "confirmed": true, "age_minutes": 8, "status": "delivered"},
+              {"id": "E-110", "shipment_id": "S-106", "kind": "hold", "source": "warehouse", "confirmed": true, "age_minutes": 25, "active": true}
+            ]
+          },
+          "expected": {"decision": "escalate", "status": null, "evidence_ids": ["E-110"]}
+        },
+        {
+          "id": "hold-inactive",
+          "shipment": {
+            "id": "S-106",
+            "current_status": "in_transit",
+            "events": [
+              {"id": "E-109", "shipment_id": "S-106", "kind": "report", "source": "carrier", "confirmed": true, "age_minutes": 8, "status": "delivered"},
+              {"id": "E-110", "shipment_id": "S-106", "kind": "hold", "source": "warehouse", "confirmed": true, "age_minutes": 25, "active": false}
+            ]
+          },
+          "expected": {"decision": "update", "status": "delivered", "evidence_ids": ["E-109"]}
+        }
+      ]
+    }
+  ],
+  "smoke": {
+    "id": "smoke",
+    "shipment": {
+      "id": "S-900",
+      "current_status": "picked_up",
+      "events": [
+        {"id": "E-900", "shipment_id": "S-900", "kind": "report", "source": "carrier", "confirmed": true, "age_minutes": 10, "status": "in_transit"}
+      ]
+    },
+    "expected": {"decision": "update", "status": "in_transit", "evidence_ids": ["E-900"]}
+  }
+}
